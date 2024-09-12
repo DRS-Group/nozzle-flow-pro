@@ -1,0 +1,42 @@
+import { forwardRef, useImperativeHandle, useState } from "react"
+import styles from './side-menu.module.css';
+
+export type SideMenuElement = {
+
+}
+
+export type SideMenuProps = {
+
+}
+
+export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) => {
+    const [followTranslateX, setFollowTranslateX] = useState('0vw');
+
+    const onAnyItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        const target = e.currentTarget;
+        setFollowTranslateX(`${target.offsetLeft + target.offsetWidth / 2}px`);
+        document.querySelectorAll(`.${styles.menuItem}`).forEach((el) => {
+            el.removeAttribute('data-current');
+        });
+
+        target.setAttribute('data-current', 'true');
+    }
+
+    useImperativeHandle(ref, () => ({
+
+    }), []);
+
+    return (
+        <div className={styles.wrapper} style={{
+            "--translateX": followTranslateX
+        } as React.CSSProperties}>
+            <span className={styles.follow}></span>
+            <div className={styles.content}>
+                <button className={styles.menuItem} data-current="true" onClick={onAnyItemClick}><i className="icon-chart-bar"></i><span>Data</span></button>
+                <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-speedometer-black"></i><span>Calibration</span></button>
+                <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-file-clock-outline"></i><span>Logs</span></button>
+                <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-cog"></i><span>Settings</span></button>
+            </div>
+        </div>
+    )
+});

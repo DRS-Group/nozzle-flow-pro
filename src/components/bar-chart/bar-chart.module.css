@@ -1,0 +1,202 @@
+.wrapper {
+    --axis-width: 0.05rem;
+    --axis-color: rgb(150, 150, 150);
+    --arrow-length: 0.5rem;
+    --left-distance: 3rem;
+    --grid-color: rgb(200, 200, 200);
+    --target-color: rgb(52, 52, 255);
+    --max-target-color: rgb(0, 207, 0);
+    --min-target-color: rgb(255, 0, 0);
+
+    position: relative;
+    height: 100%;
+    width: 100%;
+
+    background-color: white;
+
+    box-sizing: border-box;
+}
+
+.YAxis,
+.XAxis {
+    position: absolute;
+    left: var(--left-distance);
+    bottom: 1rem;
+    background-color: var(--axis-color);
+
+    transform-origin: bottom left;
+
+    border-radius: calc(var(--axis-width) * 0.5);
+
+    z-index: 1;
+}
+
+.YAxis {
+    top: 1rem;
+    width: var(--axis-width);
+}
+
+.XAxis {
+    right: 1rem;
+    height: var(--axis-width);
+
+}
+
+.YAxis::after,
+.YAxis::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--axis-width);
+    height: var(--arrow-length);
+    transform-origin: top center;
+    translate: 0rem -0.15rem;
+    background-color: var(--axis-color);
+    border-radius: calc(var(--axis-width) * 0.5);
+}
+
+.YAxis::after {
+    transform: rotate(22.5deg);
+}
+
+.YAxis::before {
+    transform: rotate(-22.5deg);
+}
+
+.XAxis::after,
+.XAxis::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: var(--arrow-length);
+    height: var(--axis-width);
+    transform-origin: center right;
+    translate: 0.15rem 0rem;
+    background-color: var(--axis-color);
+    border-radius: calc(var(--axis-width) * 0.5);
+}
+
+.XAxis::after {
+    transform: rotate(-22.5deg);
+}
+
+.XAxis::before {
+    transform: rotate(22.5deg);
+}
+
+.grid {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    left: var(--left-distance);
+    background: none;
+    z-index: 3;
+}
+
+.gridLine {
+    position: absolute;
+    border-bottom: 1px dashed var(--grid-color);
+    width: 100%;
+    height: 0;
+}
+
+.gridLine span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(calc(-100% - 0.25rem), -50%);
+    text-align: right;
+    font-size: 0.75rem;
+}
+
+.targetLines {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    left: var(--left-distance);
+    background: none;
+    z-index: 3;
+}
+
+.targetLine,
+.maxTargetLine,
+.minTargetLine {
+    position: absolute;
+    width: 100%;
+    height: 0;
+    z-index: 1;
+
+    transition: 250ms;
+}
+
+.targetLine span,
+.maxTargetLine span,
+.minTargetLine span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(calc(-100% - 0.25rem), -50%);
+    text-align: right;
+    font-size: 0.75rem;
+}
+
+.targetLine {
+    border-bottom: 2px solid var(--target-color);
+}
+
+.maxTargetLine {
+    border-bottom: 2px dashed var(--max-target-color);
+}
+
+.minTargetLine {
+    border-bottom: 2px dashed var(--min-target-color);
+}
+
+.targetLine span {
+    background-color: var(--target-color);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    color: white;
+}
+
+.maxTargetLine span {
+    background-color: var(--max-target-color);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    color: white;
+}
+
+.minTargetLine span {
+    background-color: var(--min-target-color);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    color: white;
+}
+
+.bars {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    left: var(--left-distance);
+    z-index: 2;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.1rem;
+
+    background: none;
+
+    padding: 0rem 1rem 0rem 0.5rem;
+}
+
+.bar {
+    flex-grow: 1;
+    border-radius: 0;
+    transition: height 250ms;
+}
