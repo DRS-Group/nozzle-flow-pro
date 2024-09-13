@@ -15,6 +15,20 @@ export class NozzleEvent extends Event {
     set nozzleId(nozzleId: string) {
         this._nozzleId = nozzleId;
     }
+
+    get getModalMessage() {
+        let message = ''
+        if (this.title === 'Flow above expected') {
+            message += `Nozzle ${this._nozzleId} flow is higher than expected!`;
+        }
+        else if (this.title === 'Flow below expected') {
+            message += `Nozzle ${this._nozzleId} flow is lower than expected!`;
+        }
+
+        message += `\n\n Elapsed time: ${(this.duration / 1000).toFixed(3)} seconds.`;
+
+        return message;
+    }
 }
 
 export const generateFlowAboveExpectedNozzleEvent = (nozzleId: string): NozzleEvent => {

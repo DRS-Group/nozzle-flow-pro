@@ -5,6 +5,8 @@ import { DataFecherService } from './services/data-fetcher.service';
 import { DataView } from './views/data/data.view';
 import { Nozzle } from './models/nozzle.model';
 import { generateFlowAboveExpectedNozzleEvent, generateFlowBelowExpectedNozzleEvent, NozzleEvent } from './types/nozzle-event.type';
+import { AlertModal } from './components/alert-modal/alert-modal.component';
+import styles from './App.module.css';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
@@ -108,6 +110,7 @@ function App() {
               // TRIGGER EVENT
             }
           }
+
           if (isNozzleFlowAboveExpected) {
             if (eventTitle === 'Flow below expected') {
               nozzleOngoingEvent.endTime = new Date();
@@ -125,6 +128,12 @@ function App() {
               const newEvent = generateFlowBelowExpectedNozzleEvent(nozzle.id);
               eventsToAdd.push(newEvent);
             }
+          }
+          else {
+            nozzleOngoingEvent.endTime = new Date();
+            eventsToModify.push(nozzleOngoingEvent);
+
+            eventsToModify.push(nozzleOngoingEvent);
           }
         }
       }
@@ -145,6 +154,33 @@ function App() {
       setEvents(newEvents);
   }
 
+  const getFirstNozzleUnviewedTriggeredEvent = () => {
+    return events.find((event: NozzleEvent) => {
+      return event.triggered && !event.viewed;
+    });
+  }
+
+  const getTotalNozzleUnviewedTriggeredEvents = () => {
+    return events.filter((event: NozzleEvent) => {
+      return event.triggered && !event.viewed;
+    }).length;
+  }
+
+  const markEventAsViewed = (event: NozzleEvent) => {
+    const eventIndex = events.findIndex((e) => e.id === event.id);
+    const newEvents = [...events];
+    newEvents[eventIndex].viewed = true;
+    setEvents(newEvents);
+  }
+
+  const markAllEventsAsViewed = () => {
+    const newEvents = [...events];
+    newEvents.forEach((event) => {
+      event.viewed = true;
+    });
+    setEvents(newEvents);
+  }
+
   useEffect(() => {
     if (shouldRefresh && !isRefreshing) {
       const interval = setInterval(() => {
@@ -160,15 +196,20 @@ function App() {
     updateNozzleEvents();
   }, [nozzles]);
 
-  useEffect(() => {
-    console.log(events);
-  }, [events]);
-
   return (
     <NozzlesContext.Provider value={nozzles}>
       <div style={{ flexGrow: 1, overflow: 'hidden' }}>
         <DataView onSyncClick={syncNozzles} />
+
       </div>
+      {getFirstNozzleUnviewedTriggeredEvent() &&
+        <AlertModal
+          event={getFirstNozzleUnviewedTriggeredEvent()!}
+          onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
+          onOkForAllClick={markAllEventsAsViewed}
+          totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
+        />
+      }
       <SideMenu />
     </NozzlesContext.Provider>
   );

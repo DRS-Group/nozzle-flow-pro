@@ -113,6 +113,7 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
                                 key={dataset.label}
                                 height={height}
                                 color={color}
+                                label={dataset.label}
                             ></Bar>
                         )
                     })}
@@ -134,6 +135,7 @@ type BarElement = {
 type BarProps = {
     height: number;
     color: string;
+    label: string;
 }
 
 export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
@@ -161,6 +163,8 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
     }, [props.color]);
 
     return (
-        <div className={styles.bar} style={style}></div>
+        <div className={styles.bar} style={style}>
+            <span>{props.label}</span>
+        </div>
     )
 });

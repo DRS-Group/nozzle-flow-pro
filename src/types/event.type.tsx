@@ -82,4 +82,8 @@ export class Event {
     get isPast() {
         return this._endTime!.getTime() < Date.now();
     }
+
+    get getModalMessage() {
+        return this._description;
+    }
 }

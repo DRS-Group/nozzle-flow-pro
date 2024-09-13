@@ -56,10 +56,10 @@
 .menuItem span {
     font-size: 0;
     color: white;
-    transform: translateY(0.25rem);
+    transform: translateY(0rem);
     transition: 150ms;
 }
 
 .menuItem[data-current="true"] span {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
 }

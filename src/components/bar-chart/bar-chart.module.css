@@ -196,7 +196,18 @@
 }
 
 .bar {
+    position: relative;
     flex-grow: 1;
     border-radius: 0;
     transition: height 250ms;
+}
+
+.bar span {
+    position: absolute;
+    transform-origin: center left;
+    bottom: 0;
+    left: 50%;
+    transform: translate(0, 0) rotate(-90deg);
+    font-size: 0.75rem;
+    text-align: left;
 }

@@ -14,3 +14,12 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+@font-face {
+  font-family: 'poppins';
+  src: url('../public/fonts/Poppins-Regular.ttf');
+}
+
+* {
+  font-family: 'poppins', sans-serif;
+}
