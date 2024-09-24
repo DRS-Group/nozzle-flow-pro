@@ -22,4 +22,5 @@ body {
 
 * {
   font-family: 'poppins', sans-serif;
+  user-select: none;
 }

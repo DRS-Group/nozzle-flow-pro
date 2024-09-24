@@ -26,7 +26,7 @@ export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props,
 
         const interval = setInterval(() => {
             SoundsService.playAlertSound();
-        }, 3000);
+        }, 650);
 
         return () => {
             clearInterval(interval);

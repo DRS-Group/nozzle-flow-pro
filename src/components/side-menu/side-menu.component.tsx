@@ -1,5 +1,6 @@
 import { forwardRef, useImperativeHandle, useState } from "react"
 import styles from './side-menu.module.css';
+import { ToggleButton } from "../toggle-button/toggle-button.component";
 
 export type SideMenuElement = {
 
@@ -30,6 +31,7 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
         <div className={styles.wrapper} style={{
             "--translateX": followTranslateX
         } as React.CSSProperties}>
+            <ToggleButton />
             <span className={styles.follow}></span>
             <div className={styles.content}>
                 <button className={styles.menuItem} data-current="true" onClick={onAnyItemClick}><i className="icon-chart-bar"></i><span>Data</span></button>
