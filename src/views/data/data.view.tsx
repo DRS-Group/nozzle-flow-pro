@@ -3,7 +3,7 @@ import styles from './data.module.css';
 import { BarChart, ChartData, Dataset } from "../../components/bar-chart/bar-chart.component";
 import { DataFecherService } from "../../services/data-fetcher.service";
 import { Nozzle } from "../../models/nozzle.model";
-import { NozzlesContext } from "../../App";
+import { JobContext, NozzlesContext } from "../../App";
 
 export type DataViewElement = {
 
@@ -16,6 +16,7 @@ export type DataViewProps = {
 export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) => {
 
     const nozzles: Nozzle[] | undefined = useContext<Nozzle[] | undefined>(NozzlesContext);
+    const { currentJob, setCurrentJob } = useContext<any>(JobContext);
 
     const [chartData, setChartData] = useState<ChartData>({ datasets: [] });
 
@@ -36,6 +37,10 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         setChartData({ datasets: newChartData });
     }, [nozzles]);
 
+    const onBarClick = (dataset: Dataset) => {
+        alert(`Nozzle ${dataset.label} has flow of ${dataset.value}`);
+    }
+
     return (
         <div className={styles.wrapper}>
             {nozzles != undefined && nozzles.length >= 1 &&
@@ -43,6 +48,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                     chartData={chartData}
                     targetValue={2.5}
                     tolerance={0.05}
+                    onClick={onBarClick}
                 ></BarChart>
             }
             {nozzles === undefined &&
@@ -54,6 +60,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                     }}>Synchronize</button>
                 </div>
             }
+            <span className={styles.jobTitle}>{currentJob.title}</span>
         </div >
     )
 });

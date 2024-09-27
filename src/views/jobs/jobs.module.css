@@ -1,0 +1,83 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    width: 100%;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.jobItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    height: 4rem;
+    padding: 0.25rem 1rem 0.25rem 1rem;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.jobItem>span {
+    font-size: 0.75rem;
+}
+
+.jobItem>span:first-of-type {
+    font-size: 1rem;
+}
+
+.addButton {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+
+    width: 3rem;
+    height: 3rem;
+
+    background-color: var(--primary-color);
+    border-radius: 50%;
+
+    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
+
+    color: white;
+    font-size: 1.25rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.noJobsContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.noJobsContent>button {
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 100vh;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
+}

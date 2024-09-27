@@ -7,12 +7,25 @@ import { Nozzle } from './models/nozzle.model';
 import { generateFlowAboveExpectedNozzleEvent, generateFlowBelowExpectedNozzleEvent, NozzleEvent } from './types/nozzle-event.type';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
 import styles from './App.module.css';
+import { Menu } from './views/menu/menu.view';
+import { Jobs } from './views/jobs/jobs.view';
+import { CreateJob } from './views/create-job/create-job.view';
+import { Job } from './types/job.type';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
   .catch(console.warn);
 
+
+export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView';
+
+export type NavFunctions = {
+  setPage: (page: Page) => void;
+}
+
 export const NozzlesContext = createContext<Nozzle[] | undefined>(undefined);
+export const NavFunctionsContext = createContext<NavFunctions | undefined>(undefined);
+export const JobContext = createContext<any>(undefined);
 
 function App() {
   const [nozzles, setNozzles] = useState<Nozzle[] | undefined>(undefined);
@@ -24,6 +37,15 @@ function App() {
   const [durationTolerance, setDurationTolerance] = useState<number>(7000);
 
   const [events, setEvents] = useState<NozzleEvent[]>([]);
+
+  const [currentPage, setCurrentPage] = useState<Page>('menu');
+  const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
+
+  const [NavFunctionsValue, setNavFunctionsValue] = useState<NavFunctions | undefined>({
+    setPage: (page: Page) => {
+      setCurrentPage(page);
+    }
+  });
 
   const syncNozzles = () => {
     DataFecherService.getNozzles()
@@ -197,21 +219,61 @@ function App() {
   }, [nozzles]);
 
   return (
-    <NozzlesContext.Provider value={nozzles}>
-      <div style={{ flexGrow: 1, overflow: 'hidden' }}>
-        <DataView onSyncClick={syncNozzles} />
+    <NavFunctionsContext.Provider value={NavFunctionsValue}>
+      <JobContext.Provider value={{ currentJob, setCurrentJob }} >
+        <NozzlesContext.Provider value={nozzles}>
+          {
+            currentPage === 'menu' &&
+            <Menu
+              onJobsClick={() => setCurrentPage('jobs')}
+            />
+          }
+          {
+            currentPage === 'jobs' &&
+            <Jobs
+              onBackClick={() => setCurrentPage('menu')}
+            />
+          }
+          {
+            currentPage === 'createJob' &&
+            <CreateJob />
+          }
+          {
+            currentPage === 'dataView' &&
+            <DataView
+              onSyncClick={syncNozzles}
+            />
+          }
+          {
+            currentPage === 'dataView' &&
+            <SideMenu />
+          }
+          {getFirstNozzleUnviewedTriggeredEvent() &&
+            <AlertModal
+              event={getFirstNozzleUnviewedTriggeredEvent()!}
+              onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
+              onOkForAllClick={markAllEventsAsViewed}
+              totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
+            />
+          }
+        </NozzlesContext.Provider>
+      </JobContext.Provider>
+    </NavFunctionsContext.Provider >
+    // <NozzlesContext.Provider value={nozzles}>
+    //   <div style={{ flexGrow: 1, overflow: 'hidden' }}>
+    //     <DataView onSyncClick={syncNozzles} />
 
-      </div>
-      {getFirstNozzleUnviewedTriggeredEvent() &&
-        <AlertModal
-          event={getFirstNozzleUnviewedTriggeredEvent()!}
-          onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
-          onOkForAllClick={markAllEventsAsViewed}
-          totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
-        />
-      }
-      <SideMenu />
-    </NozzlesContext.Provider>
+    //   </div>
+    //   {getFirstNozzleUnviewedTriggeredEvent() &&
+    //     <AlertModal
+    //       event={getFirstNozzleUnviewedTriggeredEvent()!}
+    //       onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
+    //       onOkForAllClick={markAllEventsAsViewed}
+    //       totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
+    //     />
+    //   }
+    //   <SideMenu />
+    // </NozzlesContext.Provider>
   );
 }
 

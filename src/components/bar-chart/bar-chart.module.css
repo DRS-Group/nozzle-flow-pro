@@ -5,7 +5,7 @@
     --left-distance: 3rem;
     --grid-color: rgb(200, 200, 200);
     --target-color: rgb(52, 52, 255);
-    --max-target-color: rgb(0, 207, 0);
+    --max-target-color: rgb(255, 0, 0);
     --min-target-color: rgb(255, 0, 0);
 
     position: relative;
@@ -94,6 +94,7 @@
     left: var(--left-distance);
     background: none;
     z-index: 3;
+    pointer-events: none;
 }
 
 .gridLine {
@@ -120,6 +121,7 @@
     left: var(--left-distance);
     background: none;
     z-index: 3;
+    pointer-events: none;
 }
 
 .targetLine,
@@ -142,6 +144,7 @@
     transform: translate(calc(-100% - 0.25rem), -50%);
     text-align: right;
     font-size: 0.75rem;
+    box-shadow: 0rem 0rem 0.25rem 0.1rem rgba(0, 0, 0, 0.25);
 }
 
 .targetLine {
@@ -193,6 +196,14 @@
     background: none;
 
     padding: 0rem 1rem 0rem 0.5rem;
+}
+
+.barWrapper {
+    position: relative;
+    flex-grow: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
 }
 
 .bar {

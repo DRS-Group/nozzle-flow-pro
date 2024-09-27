@@ -1,6 +1,7 @@
-import { forwardRef, useImperativeHandle, useState } from "react"
+import { forwardRef, useContext, useImperativeHandle, useState } from "react"
 import styles from './side-menu.module.css';
 import { ToggleButton } from "../toggle-button/toggle-button.component";
+import { JobContext, NavFunctionsContext } from "../../App";
 
 export type SideMenuElement = {
 
@@ -11,6 +12,9 @@ export type SideMenuProps = {
 }
 
 export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) => {
+    const navFunctions = useContext(NavFunctionsContext);
+    const { currentJob, setCurrentJob } = useContext(JobContext);
+
     const [followTranslateX, setFollowTranslateX] = useState('0vw');
 
     const onAnyItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -21,6 +25,11 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
         });
 
         target.setAttribute('data-current', 'true');
+    }
+
+    const onStopClick = () => {
+        setCurrentJob(null);
+        navFunctions?.setPage('menu');
     }
 
     useImperativeHandle(ref, () => ({
@@ -39,6 +48,7 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
                 <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-file-clock-outline"></i><span>Logs</span></button>
                 <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-cog"></i><span>Settings</span></button>
             </div>
+            <button className={styles.stopButton} onClick={onStopClick}><i className="icon-stop"></i><span>Stop</span></button>
         </div>
     )
 });
