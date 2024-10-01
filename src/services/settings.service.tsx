@@ -11,7 +11,8 @@ export const defaultSettings: Settings = {
     secondaryColor: '#ffffff',
     primaryFontColor: '#000000',
     secondaryFontColor: '#ffffff',
-    interfaceScale: 1
+    interfaceScale: 1,
+    nozzleSpacing: 1
 }
 
 export namespace SettingsService {

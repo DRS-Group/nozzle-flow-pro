@@ -5,6 +5,6 @@ export type Settings = {
     primaryFontColor: string;
     secondaryFontColor: string;
     interfaceScale: number;
-
+    nozzleSpacing: number;
     apiBaseUrl: string;
 }

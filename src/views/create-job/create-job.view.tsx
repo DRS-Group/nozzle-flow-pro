@@ -67,7 +67,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         ref={durationToleranceInputRef}
                     />
                     <NumberInput
-                        label='Expected flow (L/min)'
+                        label='Expected flow (L/m²)'
                         className={styles.expectedFlow}
                         value='2.5'
                         decimals={2}

@@ -14,6 +14,7 @@ import { Job } from './types/job.type';
 import { NozzlesView } from './views/nozzles/nozzles.view';
 import { NozzlesService } from './services/nozzles.service';
 import { Settings } from './views/settings/settings.view';
+import { SettingsService } from './services/settings.service';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
@@ -30,6 +31,9 @@ function App() {
 
   const [currentPage, setCurrentPage] = useState<Page>('menu');
   const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
+
+  const [speed, setSpeed] = useState<number>(0);
+  const [nozzleSpacing, setNozzleSpacing] = useState<number>(0.1);
 
   const refresh = async () => {
     DataFecherService.fetchData().then(() => {
@@ -56,8 +60,10 @@ function App() {
         return event.endTime === undefined;
       });
 
-      const isNozzleFlowAboveExpected = nozzle.flow !== undefined && nozzle.flow > currentJob!.expectedFlow * (1 + currentJob!.tolerance);
-      const isNozzleFlowBelowExpected = nozzle.flow !== undefined && nozzle.flow < currentJob!.expectedFlow * (1 - currentJob!.tolerance);
+      const expectedFlow = calculateTargetValue() || 0;
+
+      const isNozzleFlowAboveExpected = nozzle.flow !== undefined && nozzle.flow > expectedFlow * (1 + currentJob!.tolerance);
+      const isNozzleFlowBelowExpected = nozzle.flow !== undefined && nozzle.flow < expectedFlow * (1 - currentJob!.tolerance);
       const doesNozzleHaveOngoingEvent = nozzle_ongoing_events.length > 0;
 
       if (!doesNozzleHaveOngoingEvent) {
@@ -163,14 +169,16 @@ function App() {
   }
 
   useEffect(() => {
-    const eventHandler = (data: any) => {
+    const eventHandler = async (data: any) => {
       updateNozzleEvents(data.nozzles);
+      setSpeed(data.speed);
+      setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.1));
     };
     DataFecherService.addEventListener('onDataFetched', eventHandler);
     return () => {
       DataFecherService.removeEventListener('onDataFetched', eventHandler);
     }
-  }, [currentJob]);
+  }, [currentJob, setSpeed, setNozzleSpacing, speed, nozzleSpacing]);
 
   useEffect(() => {
     if (!isRefreshing && currentJob) {
@@ -182,6 +190,15 @@ function App() {
     }
 
   }, [isRefreshing, currentJob]);
+
+  const calculateTargetValue = () => {
+    if (!currentJob) return
+
+    // Nozzle expected flow in liters per second;
+    const expectedFlow = currentJob.expectedFlow;
+
+    return (speed * nozzleSpacing * expectedFlow) / 1;
+  }
 
   return (
     <NavFunctionsContext.Provider value={{ currentPage, setCurrentPage }}>

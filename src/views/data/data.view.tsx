@@ -6,6 +6,7 @@ import { Nozzle } from "../../types/nozzle.type";
 import { JobContext } from "../../App";
 import { NozzlesService } from "../../services/nozzles.service";
 import { YesNoDialog } from "../../components/yes-no-dialog/yes-no-dialog.component";
+import { SettingsService } from "../../services/settings.service";
 
 export type DataViewElement = {
 
@@ -21,6 +22,9 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
 
     const [chartData, setChartData] = useState<ChartData>({ datasets: [] });
     const [nozzles, setNozzles] = useState<Nozzle[] | undefined>(undefined);
+    const [speed, setSpeed] = useState<number>(0);
+    const [nozzleSpacing, setNozzleSpacing] = useState<number>(0.1);
+
     const [ignoreNozzleDialogOpen, setIgnoreNozzleDialogOpen] = useState<boolean>(false);
     const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
     const [ignoreNozzleDialogNozlle, setIgnoreNozzleDialogNozzle] = useState<Nozzle | null>(null);
@@ -47,18 +51,14 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     }, [nozzles]);
 
     useEffect(() => {
-        NozzlesService.getActiveNozzles().then((nozzles) => {
-            nozzles = nozzles.sort((a, b) => a.index - b.index);
-            setNozzles(nozzles);
-        });
-    }, []);
-
-    useEffect(() => {
-        const eventHandler = (data: any) => {
+        const eventHandler = async (data: any) => {
             const nozzles: Nozzle[] = data.nozzles;
+            const speed: number = data.speed;
             if (!nozzles) return;
 
             setNozzles(nozzles);
+            setSpeed(speed);
+            setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.1));
         }
 
         DataFecherService.addEventListener('onDataFetched', eventHandler);
@@ -66,7 +66,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         return () => {
             DataFecherService.removeEventListener('onDataFetched', eventHandler);
         }
-    }, [setNozzles]);
+    }, [setNozzles, setSpeed, setNozzleSpacing]);
 
     const onBarClick = async (dataset: Dataset) => {
         const nozzleId = dataset.id;
@@ -88,13 +88,20 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         DataFecherService.syncNozzles();
     }
 
+    const calculateTargetValue = () => {
+        // Nozzle expected flow in liters per second;
+        const expectedFlow = currentJob.expectedFlow;
+
+        return (speed * nozzleSpacing * expectedFlow) / 1;
+    }
+
     return (
         <>
             <div className={styles.wrapper}>
                 {nozzles != undefined && nozzles.length >= 1 &&
                     <BarChart
                         chartData={chartData}
-                        targetValue={2.5}
+                        targetValue={calculateTargetValue()}
                         tolerance={0.05}
                         onClick={onBarClick}
                     ></BarChart>
