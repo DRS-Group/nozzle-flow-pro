@@ -305,8 +305,11 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     label='Pulses/Liter'
                     title='Calibrate nozzle'
                     onConfirmClick={(value) => {
-                        calibrateDialogNozzle!.pulsesPerLiter = value;
-                        NozzlesService.updateNozzle(calibrateDialogNozzle!);
+                        DataFecherService.calibrateNozzle(calibrateDialogNozzle!.id, value).then(() => {
+
+                            calibrateDialogNozzle!.pulsesPerLiter = value;
+                            NozzlesService.updateNozzle(calibrateDialogNozzle!);
+                        });
 
                         setCalibrateDialogOpen(false);
                         setCalibrateDialogNozzle(null);
@@ -322,16 +325,20 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     label='Pulses/Liter'
                     title='Calibrate nozzle'
                     onConfirmClick={async (value) => {
-                        const nozzles = await NozzlesService.getNozzles();
-                        for (let i = 0; i < nozzles.length; i++) {
-                            nozzles[i].pulsesPerLiter = value;
-                        }
+                        DataFecherService.calibrateAllNozzles(value).then(async () => {
 
-                        NozzlesService.setNozzles(nozzles);
 
-                        NozzlesService.getActiveNozzles().then((nozzles) => {
-                            nozzles = nozzles.sort((a, b) => a.index - b.index);
-                            setNozzles(nozzles);
+                            const nozzles = await NozzlesService.getNozzles();
+                            for (let i = 0; i < nozzles.length; i++) {
+                                nozzles[i].pulsesPerLiter = value;
+                            }
+
+                            NozzlesService.setNozzles(nozzles);
+
+                            NozzlesService.getActiveNozzles().then((nozzles) => {
+                                nozzles = nozzles.sort((a, b) => a.index - b.index);
+                                setNozzles(nozzles);
+                            });
                         });
 
                         setCalibrateDialogOpen(false);

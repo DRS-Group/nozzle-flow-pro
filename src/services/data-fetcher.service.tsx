@@ -93,4 +93,24 @@ export namespace DataFecherService {
             });
         });
     }
+
+    export const calibrateAllNozzles = async (value: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+
+            CapacitorHttp.post({ url: `${ApiBaseUri}/calibrate`, data: JSON.stringify({ value: value }), headers: { "Content-Type": 'application/json' } }).then(async (response) => {
+                resolve();
+            });
+        });
+    }
+
+    export const calibrateNozzle = async (nozzleId: string, value: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+
+            CapacitorHttp.post({ url: `${ApiBaseUri}/calibrate/${nozzleId}`, data: JSON.stringify({ value: value }), headers: { "Content-Type": 'application/json' } }).then(async (response) => {
+                resolve();
+            });
+        });
+    }
 }
