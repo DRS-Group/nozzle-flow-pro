@@ -37,11 +37,19 @@
     flex-shrink: 0;
 }
 
-.jobItem>span {
+.jobItem .left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.jobItem .left>span {
     font-size: 0.75rem;
 }
 
-.jobItem>span:first-of-type {
+.jobItem .left>span:first-of-type {
     font-size: 1rem;
 }
 

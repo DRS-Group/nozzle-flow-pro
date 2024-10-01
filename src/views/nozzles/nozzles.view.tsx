@@ -1,5 +1,7 @@
 import { JobContext } from '../../App';
 import { ContextMenu, ContextMenuItem } from '../../components/context-menu/context-menu.component';
+import { NumberInputDialog } from '../../components/number-input-dialog/number-input-dialog.component';
+import { NumberInput } from '../../components/number-input/number-input.component';
 import { TextInputDialog } from '../../components/text-input-dialog/text-input-dialog.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
@@ -30,9 +32,12 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     const [ignoreNozzleDialogOpen, setIgnoreNozzleDialogOpen] = useState<boolean>(false);
     const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
     const [changeNameDialogOpen, setChangeNameDialogOpen] = useState<boolean>(false);
+    const [calibrateDialogOpen, setCalibrateDialogOpen] = useState<boolean>(false);
+
     const [ignoreNozzleDialogNozlle, setIgnoreNozzleDialogNozzle] = useState<Nozzle | null>(null);
     const [unignoreNozzleDialogNozlle, setUnignoreNozzleDialogNozzle] = useState<Nozzle | null>(null);
     const [changeNameDialogNozzle, setChangeNameDialogNozzle] = useState<Nozzle | null>(null);
+    const [calibrateDialogNozzle, setCalibrateDialogNozzle] = useState<Nozzle | null>(null);
 
     useImperativeHandle(ref, () => ({
 
@@ -127,6 +132,9 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
         items.push({
             label: 'calibrate',
             onClick: () => {
+                setCalibrateDialogNozzle(contextMenuNozzle);
+                setCalibrateDialogOpen(true);
+
                 setContextMenuNozzle(null);
                 setContextMenuPosition(null);
             },
@@ -160,7 +168,12 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     >
                         <i className="icon-autorenew"></i>
                     </div>
-                    <div className={`${styles.menuItem} ${styles.calibrateButton}`}>
+                    <div className={`${styles.menuItem} ${styles.calibrateButton}`}
+                        onClick={() => {
+                            setCalibrateDialogOpen(true);
+                            setCalibrateDialogNozzle(null);
+                        }}
+                    >
                         <i className="icon-speedometer-black"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.clearButton}`}
@@ -287,6 +300,49 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     }}
                 />
             }
+            {calibrateDialogOpen && calibrateDialogNozzle &&
+                <NumberInputDialog
+                    label='Pulses/Liter'
+                    title='Calibrate nozzle'
+                    onConfirmClick={(value) => {
+                        calibrateDialogNozzle!.pulsesPerLiter = value;
+                        NozzlesService.updateNozzle(calibrateDialogNozzle!);
+
+                        setCalibrateDialogOpen(false);
+                        setCalibrateDialogNozzle(null);
+                    }}
+                    onCancelClick={() => {
+                        setCalibrateDialogOpen(false);
+                        setCalibrateDialogNozzle(null);
+                    }}
+                />
+            }
+            {calibrateDialogOpen && calibrateDialogNozzle === null &&
+                <NumberInputDialog
+                    label='Pulses/Liter'
+                    title='Calibrate nozzle'
+                    onConfirmClick={async (value) => {
+                        const nozzles = await NozzlesService.getNozzles();
+                        for (let i = 0; i < nozzles.length; i++) {
+                            nozzles[i].pulsesPerLiter = value;
+                        }
+
+                        NozzlesService.setNozzles(nozzles);
+
+                        NozzlesService.getActiveNozzles().then((nozzles) => {
+                            nozzles = nozzles.sort((a, b) => a.index - b.index);
+                            setNozzles(nozzles);
+                        });
+
+                        setCalibrateDialogOpen(false);
+                        setCalibrateDialogNozzle(null);
+                    }}
+                    onCancelClick={() => {
+                        setCalibrateDialogOpen(false);
+                        setCalibrateDialogNozzle(null);
+                    }}
+                />
+            }
         </>
     )
 });
@@ -316,8 +372,13 @@ const NozzleItem = forwardRef<NozzleItemElement, NozzleItemProps>((props, ref) =
 
     return (
         <div className={styles.jobItem} onClick={onClick}>
-            <span>{props.nozzle.name}</span>
-            <span>{props.nozzle.id}</span>
+            <div className={styles.left}>
+                <span>{props.nozzle.name}</span>
+                <span>{props.nozzle.id}</span>
+            </div>
+            <div className={styles.right}>
+                <span>{props.nozzle.pulsesPerLiter} pulses/L</span>
+            </div>
         </div>
     )
 });

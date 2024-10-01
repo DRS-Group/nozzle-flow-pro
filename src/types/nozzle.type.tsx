@@ -3,6 +3,7 @@ export type Nozzle = {
     name: string;
     flow: number | undefined;
     index: number;
+    pulsesPerLiter: number;
 
     ignored?: boolean;
 }

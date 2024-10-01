@@ -46,6 +46,8 @@ export namespace DataFecherService {
 
                 const newNozzles = fetchedNozzles.filter(fetchedNozzle => {
                     return nozzles.findIndex(n => n.id === fetchedNozzle.id) === -1;
+                }).map(nozzle => {
+                    return { ...nozzle, pulsesPerLiter: 350 };
                 });
 
                 nozzles.push(...newNozzles);

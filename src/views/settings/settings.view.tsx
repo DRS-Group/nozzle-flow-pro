@@ -1,6 +1,6 @@
 import { JobContext, NavFunctionsContext } from '../../App';
 import { TopBar } from '../../components/top-bar/top-bar.component';
-import { defaultSettings, SettingsService } from '../../services/settings.service';
+import { defaultLogoUri, defaultSettings, SettingsService } from '../../services/settings.service';
 import styles from './settings.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { Settings as SettingsType } from '../../types/settings.type';
@@ -51,6 +51,34 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                 />
             }
             <div className={styles.content}>
+                <div className={styles.section}>
+                    <div className={styles.sectionTitle}>
+                        Desenvolvimento
+                    </div>
+                    <div className={styles.sectionContent}>
+                        <div className={styles.item}
+                            onClick={() => {
+                                SettingsService.setSettings(defaultSettings).then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                                SettingsService.setLogoUri(defaultLogoUri).then(() => {
+                                    SettingsService.getLogoUri().then((logoUri) => {
+                                        setLogoUri(logoUri);
+                                    });
+                                });
+                            }}
+                        >
+                            <div className={styles.itemLeft}>
+                                <span className={styles.itemName}>Reset settings</span>
+                            </div>
+                            <div className={styles.itemRight}>
+                                <i className="icon-thin-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div className={styles.section}>
                     <div className={styles.sectionTitle}>
                         General

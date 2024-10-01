@@ -3,7 +3,7 @@ import { Settings } from "../types/settings.type";
 
 export const languages = ['en-us', 'pt-br'];
 
-const defaultLogoUri = '/images/logo_drs.png';
+export const defaultLogoUri = '/images/logo_drs.png';
 export const defaultSettings: Settings = {
     language: 'en-us',
     apiBaseUrl: 'http://localhost:3000',
