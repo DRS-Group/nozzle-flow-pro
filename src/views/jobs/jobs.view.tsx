@@ -1,5 +1,6 @@
 import { JobContext, NavFunctionsContext } from '../../App';
 import { ContextMenu } from '../../components/context-menu/context-menu.component';
+import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { JobsService } from '../../services/jobs.service';
 import { Job } from '../../types/job.type';
@@ -15,11 +16,14 @@ export type JobsProps = {
 }
 
 export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
-    const navFunctions = useContext(NavFunctionsContext);
+    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
     const { currentJob, setCurrentJob } = useContext(JobContext);
 
     const [contextMenuJob, setContextMenuJob] = useState<Job | null>(null);
     const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
+
+    const [deleteJobDialogOpen, setDeleteJobDialogOpen] = useState<boolean>(false);
+    const [deleteJobDialogJob, setDeleteJobDialogJob] = useState<Job | null>(null);
 
     const [jobs, setJobs] = useState<Job[]>([]);
 
@@ -52,7 +56,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
     }
 
     const onAddButtonClick = () => {
-        navFunctions?.setPage('createJob');
+        setCurrentPage('createJob');
     }
 
     return (
@@ -79,6 +83,12 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                     </div>
                 )}
             </div>
+            <div
+                className={styles.addButton}
+                onClick={onAddButtonClick}
+            >
+                <i className="icon-plus"></i>
+            </div>
             {contextMenuJob && contextMenuPosition && (
                 <ContextMenu
                     onBackgroundClick={onContextMenuBackgroundClick}
@@ -88,7 +98,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                             label: 'Continue',
                             onClick: () => {
                                 setCurrentJob(contextMenuJob);
-                                navFunctions?.setPage('dataView');
+                                setCurrentPage('dataView');
 
                                 setContextMenuJob(null);
                                 setContextMenuPosition(null);
@@ -108,9 +118,8 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                         {
                             label: 'Delete',
                             onClick: () => {
-                                JobsService.removeJob(contextMenuJob).then(() => {
-                                    refreshJobs();
-                                });
+                                setDeleteJobDialogJob(contextMenuJob);
+                                setDeleteJobDialogOpen(true);
 
                                 setContextMenuJob(null);
                                 setContextMenuPosition(null);
@@ -119,12 +128,27 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                         }
                     ]} />
             )}
-            <div
-                className={styles.addButton}
-                onClick={onAddButtonClick}
-            >
-                <i className="icon-plus"></i>
-            </div>
+            {deleteJobDialogOpen &&
+                <YesNoDialog
+                    title='Delete Job'
+                    message='Are you sure you want to delete this job?'
+                    onYesClick={() => {
+                        console.log(deleteJobDialogJob);
+
+                        JobsService.removeJob(deleteJobDialogJob!).then(() => {
+                            refreshJobs();
+                        });
+
+                        setDeleteJobDialogOpen(false);
+                        setDeleteJobDialogJob(null);
+                    }}
+
+                    onNoClick={() => {
+                        setDeleteJobDialogOpen(false);
+                        setDeleteJobDialogJob(null);
+                    }}
+                />
+            }
         </>
     )
 });

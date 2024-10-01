@@ -221,4 +221,5 @@
     transform: translate(0, 0) rotate(-90deg);
     font-size: 0.75rem;
     text-align: left;
+    text-wrap: nowrap;
 }

@@ -2,23 +2,30 @@ import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from
 import styles from './data.module.css';
 import { BarChart, ChartData, Dataset } from "../../components/bar-chart/bar-chart.component";
 import { DataFecherService } from "../../services/data-fetcher.service";
-import { Nozzle } from "../../models/nozzle.model";
-import { JobContext, NozzlesContext } from "../../App";
+import { Nozzle } from "../../types/nozzle.type";
+import { JobContext } from "../../App";
+import { NozzlesService } from "../../services/nozzles.service";
+import { YesNoDialog } from "../../components/yes-no-dialog/yes-no-dialog.component";
 
 export type DataViewElement = {
 
 }
 
 export type DataViewProps = {
-    onSyncClick: () => void;
+
 }
 
 export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) => {
 
-    const nozzles: Nozzle[] | undefined = useContext<Nozzle[] | undefined>(NozzlesContext);
     const { currentJob, setCurrentJob } = useContext<any>(JobContext);
 
     const [chartData, setChartData] = useState<ChartData>({ datasets: [] });
+    const [nozzles, setNozzles] = useState<Nozzle[] | undefined>(undefined);
+    const [ignoreNozzleDialogOpen, setIgnoreNozzleDialogOpen] = useState<boolean>(false);
+    const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
+    const [ignoreNozzleDialogNozlle, setIgnoreNozzleDialogNozzle] = useState<Nozzle | null>(null);
+    const [unignoreNozzleDialogNozlle, setUnignoreNozzleDialogNozzle] = useState<Nozzle | null>(null);
+
 
     useImperativeHandle(ref, () => ({
 
@@ -29,38 +36,110 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
 
         const newChartData = nozzles.map((nozzle: Nozzle) => {
             return {
-                label: nozzle.id,
-                value: nozzle.flow
+                label: nozzle.name,
+                value: nozzle.flow,
+                id: nozzle.id,
+                opacity: nozzle.ignored ? 0.5 : 1
             } as Dataset;
         });
 
         setChartData({ datasets: newChartData });
     }, [nozzles]);
 
-    const onBarClick = (dataset: Dataset) => {
-        alert(`Nozzle ${dataset.label} has flow of ${dataset.value}`);
+    useEffect(() => {
+        NozzlesService.getActiveNozzles().then((nozzles) => {
+            nozzles = nozzles.sort((a, b) => a.index - b.index);
+            setNozzles(nozzles);
+        });
+    }, []);
+
+    useEffect(() => {
+        const eventHandler = (data: any) => {
+            const nozzles: Nozzle[] = data.nozzles;
+            if (!nozzles) return;
+
+            setNozzles(nozzles);
+        }
+
+        DataFecherService.addEventListener('onDataFetched', eventHandler);
+
+        return () => {
+            DataFecherService.removeEventListener('onDataFetched', eventHandler);
+        }
+    }, [setNozzles]);
+
+    const onBarClick = async (dataset: Dataset) => {
+        const nozzleId = dataset.id;
+        const nozzle = await NozzlesService.getNozzleById(nozzleId);
+
+        if (nozzle === null) return;
+
+        if (nozzle.ignored) {
+            setUnignoreNozzleDialogNozzle(nozzle);
+            setUnignoreNozzleDialogOpen(true);
+        }
+        else {
+            setIgnoreNozzleDialogNozzle(nozzle);
+            setIgnoreNozzleDialogOpen(true);
+        }
+    }
+
+    const onSyncClick = () => {
+        DataFecherService.syncNozzles();
     }
 
     return (
-        <div className={styles.wrapper}>
-            {nozzles != undefined && nozzles.length >= 1 &&
-                <BarChart
-                    chartData={chartData}
-                    targetValue={2.5}
-                    tolerance={0.05}
-                    onClick={onBarClick}
-                ></BarChart>
+        <>
+            <div className={styles.wrapper}>
+                {nozzles != undefined && nozzles.length >= 1 &&
+                    <BarChart
+                        chartData={chartData}
+                        targetValue={2.5}
+                        tolerance={0.05}
+                        onClick={onBarClick}
+                    ></BarChart>
+                }
+                {nozzles === undefined || nozzles.length === 0 &&
+                    <div className={styles.syncWrapper}>
+                        <span>There is no synchronized nozzle.</span>
+                        <span>Click the button bellow to synchronize.</span>
+                        <button className={styles.syncButton} onClick={onSyncClick}>Synchronize</button>
+                    </div>
+                }
+                <span className={styles.jobTitle}>{currentJob.title}</span>
+            </div >
+            {ignoreNozzleDialogOpen &&
+                <YesNoDialog
+                    title='Ignore nozzle'
+                    message='Are you sure you want to ignore this nozzle?'
+                    onYesClick={() => {
+                        ignoreNozzleDialogNozlle!.ignored = true;
+                        NozzlesService.updateNozzle(ignoreNozzleDialogNozlle!);
+
+                        setIgnoreNozzleDialogOpen(false);
+                    }}
+
+                    onNoClick={() => {
+                        setIgnoreNozzleDialogOpen(false);
+                    }}
+                />
             }
-            {nozzles === undefined &&
-                <div className={styles.syncWrapper}>
-                    <span>There is no synchronized nozzle.</span>
-                    <span>Click the button bellow to synchronize.</span>
-                    <button className={styles.syncButton} onClick={() => {
-                        props.onSyncClick();
-                    }}>Synchronize</button>
-                </div>
+            {unignoreNozzleDialogOpen &&
+                <YesNoDialog
+                    title='Unignore nozzle'
+                    message='Are you sure you want to unignore this nozzle?'
+                    onYesClick={() => {
+                        unignoreNozzleDialogNozlle!.ignored = false;
+                        NozzlesService.updateNozzle(unignoreNozzleDialogNozlle!);
+
+                        setUnignoreNozzleDialogOpen(false);
+                    }}
+
+                    onNoClick={() => {
+                        setUnignoreNozzleDialogOpen(false);
+                    }}
+                />
             }
-            <span className={styles.jobTitle}>{currentJob.title}</span>
-        </div >
+        </>
     )
 });

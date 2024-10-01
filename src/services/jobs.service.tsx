@@ -1,8 +1,6 @@
 import { Preferences } from "@capacitor/preferences";
 import { Job } from "../types/job.type";
 
-export const languages = ['en-us', 'pt-br'];
-
 export namespace JobsService {
 
     export const getJobs = async (): Promise<Job[]> => {

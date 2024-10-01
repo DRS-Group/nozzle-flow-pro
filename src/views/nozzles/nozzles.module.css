@@ -1,0 +1,180 @@
+.wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+
+    flex-grow: 1;
+    overflow-y: auto;
+    z-index: 0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+
+    flex-grow: 1;
+    overflow-y: auto;
+    z-index: -2;
+}
+
+.jobItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    height: 4rem;
+    padding: 0.25rem 1rem 0.25rem 1rem;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.jobItem>span {
+    font-size: 0.75rem;
+}
+
+.jobItem>span:first-of-type {
+    font-size: 1rem;
+}
+
+.menuButton {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+
+    width: 3rem;
+    height: 3rem;
+
+    background-color: var(--primary-color);
+    border-radius: 50%;
+
+    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
+
+    color: white;
+    font-size: 1.25rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 200ms;
+
+}
+
+.menuButton[data-state="open"] {
+    width: 3.5rem;
+    height: 3.5rem;
+    transition: 200ms;
+}
+
+.menuButton[data-state="open"]>i {
+    scale: 1.17;
+    transform: rotate(135deg);
+    transition: 200ms;
+}
+
+.menuButton:not([data-state="open"])>i {
+    transform: rotate(0deg);
+    transition: 200ms;
+}
+
+.menuButton .menuItem {
+    position: absolute;
+
+    width: 3rem;
+    height: 3rem;
+
+    background-color: var(--primary-color);
+    border-radius: 50%;
+
+    box-shadow: none;
+
+    color: white;
+    font-size: 1.25rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: translate(0, 0);
+
+    z-index: -1;
+    transition: 200ms;
+}
+
+.menuButton:not([data-state="open"]) .menuItem {
+    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+}
+
+.menuButton[data-state="open"] .menuItem {
+    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
+}
+
+
+.menuButton[data-state="open"] .refreshButton {
+    transform: translate(-0rem, -4rem);
+    transition: 200ms;
+}
+
+.menuButton[data-state="open"] .calibrateButton {
+    transform: translate(-0rem, -7.5rem);
+    transition: 200ms;
+}
+
+.menuButton[data-state="open"] .clearButton {
+    transform: translate(0rem, -11rem);
+    transition: 200ms;
+}
+
+.noJobsContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.noJobsContent>button {
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 100vh;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
+}
+
+.syncWrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    z-index: -2;
+}
+
+.syncWrapper button {
+    margin-top: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    font-size: 1rem;
+}

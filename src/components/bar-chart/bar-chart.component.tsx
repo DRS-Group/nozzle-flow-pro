@@ -87,8 +87,10 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
                             key={dataset.label}
                             height={height}
                             color={color}
+                            opacity={dataset.opacity}
                             label={dataset.label}
                             onClick={props.onClick}
+                            id={dataset.id}
                         ></Bar>
                     )
                 })}
@@ -98,8 +100,10 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
 });
 
 export type Dataset = {
+    id: string
     label: string,
-    value: number
+    value: number,
+    opacity?: number
 }
 
 type BarElement = {
@@ -109,7 +113,9 @@ type BarElement = {
 type BarProps = {
     height: number;
     color: string;
+    opacity?: number;
     label: string;
+    id: string;
     onClick?: (dataset: Dataset) => void;
 }
 
@@ -120,15 +126,17 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
 
     const [style, setStyle] = useState({
         height: `${props.height * 100}%`,
-        backgroundColor: props.color
+        backgroundColor: props.color,
+        opacity: props.opacity || 1
     });
 
     useEffect(() => {
         setStyle({
             ...style,
             height: `${props.height * 100}%`,
+            opacity: props.opacity || 1
         });
-    }, [props.height]);
+    }, [props.height, props.opacity]);
 
     useEffect(() => {
         setStyle({
@@ -141,7 +149,7 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
         <div
             className={styles.barWrapper}
             onClick={() => {
-                if (props.onClick) props.onClick({ label: props.label, value: props.height });
+                if (props.onClick) props.onClick({ label: props.label, value: props.height, id: props.id! });
             }}
         >
             <div className={styles.bar} style={style}>

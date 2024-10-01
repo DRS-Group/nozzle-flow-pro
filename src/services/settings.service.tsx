@@ -8,6 +8,8 @@ export namespace SettingsService {
         language: string;
         primaryColor: string;
         secondaryColor: string;
+
+        apiBaseUrl: string;
     }
 
     export const getSettings = async (): Promise<Settings> => {
@@ -18,12 +20,34 @@ export namespace SettingsService {
         });
     }
 
+    export const getSettingOrDefault = async (key: string, defaultValue: any): Promise<any> => {
+        return new Promise(async (resolve, reject) => {
+
+            let settings: Settings | any = await getSettings();
+
+            if (settings[key] === undefined) {
+                settings[key] = defaultValue;
+            }
+        });
+    }
 
     export const setLanguage = async (language: string): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             let settings = await getSettings();
 
             settings.language = language;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+        });
+    }
+
+    export const setApiBaseUrl = async (apiBaseUrl: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.apiBaseUrl = apiBaseUrl;
 
             Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
                 resolve();

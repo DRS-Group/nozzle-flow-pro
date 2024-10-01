@@ -17,29 +17,33 @@ export type CreateJobProps = {
 }
 
 export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, ref) => {
-    const navFunctions = useContext(NavFunctionsContext);
+    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
     const { currentJob, setCurrentJob } = useContext(JobContext);
 
     const titleInputRef = useRef<TextInputElement>(null);
+    const durationToleranceInputRef = useRef<TextInputElement>(null);
+    const expectedFlowInputRef = useRef<TextInputElement>(null);
+    const flowToleranceInputRef = useRef<TextInputElement>(null);
 
     useImperativeHandle(ref, () => ({
 
     }), []);
 
     const onBackClick = () => {
-        navFunctions?.setPage('jobs');
+        setCurrentPage('jobs');
     }
 
     const onConfirmButtonClick = () => {
-        JobsService.addJob(new Job(titleInputRef.current!.getValue(), 2.5, 0.05, 7000)).then((job: Job) => {
+        const title = titleInputRef.current!.getValue();
+        const durationTolerance = parseFloat(durationToleranceInputRef.current!.getValue());
+        const expectedFlow = parseFloat(expectedFlowInputRef.current!.getValue());
+        const flowTolerance = parseFloat(flowToleranceInputRef.current!.getValue()) / 100;
+
+        JobsService.addJob(new Job(title, expectedFlow, flowTolerance, durationTolerance)).then((job: Job) => {
             setCurrentJob(job);
-            navFunctions?.setPage('dataView');
+            setCurrentPage('dataView');
         });
     }
-
-    useEffect(() => {
-        console.log(currentJob);
-    }, [currentJob]);
 
     return (
         <>
@@ -60,18 +64,21 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         className={styles.durationToleranceInput}
                         value='7000'
                         decimals={0}
+                        ref={durationToleranceInputRef}
                     />
                     <NumberInput
                         label='Expected flow (L/min)'
                         className={styles.expectedFlow}
                         value='2.5'
                         decimals={2}
+                        ref={expectedFlowInputRef}
                     />
                     <NumberInput
                         label='Variation margin (%)'
                         className={styles.flowToleranceInput}
                         value='5'
                         decimals={2}
+                        ref={flowToleranceInputRef}
                     />
                 </div>
             </div>

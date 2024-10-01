@@ -7,6 +7,7 @@ export type MenuElement = {
 
 export type MenuProps = {
     onJobsClick: () => void;
+    onNozzlesClick: () => void;
 }
 
 export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
@@ -16,6 +17,10 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
 
     const onJobsClick = () => {
         props.onJobsClick();
+    }
+
+    const onNozzlesClick = () => {
+        props.onNozzlesClick();
     }
 
     return (
@@ -29,7 +34,9 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
                     <img src="/images/briefcase.svg" />
                     <span>Jobs</span>
                 </div>
-                <div className={styles.item}>
+                <div className={styles.item}
+                    onClick={onNozzlesClick}
+                >
                     <img src="/images/nozzle.svg" />
                     <span>Nozzles</span>
                 </div>

@@ -3,7 +3,7 @@ import { SideMenu } from './components/side-menu/side-menu.component';
 import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen';
 import { DataFecherService } from './services/data-fetcher.service';
 import { DataView } from './views/data/data.view';
-import { Nozzle } from './models/nozzle.model';
+import { Nozzle } from './types/nozzle.type';
 import { generateFlowAboveExpectedNozzleEvent, generateFlowBelowExpectedNozzleEvent, NozzleEvent } from './types/nozzle-event.type';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
 import styles from './App.module.css';
@@ -11,81 +11,33 @@ import { Menu } from './views/menu/menu.view';
 import { Jobs } from './views/jobs/jobs.view';
 import { CreateJob } from './views/create-job/create-job.view';
 import { Job } from './types/job.type';
+import { NozzlesView } from './views/nozzles/nozzles.view';
+import { NozzlesService } from './services/nozzles.service';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
   .catch(console.warn);
 
 
-export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView';
+export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView' | 'nozzles';
 
-export type NavFunctions = {
-  setPage: (page: Page) => void;
-}
-
-export const NozzlesContext = createContext<Nozzle[] | undefined>(undefined);
-export const NavFunctionsContext = createContext<NavFunctions | undefined>(undefined);
+export const NavFunctionsContext = createContext<any>(undefined);
 export const JobContext = createContext<any>(undefined);
 
 function App() {
-  const [nozzles, setNozzles] = useState<Nozzle[] | undefined>(undefined);
-  const [shouldRefresh, setShouldRefresh] = useState<boolean>(false);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-
-  const [expectedFlow, setExpectedFlow] = useState<number>(2.5);
-  const [tolerance, setTolerance] = useState<number>(0.05);
-  const [durationTolerance, setDurationTolerance] = useState<number>(7000);
-
-  const [events, setEvents] = useState<NozzleEvent[]>([]);
 
   const [currentPage, setCurrentPage] = useState<Page>('menu');
   const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
 
-  const [NavFunctionsValue, setNavFunctionsValue] = useState<NavFunctions | undefined>({
-    setPage: (page: Page) => {
-      setCurrentPage(page);
-    }
-  });
-
-  const syncNozzles = () => {
-    DataFecherService.getNozzles()
-      .then((nozzles: Nozzle[]) => {
-        setNozzles(nozzles);
-        setShouldRefresh(true);
-      })
-      .catch((error) => {
-        setNozzles(undefined);
-      });
-  }
-
   const refresh = async () => {
-    if (nozzles !== undefined) {
-      DataFecherService.getData()
-        .then((newNozzles: Nozzle[]) => {
-          const oldNozzles = [...nozzles];
-
-          for (let oldNozzleIndez = 0; oldNozzleIndez < oldNozzles.length; oldNozzleIndez++) {
-            const oldNozzle = oldNozzles[oldNozzleIndez];
-            const newNozzle = newNozzles.find((nozzle: Nozzle) => nozzle.id === oldNozzle.id);
-
-            if (newNozzle) {
-              oldNozzles[oldNozzleIndez].flow = newNozzle.flow;
-            }
-          }
-
-          setNozzles(oldNozzles);
-        })
-        .catch((error) => {
-          setNozzles(undefined);
-        })
-        .finally(() => {
-          setIsRefreshing(false);
-        });
-    }
+    DataFecherService.fetchData().then(() => {
+      setIsRefreshing(false);
+    });
   }
 
-  const updateNozzleEvents = () => {
-    if (nozzles === undefined) return;
+  const updateNozzleEvents = async (nozzles: Nozzle[]) => {
+    if (nozzles === undefined || currentJob === undefined) return;
 
     let eventsToAdd: NozzleEvent[] = [];
     let eventsToModify: NozzleEvent[] = [];
@@ -93,7 +45,7 @@ function App() {
     for (let i = 0; i < nozzles.length; i++) {
       const nozzle = nozzles[i];
 
-      const nozzleEvents: NozzleEvent[] = events.filter((event) => {
+      const nozzleEvents: NozzleEvent[] = currentJob.nozzleEvents.filter((event) => {
         return event.nozzleId === nozzle.id;
       });
 
@@ -101,8 +53,8 @@ function App() {
         return event.endTime === undefined;
       });
 
-      const isNozzleFlowAboveExpected = nozzle.flow !== undefined && nozzle.flow > expectedFlow * (1 + tolerance);
-      const isNozzleFlowBelowExpected = nozzle.flow !== undefined && nozzle.flow < expectedFlow * (1 - tolerance);
+      const isNozzleFlowAboveExpected = nozzle.flow !== undefined && nozzle.flow > currentJob!.expectedFlow * (1 + currentJob!.tolerance);
+      const isNozzleFlowBelowExpected = nozzle.flow !== undefined && nozzle.flow < currentJob!.expectedFlow * (1 - currentJob!.tolerance);
       const doesNozzleHaveOngoingEvent = nozzle_ongoing_events.length > 0;
 
       if (!doesNozzleHaveOngoingEvent) {
@@ -125,7 +77,7 @@ function App() {
           const eventTitle = nozzleOngoingEvent.title;
 
           if (!wasEventTriggered) {
-            if (eventDuration > durationTolerance) {
+            if (eventDuration > currentJob!.durationTolerance) {
               nozzleOngoingEvent.triggered = true;
               eventsToModify.push(nozzleOngoingEvent);
 
@@ -161,7 +113,7 @@ function App() {
       }
     }
 
-    let newEvents = [...events];
+    let newEvents = [...currentJob.nozzleEvents];
 
     for (let event of eventsToAdd) {
       newEvents.push(event);
@@ -172,39 +124,53 @@ function App() {
       newEvents[eventIndex] = event;
     }
 
-    if (eventsToAdd.length > 0 || eventsToModify.length > 0)
-      setEvents(newEvents);
+    if (eventsToAdd.length > 0 || eventsToModify.length > 0) {
+      currentJob.nozzleEvents = newEvents;
+      setCurrentJob(currentJob);
+    }
   }
 
   const getFirstNozzleUnviewedTriggeredEvent = () => {
-    return events.find((event: NozzleEvent) => {
+    return currentJob?.nozzleEvents.find((event: NozzleEvent) => {
       return event.triggered && !event.viewed;
     });
   }
 
   const getTotalNozzleUnviewedTriggeredEvents = () => {
-    return events.filter((event: NozzleEvent) => {
+    return currentJob?.nozzleEvents.filter((event: NozzleEvent) => {
       return event.triggered && !event.viewed;
     }).length;
   }
 
   const markEventAsViewed = (event: NozzleEvent) => {
-    const eventIndex = events.findIndex((e) => e.id === event.id);
-    const newEvents = [...events];
+    const eventIndex = currentJob!.nozzleEvents.findIndex((e) => e.id === event.id);
+    const newEvents = [...currentJob!.nozzleEvents!];
     newEvents[eventIndex].viewed = true;
-    setEvents(newEvents);
+    currentJob!.nozzleEvents = newEvents;
+    setCurrentJob(currentJob);
   }
 
   const markAllEventsAsViewed = () => {
-    const newEvents = [...events];
+    const newEvents = [...currentJob!.nozzleEvents];
     newEvents.forEach((event) => {
       event.viewed = true;
     });
-    setEvents(newEvents);
+    currentJob!.nozzleEvents = newEvents;
+    setCurrentJob(currentJob);
   }
 
   useEffect(() => {
-    if (shouldRefresh && !isRefreshing) {
+    const eventHandler = (data: any) => {
+      updateNozzleEvents(data.nozzles);
+    };
+    DataFecherService.addEventListener('onDataFetched', eventHandler);
+    return () => {
+      DataFecherService.removeEventListener('onDataFetched', eventHandler);
+    }
+  }, [currentJob]);
+
+  useEffect(() => {
+    if (!isRefreshing && currentJob) {
       const interval = setInterval(() => {
         setIsRefreshing(true);
         refresh();
@@ -212,20 +178,17 @@ function App() {
       return () => clearInterval(interval);
     }
 
-  }, [shouldRefresh, isRefreshing]);
-
-  useEffect(() => {
-    updateNozzleEvents();
-  }, [nozzles]);
+  }, [isRefreshing, currentJob]);
 
   return (
-    <NavFunctionsContext.Provider value={NavFunctionsValue}>
+    <NavFunctionsContext.Provider value={{ currentPage, setCurrentPage }}>
       <JobContext.Provider value={{ currentJob, setCurrentJob }} >
-        <NozzlesContext.Provider value={nozzles}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           {
             currentPage === 'menu' &&
             <Menu
               onJobsClick={() => setCurrentPage('jobs')}
+              onNozzlesClick={() => setCurrentPage('nozzles')}
             />
           }
           {
@@ -240,12 +203,16 @@ function App() {
           }
           {
             currentPage === 'dataView' &&
-            <DataView
-              onSyncClick={syncNozzles}
+            <DataView />
+          }
+          {
+            currentPage === 'nozzles' &&
+            <NozzlesView
+              onBackClick={() => setCurrentPage('menu')}
             />
           }
           {
-            currentPage === 'dataView' &&
+            (currentPage === 'dataView' || (currentPage === 'nozzles' && currentJob)) &&
             <SideMenu />
           }
           {getFirstNozzleUnviewedTriggeredEvent() &&
@@ -256,24 +223,9 @@ function App() {
               totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
             />
           }
-        </NozzlesContext.Provider>
+        </div>
       </JobContext.Provider>
-    </NavFunctionsContext.Provider >
-    // <NozzlesContext.Provider value={nozzles}>
-    //   <div style={{ flexGrow: 1, overflow: 'hidden' }}>
-    //     <DataView onSyncClick={syncNozzles} />
-
-    //   </div>
-    //   {getFirstNozzleUnviewedTriggeredEvent() &&
-    //     <AlertModal
-    //       event={getFirstNozzleUnviewedTriggeredEvent()!}
-    //       onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
-    //       onOkForAllClick={markAllEventsAsViewed}
-    //       totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
-    //     />
-    //   }
-    //   <SideMenu />
-    // </NozzlesContext.Provider>
+    </NavFunctionsContext.Provider>
   );
 }
 

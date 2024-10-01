@@ -12,7 +12,7 @@ export type SideMenuProps = {
 }
 
 export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) => {
-    const navFunctions = useContext(NavFunctionsContext);
+    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
     const { currentJob, setCurrentJob } = useContext(JobContext);
 
     const [followTranslateX, setFollowTranslateX] = useState('0vw');
@@ -27,9 +27,19 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
         target.setAttribute('data-current', 'true');
     }
 
+    const onDataClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        setCurrentPage('dataView');
+        onAnyItemClick(e);
+    }
+
+    const onNozzlesClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        setCurrentPage('nozzles');
+        onAnyItemClick(e);
+    }
+
     const onStopClick = () => {
         setCurrentJob(null);
-        navFunctions?.setPage('menu');
+        setCurrentPage('menu');
     }
 
     useImperativeHandle(ref, () => ({
@@ -43,8 +53,8 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
             <ToggleButton />
             <span className={styles.follow}></span>
             <div className={styles.content}>
-                <button className={styles.menuItem} data-current="true" onClick={onAnyItemClick}><i className="icon-chart-bar"></i><span>Data</span></button>
-                <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-speedometer-black"></i><span>Calibration</span></button>
+                <button className={styles.menuItem} data-current="true" onClick={onDataClick}><i className="icon-chart-bar"></i><span>Data</span></button>
+                <button className={styles.menuItem} onClick={onNozzlesClick}><i className="icon-nozzle"></i><span>Nozzles</span></button>
                 <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-file-clock-outline"></i><span>Logs</span></button>
                 <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-cog"></i><span>Settings</span></button>
             </div>

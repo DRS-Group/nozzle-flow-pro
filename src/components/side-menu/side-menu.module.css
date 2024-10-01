@@ -81,6 +81,7 @@
     transition: transform 250ms;
 }
 
-.stopButton span {
+.stopButton span,
+.stopButton i {
     font-size: 0.75rem;
 }
