@@ -9,7 +9,7 @@ export type TextInputDialogElement = {
 export type TextInputDialogProps = {
     label: string,
     title: string,
-    onConfirmClick: (name: string) => void,
+    onConfirmClick: (value: string) => void,
     onCancelClick: () => void
 }
 

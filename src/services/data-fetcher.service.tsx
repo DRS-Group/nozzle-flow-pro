@@ -2,6 +2,7 @@ import { CapacitorHttp } from '@capacitor/core';
 import { Nozzle } from '../types/nozzle.type';
 import { EventHandler } from '../types/event-handler';
 import { NozzlesService } from './nozzles.service';
+import { SettingsService } from './settings.service';
 
 export namespace DataFecherService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
@@ -33,8 +34,10 @@ export namespace DataFecherService {
     }
 
     export const syncNozzles = async (): Promise<Nozzle[]> => {
-        return new Promise((resolve, reject) => {
-            CapacitorHttp.get({ url: 'http://10.0.0.122:3000/sync', }).then(async (response) => {
+        return new Promise(async (resolve, reject) => {
+            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+
+            CapacitorHttp.get({ url: `${ApiBaseUri}/sync`, }).then(async (response) => {
                 const fetchedNozzles: Nozzle[] = response.data.map((item: string) => {
                     return { id: item, name: item } as Nozzle;
                 });
@@ -63,8 +66,10 @@ export namespace DataFecherService {
     }
 
     export const fetchData = async (): Promise<Nozzle[]> => {
-        return new Promise((resolve, reject) => {
-            CapacitorHttp.get({ url: 'http://10.0.0.122:3000/data', }).then(async (response) => {
+        return new Promise(async (resolve, reject) => {
+            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+
+            CapacitorHttp.get({ url: `${ApiBaseUri}/data`, }).then(async (response) => {
 
                 const oldNozzles = await NozzlesService.getActiveNozzles();
                 const newNozzles = response.data.nozzles;

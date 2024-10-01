@@ -1,0 +1,80 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    flex-grow: 1;
+}
+
+.section:not(:last-child) {
+    padding-bottom: 1rem;
+    border-bottom: 0.05rem solid rgba(0, 0, 0, 0.25);
+}
+
+.sectionTitle {
+    font-size: 0.75rem;
+    font-weight: 200;
+    margin-top: 1rem;
+    padding: 0 1rem;
+    text-transform: uppercase;
+}
+
+.sectionContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.25rem;
+    flex-direction: row;
+    padding: 1rem 1rem;
+    transition: 100ms;
+}
+
+.item:active {
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: 150ms;
+}
+
+.itemLeft {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.itemName {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.itemValue {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.itemRight {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.itemRight>i {
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.colorBox {
+    width: 1rem;
+    height: 1rem;
+    border: 0.1rem solid rgba(0, 0, 0, 0.25);
+    border-radius: 0.25rem;
+    background-color: var(--primary-color);
+}
+
+.itemValue>img {
+    height: 1rem;
+    border-radius: 0.25rem;
+}

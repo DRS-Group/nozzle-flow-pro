@@ -13,13 +13,14 @@ import { CreateJob } from './views/create-job/create-job.view';
 import { Job } from './types/job.type';
 import { NozzlesView } from './views/nozzles/nozzles.view';
 import { NozzlesService } from './services/nozzles.service';
+import { Settings } from './views/settings/settings.view';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
   .catch(console.warn);
 
 
-export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView' | 'nozzles';
+export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView' | 'nozzles' | 'settings';
 
 export const NavFunctionsContext = createContext<any>(undefined);
 export const JobContext = createContext<any>(undefined);
@@ -44,6 +45,8 @@ function App() {
 
     for (let i = 0; i < nozzles.length; i++) {
       const nozzle = nozzles[i];
+
+      if (nozzle.ignored) continue;
 
       const nozzleEvents: NozzleEvent[] = currentJob.nozzleEvents.filter((event) => {
         return event.nozzleId === nozzle.id;
@@ -212,7 +215,11 @@ function App() {
             />
           }
           {
-            (currentPage === 'dataView' || (currentPage === 'nozzles' && currentJob)) &&
+            currentPage === 'settings' &&
+            <Settings />
+          }
+          {
+            (currentPage === 'dataView' || (currentPage === 'nozzles' && currentJob) || (currentPage === 'settings' && currentJob)) &&
             <SideMenu />
           }
           {getFirstNozzleUnviewedTriggeredEvent() &&

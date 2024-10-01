@@ -1,5 +1,7 @@
+import { NavFunctionsContext } from '../../App';
+import { SettingsService } from '../../services/settings.service';
 import styles from './menu.module.css';
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 
 export type MenuElement = {
 
@@ -11,9 +13,18 @@ export type MenuProps = {
 }
 
 export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
+    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
+    const [logo, setLogo] = useState<string>('');
+
     useImperativeHandle(ref, () => ({
 
     }), []);
+
+    useEffect(() => {
+        SettingsService.getLogoUri().then((logo) => {
+            setLogo(logo);
+        });
+    }, []);
 
     const onJobsClick = () => {
         props.onJobsClick();
@@ -23,9 +34,13 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
         props.onNozzlesClick();
     }
 
+    const onSettingsClick = () => {
+        setCurrentPage('settings');
+    }
+
     return (
         <div className={styles.wrapper}>
-            <img src='/images/logo_drs.png' className={styles.logo} />
+            <img src={logo} className={styles.logo} />
             <div className={styles.itemsWrapper}>
                 <div
                     className={styles.item}
@@ -40,7 +55,9 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
                     <img src="/images/nozzle.svg" />
                     <span>Nozzles</span>
                 </div>
-                <div className={styles.item}>
+                <div className={styles.item}
+                    onClick={onSettingsClick}
+                >
                     <img src="/images/settings.svg" />
                     <span>Settings</span>
                 </div>

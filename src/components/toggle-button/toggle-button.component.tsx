@@ -7,11 +7,11 @@ export type ToggleButtonElement = {
 }
 
 export type ToggleButtonProps = {
-
+    state?: "on" | "off" | "auto";
 }
 
 export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((props, ref) => {
-    const [buttonState, setButtonState] = useState<"on" | "off" | "auto">("off");
+    const [buttonState, setButtonState] = useState<"on" | "off" | "auto">(props.state || "auto");
     const [timeoutHandle, setTimeoutHandle] = useState<NodeJS.Timeout | null>(null);
 
     useImperativeHandle(ref, () => ({

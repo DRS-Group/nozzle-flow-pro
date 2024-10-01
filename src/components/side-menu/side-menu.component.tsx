@@ -37,6 +37,11 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
         onAnyItemClick(e);
     }
 
+    const onSettingsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        setCurrentPage('settings');
+        onAnyItemClick(e);
+    }
+
     const onStopClick = () => {
         setCurrentJob(null);
         setCurrentPage('menu');
@@ -56,7 +61,7 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
                 <button className={styles.menuItem} data-current="true" onClick={onDataClick}><i className="icon-chart-bar"></i><span>Data</span></button>
                 <button className={styles.menuItem} onClick={onNozzlesClick}><i className="icon-nozzle"></i><span>Nozzles</span></button>
                 <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-file-clock-outline"></i><span>Logs</span></button>
-                <button className={styles.menuItem} onClick={onAnyItemClick}><i className="icon-cog"></i><span>Settings</span></button>
+                <button className={styles.menuItem} onClick={onSettingsClick}><i className="icon-cog"></i><span>Settings</span></button>
             </div>
             <button className={styles.stopButton} onClick={onStopClick}><i className="icon-stop"></i><span>Stop</span></button>
         </div>
