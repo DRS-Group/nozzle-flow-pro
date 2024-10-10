@@ -21,14 +21,14 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const { currentJob, setCurrentJob } = useContext<any>(JobContext);
 
     const [chartData, setChartData] = useState<ChartData>({ datasets: [] });
-    const [nozzles, setNozzles] = useState<Nozzle[] | undefined>(undefined);
+    const [nozzles, setNozzles] = useState<Nozzle[]>([]);
     const [speed, setSpeed] = useState<number>(0);
     const [nozzleSpacing, setNozzleSpacing] = useState<number>(0.1);
 
     const [ignoreNozzleDialogOpen, setIgnoreNozzleDialogOpen] = useState<boolean>(false);
     const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
-    const [ignoreNozzleDialogNozlle, setIgnoreNozzleDialogNozzle] = useState<Nozzle | null>(null);
-    const [unignoreNozzleDialogNozlle, setUnignoreNozzleDialogNozzle] = useState<Nozzle | null>(null);
+    const [ignoreNozzleDialogNozlleIndex, setIgnoreNozzleDialogNozzleIndex] = useState<number | null>(null);
+    const [unignoreNozzleDialogNozlleIndex, setUnignoreNozzleDialogNozzleIndex] = useState<number | null>(null);
 
 
     useImperativeHandle(ref, () => ({
@@ -42,7 +42,6 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             return {
                 label: nozzle.name,
                 value: nozzle.flow,
-                id: nozzle.id,
                 opacity: nozzle.ignored ? 0.5 : 1
             } as Dataset;
         });
@@ -68,24 +67,23 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         }
     }, [setNozzles, setSpeed, setNozzleSpacing]);
 
-    const onBarClick = async (dataset: Dataset) => {
-        const nozzleId = dataset.id;
-        const nozzle = await NozzlesService.getNozzleById(nozzleId);
+    const onBarClick = async (nozzleIndex: number) => {
+        const nozzle = nozzles[nozzleIndex];
 
         if (nozzle === null) return;
 
         if (nozzle.ignored) {
-            setUnignoreNozzleDialogNozzle(nozzle);
+            setUnignoreNozzleDialogNozzleIndex(nozzleIndex);
             setUnignoreNozzleDialogOpen(true);
         }
         else {
-            setIgnoreNozzleDialogNozzle(nozzle);
+            setIgnoreNozzleDialogNozzleIndex(nozzleIndex);
             setIgnoreNozzleDialogOpen(true);
         }
     }
 
     const onSyncClick = () => {
-        DataFecherService.syncNozzles();
+        // DataFecherService.syncNozzles();
     }
 
     const calculateTargetValue = () => {
@@ -115,13 +113,14 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                 }
                 <span className={styles.jobTitle}>{currentJob.title}</span>
             </div >
-            {ignoreNozzleDialogOpen &&
+            {ignoreNozzleDialogOpen && ignoreNozzleDialogNozlleIndex &&
                 <YesNoDialog
                     title='Ignore nozzle'
                     message='Are you sure you want to ignore this nozzle?'
                     onYesClick={() => {
-                        ignoreNozzleDialogNozlle!.ignored = true;
-                        NozzlesService.updateNozzle(ignoreNozzleDialogNozlle!);
+                        const nozzle = nozzles[ignoreNozzleDialogNozlleIndex];
+                        nozzle.ignored = true;
+                        NozzlesService.updateNozzle(nozzle, ignoreNozzleDialogNozlleIndex);
 
                         setIgnoreNozzleDialogOpen(false);
                     }}
@@ -131,13 +130,14 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                     }}
                 />
             }
-            {unignoreNozzleDialogOpen &&
+            {unignoreNozzleDialogOpen && unignoreNozzleDialogNozlleIndex !== null &&
                 <YesNoDialog
                     title='Unignore nozzle'
                     message='Are you sure you want to unignore this nozzle?'
                     onYesClick={() => {
-                        unignoreNozzleDialogNozlle!.ignored = false;
-                        NozzlesService.updateNozzle(unignoreNozzleDialogNozlle!);
+                        const nozzle = nozzles[unignoreNozzleDialogNozlleIndex];
+                        nozzle.ignored = false;
+                        NozzlesService.updateNozzle(nozzle, unignoreNozzleDialogNozlleIndex);
 
                         setUnignoreNozzleDialogOpen(false);
                     }}

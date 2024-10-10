@@ -47,13 +47,13 @@ function App() {
     let eventsToAdd: NozzleEvent[] = [];
     let eventsToModify: NozzleEvent[] = [];
 
-    for (let i = 0; i < nozzles.length; i++) {
-      const nozzle = nozzles[i];
+    for (let nozzleIndex = 0; nozzleIndex < nozzles.length; nozzleIndex++) {
+      const nozzle = nozzles[nozzleIndex];
 
       if (nozzle.ignored) continue;
 
-      const nozzleEvents: NozzleEvent[] = currentJob.nozzleEvents.filter((event) => {
-        return event.nozzleId === nozzle.id;
+      const nozzleEvents: NozzleEvent[] = currentJob?.nozzleEvents.filter((event: NozzleEvent) => {
+        return event.nozzleIndex === nozzleIndex;
       });
 
       const nozzle_ongoing_events = nozzleEvents.filter((event) => {
@@ -62,17 +62,17 @@ function App() {
 
       const expectedFlow = calculateTargetValue() || 0;
 
-      const isNozzleFlowAboveExpected = nozzle.flow !== undefined && nozzle.flow > expectedFlow * (1 + currentJob!.tolerance);
-      const isNozzleFlowBelowExpected = nozzle.flow !== undefined && nozzle.flow < expectedFlow * (1 - currentJob!.tolerance);
+      const isNozzleFlowAboveExpected = nozzle.flow !== null && nozzle.flow > expectedFlow * (1 + currentJob!.tolerance);
+      const isNozzleFlowBelowExpected = nozzle.flow !== null && nozzle.flow < expectedFlow * (1 - currentJob!.tolerance);
       const doesNozzleHaveOngoingEvent = nozzle_ongoing_events.length > 0;
 
       if (!doesNozzleHaveOngoingEvent) {
         if (isNozzleFlowAboveExpected) {
-          const newEvent = generateFlowAboveExpectedNozzleEvent(nozzle.id);
+          const newEvent = generateFlowAboveExpectedNozzleEvent(nozzleIndex, nozzle);
           eventsToAdd.push(newEvent);
         }
         else if (isNozzleFlowBelowExpected) {
-          const newEvent = generateFlowBelowExpectedNozzleEvent(nozzle.id);
+          const newEvent = generateFlowBelowExpectedNozzleEvent(nozzleIndex, nozzle);
           eventsToAdd.push(newEvent);
         }
         else {
@@ -99,7 +99,7 @@ function App() {
               nozzleOngoingEvent.endTime = new Date();
               eventsToModify.push(nozzleOngoingEvent);
 
-              const newEvent = generateFlowAboveExpectedNozzleEvent(nozzle.id);
+              const newEvent = generateFlowAboveExpectedNozzleEvent(nozzleIndex, nozzle);
               eventsToAdd.push(newEvent);
             }
           }
@@ -108,7 +108,7 @@ function App() {
               nozzleOngoingEvent.endTime = new Date();
               eventsToModify.push(nozzleOngoingEvent);
 
-              const newEvent = generateFlowBelowExpectedNozzleEvent(nozzle.id);
+              const newEvent = generateFlowBelowExpectedNozzleEvent(nozzleIndex, nozzle);
               eventsToAdd.push(newEvent);
             }
           }

@@ -4,6 +4,7 @@ import { Nozzle } from "../types/nozzle.type";
 import { SettingsService } from "./settings.service";
 import { DataFecherService } from "./data-fetcher.service";
 import { EventHandler } from "../types/event-handler";
+import { count } from "console";
 
 export namespace NozzlesService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
@@ -43,14 +44,6 @@ export namespace NozzlesService {
         });
     }
 
-    export const getActiveNozzles = async (): Promise<Nozzle[]> => {
-        return new Promise(async (resolve, reject) => {
-            let nozzles = (await getNozzles()).filter(nozzle => nozzle.index >= 0).sort((a, b) => a.index - b.index);
-
-            resolve(nozzles);
-        });
-    }
-
     export const setNozzles = async (nozzles: Nozzle[]): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             Preferences.set({ key: 'nozzles', value: JSON.stringify(nozzles) }).then(() => {
@@ -71,11 +64,11 @@ export namespace NozzlesService {
         });
     }
 
-    export const removeNozzle = async (nozzle: Nozzle): Promise<void> => {
+    export const removeNozzle = async (index: number): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             let nozzles = await getNozzles();
 
-            nozzles = nozzles.filter(n => n.id !== nozzle.id);
+            nozzles = nozzles.filter((n, i) => i !== index);
 
             setNozzles(nozzles).then(() => {
                 resolve();
@@ -83,23 +76,9 @@ export namespace NozzlesService {
         });
     }
 
-    export const removeNozzleById = async (id: string): Promise<void> => {
+    export const updateNozzle = async (nozzle: Nozzle, index: number): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             let nozzles = await getNozzles();
-
-            nozzles = nozzles.filter(n => n.id !== id);
-
-            setNozzles(nozzles).then(() => {
-                resolve();
-            });
-        });
-    }
-
-    export const updateNozzle = async (nozzle: Nozzle): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let nozzles = await getNozzles();
-
-            let index = nozzles.findIndex(n => n.id === nozzle.id);
 
             nozzles[index] = nozzle;
 
@@ -109,13 +88,33 @@ export namespace NozzlesService {
         });
     }
 
-    export const getNozzleById = async (id: string): Promise<Nozzle | null> => {
+    export const getNozzleByIndex = async (index: number): Promise<Nozzle> => {
         return new Promise(async (resolve, reject) => {
             let nozzles = await getNozzles();
 
-            let nozzle = nozzles.find(n => n.id === id);
+            resolve(nozzles[index]);
+        });
+    }
 
-            resolve(nozzle || null);
+    export const clearNozzles = async (): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            setNozzles([]).then(() => {
+                resolve();
+            });
+        });
+    }
+
+    export const generateNozzles = async (count: number): Promise<Nozzle[]> => {
+        return new Promise(async (resolve, reject) => {
+            let nozzles: Nozzle[] = [];
+
+            for (let i = 0; i < count; i++) {
+                nozzles.push({ name: `Nozzle ${i + 1}`, flow: null, pulsesPerLiter: 350 });
+            }
+
+            setNozzles(nozzles).then(() => {
+                resolve(nozzles);
+            });
         });
     }
 }

@@ -18,7 +18,7 @@ export type BarChartProps = {
     barsGap?: number,
     targetValue: number,
     tolerance: number
-    onClick?: (dataset: Dataset) => void
+    onClick?: (nozzleIndex: number) => void
 }
 
 export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) => {
@@ -90,7 +90,7 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
                             opacity={dataset.opacity}
                             label={dataset.label}
                             onClick={props.onClick}
-                            id={dataset.id}
+                            nozzleIndex={index}
                         ></Bar>
                     )
                 })}
@@ -100,7 +100,6 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
 });
 
 export type Dataset = {
-    id: string
     label: string,
     value: number,
     opacity?: number
@@ -115,8 +114,8 @@ type BarProps = {
     color: string;
     opacity?: number;
     label: string;
-    id: string;
-    onClick?: (dataset: Dataset) => void;
+    onClick?: (nozzleIndex: number) => void;
+    nozzleIndex: number;
 }
 
 export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
@@ -149,7 +148,7 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
         <div
             className={styles.barWrapper}
             onClick={() => {
-                if (props.onClick) props.onClick({ label: props.label, value: props.height, id: props.id! });
+                if (props.onClick) props.onClick(props.nozzleIndex);
             }}
         >
             <div className={styles.bar} style={style}>
