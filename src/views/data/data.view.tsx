@@ -100,7 +100,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                     <BarChart
                         chartData={chartData}
                         targetValue={calculateTargetValue()}
-                        tolerance={0.05}
+                        tolerance={currentJob.tolerance}
                         onClick={onBarClick}
                     ></BarChart>
                 }

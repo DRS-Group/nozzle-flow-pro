@@ -50,7 +50,33 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
     }
 
     const valueToChartPercentage = (value: number) => {
-        return (value) / (props.targetValue * 2) * 100;
+        const tolerance = props.tolerance * 100;
+        let percentage = (value) / (props.targetValue * 2) * 100;
+        const minFlowPercentage = 50 - tolerance;
+        const maxFlowPercentage = 50 + tolerance;
+
+        function lerp(a: number, b: number, alpha: number) {
+            return a + alpha * (b - a);
+        }
+
+        if (percentage < minFlowPercentage) {
+            const alpha = percentage / minFlowPercentage;
+            const newPercentage = lerp(0, 25, alpha);
+            percentage = newPercentage;
+        }
+        else if (percentage > maxFlowPercentage) {
+            const alpha = (percentage - maxFlowPercentage) / (100 - maxFlowPercentage);
+            const newPercentage = lerp(75, 100, alpha);
+            percentage = newPercentage;
+        }
+        else {
+            const alpha = (percentage - minFlowPercentage) / (maxFlowPercentage - minFlowPercentage);
+            const newPercentage = lerp(25, 75, alpha);
+            percentage = newPercentage;
+        }
+
+
+        return percentage;
     }
 
     return (
@@ -82,10 +108,14 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
                     const height = valueToChartPercentage(value) / 100;
                     const color = (value > props.targetValue * (1 + props.tolerance)) ? MAX_TARGET_COLOR : (value < props.targetValue * (1 - props.tolerance)) ? MIN_TARGET_COLOR : TARGET_COLOR;
 
+                    function randomNumber(min: number, max: number) { // min and max included 
+                        return (Math.random() * (max - min) + min);
+                    }
+
                     return (
                         <Bar
                             key={dataset.label}
-                            height={height}
+                            height={height * randomNumber(1, 1.000001)}
                             color={color}
                             opacity={dataset.opacity}
                             label={dataset.label}
