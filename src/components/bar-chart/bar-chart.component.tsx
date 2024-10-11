@@ -59,19 +59,21 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
             return a + alpha * (b - a);
         }
 
-        if (percentage < minFlowPercentage) {
-            const alpha = percentage / minFlowPercentage;
-            const newPercentage = lerp(0, 25, alpha);
+        let alpha = (percentage - minFlowPercentage) / (maxFlowPercentage - minFlowPercentage);
+        
+        let newPercentage = lerp(25, 75, alpha);
+
+        if (newPercentage < minFlowPercentage) {
+            alpha = percentage / minFlowPercentage;
+            newPercentage = lerp(0, 25, alpha);
             percentage = newPercentage;
         }
-        else if (percentage > maxFlowPercentage) {
-            const alpha = (percentage - maxFlowPercentage) / (100 - maxFlowPercentage);
-            const newPercentage = lerp(75, 100, alpha);
+        else if (newPercentage > maxFlowPercentage) {
+            alpha = (percentage - maxFlowPercentage) / (100 - maxFlowPercentage);
+            newPercentage = lerp(75, 100, alpha);
             percentage = newPercentage;
         }
         else {
-            const alpha = (percentage - minFlowPercentage) / (maxFlowPercentage - minFlowPercentage);
-            const newPercentage = lerp(25, 75, alpha);
             percentage = newPercentage;
         }
 
