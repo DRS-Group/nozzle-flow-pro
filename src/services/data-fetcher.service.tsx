@@ -45,7 +45,7 @@ export namespace DataFecherService {
                     nozzles[i].flow = flows[i] || 0;
                 }
 
-                const res = { ...response.data, nozzles: nozzles }
+                const res = { ...response.data, nozzles: nozzles, speed: 1 }
 
                 dispatchEvent('onDataFetched', res);
 
@@ -58,7 +58,13 @@ export namespace DataFecherService {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
 
-            CapacitorHttp.post({ url: `${ApiBaseUri}/calibrate`, data: JSON.stringify({ value: value }), headers: { "Content-Type": 'application/json' } }).then(async (response) => {
+            CapacitorHttp.post(
+                {
+                    url: `${ApiBaseUri}/calibrateAll`,
+                    params: { pulsesPerLiter: value.toString() },
+                }
+
+            ).then(async (response) => {
                 resolve();
             });
         });
@@ -68,7 +74,15 @@ export namespace DataFecherService {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
 
-            CapacitorHttp.post({ url: `${ApiBaseUri}/calibrate/${nozzleIndex}`, data: JSON.stringify({ value: value }), headers: { "Content-Type": 'application/json' } }).then(async (response) => {
+            CapacitorHttp.post(
+                {
+                    url: `${ApiBaseUri}/calibrate`,
+                    params: {
+                        pulsesPerLiter: value.toString(),
+                        nozzleIndex: nozzleIndex.toString(),
+                    },
+                }
+            ).then(async (response) => {
                 resolve();
             });
         });
