@@ -6,13 +6,11 @@ import { DataView } from './views/data/data.view';
 import { Nozzle } from './types/nozzle.type';
 import { generateFlowAboveExpectedNozzleEvent, generateFlowBelowExpectedNozzleEvent, NozzleEvent } from './types/nozzle-event.type';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
-import styles from './App.module.css';
 import { Menu } from './views/menu/menu.view';
 import { Jobs } from './views/jobs/jobs.view';
 import { CreateJob } from './views/create-job/create-job.view';
 import { Job } from './types/job.type';
 import { NozzlesView } from './views/nozzles/nozzles.view';
-import { NozzlesService } from './services/nozzles.service';
 import { Settings } from './views/settings/settings.view';
 import { SettingsService } from './services/settings.service';
 

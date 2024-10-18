@@ -8,9 +8,6 @@ const config: CapacitorConfig = {
     hostname: 'localhost:3001',
     cleartext: true,
   },
-  cordova: {
-    accessOrigins: ['http://10.0.0.122:3000/'],
-  },
   plugins: {
     CapacitorHttp: {
       enabled: true
