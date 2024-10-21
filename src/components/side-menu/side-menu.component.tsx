@@ -8,7 +8,7 @@ export type SideMenuElement = {
 }
 
 export type SideMenuProps = {
-
+    onActiveChange: (active: 'on' | 'off' | 'auto') => void;
 }
 
 export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) => {
@@ -55,7 +55,9 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
         <div className={styles.wrapper} style={{
             "--translateX": followTranslateX
         } as React.CSSProperties}>
-            <ToggleButton />
+            <ToggleButton 
+                onStateChange={props.onActiveChange}
+            />
             <span className={styles.follow}></span>
             <div className={styles.content}>
                 <button className={styles.menuItem} data-current="true" onClick={onDataClick}><i className="icon-chart-bar"></i><span>Data</span></button>

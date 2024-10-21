@@ -3,7 +3,7 @@ import styles from './data.module.css';
 import { BarChart, ChartData, Dataset } from "../../components/bar-chart/bar-chart.component";
 import { DataFecherService } from "../../services/data-fetcher.service";
 import { Nozzle } from "../../types/nozzle.type";
-import { JobContext } from "../../App";
+import { JobContext, SpeedContext } from "../../App";
 import { NozzlesService } from "../../services/nozzles.service";
 import { YesNoDialog } from "../../components/yes-no-dialog/yes-no-dialog.component";
 import { SettingsService } from "../../services/settings.service";
@@ -30,6 +30,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const [ignoreNozzleDialogNozlleIndex, setIgnoreNozzleDialogNozzleIndex] = useState<number | null>(null);
     const [unignoreNozzleDialogNozlleIndex, setUnignoreNozzleDialogNozzleIndex] = useState<number | null>(null);
 
+    const speedContextValue = useContext(SpeedContext);
 
     useImperativeHandle(ref, () => ({
 
@@ -56,7 +57,8 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             if (!nozzles) return;
 
             setNozzles(nozzles);
-            setSpeed(speed);
+            // setSpeed(speed);
+            setSpeed(speedContextValue);
             setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.1));
         }
 
@@ -65,7 +67,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         return () => {
             DataFecherService.removeEventListener('onDataFetched', eventHandler);
         }
-    }, [setNozzles, setSpeed, setNozzleSpacing]);
+    }, [setNozzles, setSpeed, setNozzleSpacing, speedContextValue]);
 
     const onBarClick = async (nozzleIndex: number) => {
         const nozzle = nozzles[nozzleIndex];

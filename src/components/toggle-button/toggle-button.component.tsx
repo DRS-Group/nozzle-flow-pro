@@ -8,6 +8,7 @@ export type ToggleButtonElement = {
 
 export type ToggleButtonProps = {
     state?: "on" | "off" | "auto";
+    onStateChange: (state: "on" | "off" | "auto") => void;
 }
 
 export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((props, ref) => {
@@ -23,10 +24,14 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
         const timer = setTimeout(() => {
             SoundsService.playClickSound();
 
-            if (buttonState !== "auto")
+            if (buttonState !== "auto") {
                 setButtonState("auto");
-            else
+                props.onStateChange("auto");
+            }
+            else {
                 setButtonState("off");
+                props.onStateChange("off");
+            }
         }, 3000);
 
         setTimeoutHandle(timer);
@@ -37,10 +42,14 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
     }
 
     const onClick = () => {
-        if (buttonState === "off")
+        if (buttonState === "off") {
             setButtonState("on");
-        else if (buttonState === "on")
+            props.onStateChange("on");
+        }
+        else if (buttonState === "on") {
             setButtonState("off");
+            props.onStateChange("off");
+        }
     }
 
     const getLabel = () => {

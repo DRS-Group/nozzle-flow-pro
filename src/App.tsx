@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
+import { act, createContext, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { SideMenu } from './components/side-menu/side-menu.component';
 import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen';
 import { DataFecherService } from './services/data-fetcher.service';
@@ -24,14 +24,63 @@ export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView' | 'nozzles' | 'set
 export const NavFunctionsContext = createContext<any>(undefined);
 export const JobContext = createContext<any>(undefined);
 
+export const SpeedContext = createContext<number>(3);
+
+
+export type SpeedSimulatorElement = {
+  getSpeed: () => number;
+}
+
+export type SpeedSimulatorProps = {
+  onSpeedChange: (speed: number) => void;
+}
+
+export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorProps>((props, ref) => {
+  const [speed, setSpeed] = useState<number>(3);
+  useImperativeHandle(ref, () => ({
+    getSpeed: () => {
+      return speed;
+    }
+  }), []);
+
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'absolute',
+      top: 0,
+      right: '5rem',
+      left: '5rem',
+      height: '2rem',
+      zIndex: 100,
+      opacity: 0.5,
+    }}>
+      <input type='range' min={0} max={15} defaultValue={speed} step={0.1} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        setSpeed(parseFloat(e.target.value));
+        props.onSpeedChange(parseFloat(e.target.value));
+      }}
+        style={{
+          flexGrow: 1
+        }}
+      />
+      <span>{speed.toFixed(1)}m/s</span>
+    </div>
+  );
+});
+
 function App() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const [currentPage, setCurrentPage] = useState<Page>('menu');
   const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
 
-  const [speed, setSpeed] = useState<number>(0);
+  const [speed, setSpeed] = useState<number>(3);
+  const [active, setActive] = useState<'on' | 'off'>('off');
+  const [activeButtonState, setActiveButtonState] = useState<'on' | 'off' | 'auto'>('auto');
   const [nozzleSpacing, setNozzleSpacing] = useState<number>(0.1);
+
+  const speedSimulatorRef = useRef<SpeedSimulatorElement>(null);
 
   const refresh = async () => {
     DataFecherService.fetchData().then(() => {
@@ -39,8 +88,42 @@ function App() {
     });
   }
 
+  const shouldUpdateNozzleEvents = () => {
+    if (activeButtonState === 'off') return false;
+    if (activeButtonState === 'auto' && active === 'off') return false;
+    return true;
+  }
+
+  useEffect(() => {
+  }, [currentJob?.nozzleEvents]);
+
+  useEffect(() => {
+    if (!currentJob) return;
+    if (activeButtonState === 'on') {
+      currentJob.nozzleEvents.filter((event: NozzleEvent) => {
+        return event.endTime !== undefined;
+      });
+
+      setCurrentJob(currentJob);
+    }
+  }, [activeButtonState, currentJob]);
+
+  useEffect(() => {
+    if (!currentJob) return;
+    if (activeButtonState === 'auto' && active === 'on') {
+      currentJob.nozzleEvents = currentJob.nozzleEvents.filter((event: NozzleEvent) => {
+        return event.endTime !== undefined;
+      });
+      setCurrentJob(currentJob);
+    }
+  }, [active, currentJob]);
+
   const updateNozzleEvents = async (nozzles: Nozzle[]) => {
     if (nozzles === undefined || currentJob === undefined) return;
+
+    if (!shouldUpdateNozzleEvents()) {
+      return;
+    }
 
     let eventsToAdd: NozzleEvent[] = [];
     let eventsToModify: NozzleEvent[] = [];
@@ -53,6 +136,8 @@ function App() {
       const nozzleEvents: NozzleEvent[] = currentJob?.nozzleEvents.filter((event: NozzleEvent) => {
         return event.nozzleIndex === nozzleIndex;
       });
+
+      if (!nozzleEvents) continue;
 
       const nozzle_ongoing_events = nozzleEvents.filter((event) => {
         return event.endTime === undefined;
@@ -169,14 +254,18 @@ function App() {
   useEffect(() => {
     const eventHandler = async (data: any) => {
       updateNozzleEvents(data.nozzles);
-      setSpeed(data.speed);
+      // setSpeed(data.speed);
       setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.1));
+
+      if (activeButtonState === 'auto') {
+        setActive(data.active == true ? 'on' : 'off');
+      }
     };
     DataFecherService.addEventListener('onDataFetched', eventHandler);
     return () => {
       DataFecherService.removeEventListener('onDataFetched', eventHandler);
     }
-  }, [currentJob, setSpeed, setNozzleSpacing, speed, nozzleSpacing]);
+  }, [currentJob, setSpeed, setNozzleSpacing, speed, nozzleSpacing, active, activeButtonState]);
 
   useEffect(() => {
     if (!isRefreshing && currentJob) {
@@ -199,55 +288,60 @@ function App() {
   }
 
   return (
-    <NavFunctionsContext.Provider value={{ currentPage, setCurrentPage }}>
-      <JobContext.Provider value={{ currentJob, setCurrentJob }} >
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          {
-            currentPage === 'menu' &&
-            <Menu
-              onJobsClick={() => setCurrentPage('jobs')}
-              onNozzlesClick={() => setCurrentPage('nozzles')}
-            />
-          }
-          {
-            currentPage === 'jobs' &&
-            <Jobs
-              onBackClick={() => setCurrentPage('menu')}
-            />
-          }
-          {
-            currentPage === 'createJob' &&
-            <CreateJob />
-          }
-          {
-            currentPage === 'dataView' &&
-            <DataView />
-          }
-          {
-            currentPage === 'nozzles' &&
-            <NozzlesView
-              onBackClick={() => setCurrentPage('menu')}
-            />
-          }
-          {
-            currentPage === 'settings' &&
-            <Settings />
-          }
-          {
-            (currentPage === 'dataView' || (currentPage === 'nozzles' && currentJob) || (currentPage === 'settings' && currentJob)) &&
-            <SideMenu />
-          }
-          {getFirstNozzleUnviewedTriggeredEvent() &&
-            <AlertModal
-              event={getFirstNozzleUnviewedTriggeredEvent()!}
-              onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
-              onOkForAllClick={markAllEventsAsViewed}
-              totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
-            />
-          }
-        </div>
-      </JobContext.Provider>
-    </NavFunctionsContext.Provider>
+    <SpeedContext.Provider value={speed}>
+      <NavFunctionsContext.Provider value={{ currentPage, setCurrentPage }}>
+        <JobContext.Provider value={{ currentJob, setCurrentJob }} >
+          <SpeedSimulator ref={speedSimulatorRef} onSpeedChange={(speed: number) => { setSpeed(speed) }} />
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            {
+              currentPage === 'menu' &&
+              <Menu
+                onJobsClick={() => setCurrentPage('jobs')}
+                onNozzlesClick={() => setCurrentPage('nozzles')}
+              />
+            }
+            {
+              currentPage === 'jobs' &&
+              <Jobs
+                onBackClick={() => setCurrentPage('menu')}
+              />
+            }
+            {
+              currentPage === 'createJob' &&
+              <CreateJob />
+            }
+            {
+              currentPage === 'dataView' &&
+              <DataView />
+            }
+            {
+              currentPage === 'nozzles' &&
+              <NozzlesView
+                onBackClick={() => setCurrentPage('menu')}
+              />
+            }
+            {
+              currentPage === 'settings' &&
+              <Settings />
+            }
+            {
+              (currentPage === 'dataView' || (currentPage === 'nozzles' && currentJob) || (currentPage === 'settings' && currentJob)) &&
+              <SideMenu
+                onActiveChange={(active) => setActiveButtonState(active)}
+              />
+            }
+            {getFirstNozzleUnviewedTriggeredEvent() &&
+              <AlertModal
+                event={getFirstNozzleUnviewedTriggeredEvent()!}
+                onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
+                onOkForAllClick={markAllEventsAsViewed}
+                totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
+              />
+            }
+          </div>
+        </JobContext.Provider>
+      </NavFunctionsContext.Provider>
+    </SpeedContext.Provider>
   );
 }
 

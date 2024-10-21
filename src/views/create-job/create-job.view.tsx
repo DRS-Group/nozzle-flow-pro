@@ -36,7 +36,8 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
     const onConfirmButtonClick = () => {
         const title = titleInputRef.current!.getValue();
         const durationTolerance = parseFloat(durationToleranceInputRef.current!.getValue());
-        const expectedFlow = parseFloat(expectedFlowInputRef.current!.getValue());
+        // Divide-se por 10.000 para obter o valor em L/m².
+        const expectedFlow = parseFloat(expectedFlowInputRef.current!.getValue()) / 10000;
         const flowTolerance = parseFloat(flowToleranceInputRef.current!.getValue()) / 100;
 
         JobsService.addJob(new Job(title, expectedFlow, flowTolerance, durationTolerance)).then((job: Job) => {
@@ -67,7 +68,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         ref={durationToleranceInputRef}
                     />
                     <NumberInput
-                        label='Expected flow (L/m²)'
+                        label='Expected flow (L/ha)'
                         className={styles.expectedFlow}
                         value='2.5'
                         decimals={2}

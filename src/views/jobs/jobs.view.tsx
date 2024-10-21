@@ -133,7 +133,6 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                     title='Delete Job'
                     message='Are you sure you want to delete this job?'
                     onYesClick={() => {
-                        console.log(deleteJobDialogJob);
 
                         JobsService.removeJob(deleteJobDialogJob!).then(() => {
                             refreshJobs();
