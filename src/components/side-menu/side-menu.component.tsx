@@ -15,11 +15,8 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
     const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
     const { currentJob, setCurrentJob } = useContext(JobContext);
 
-    const [followTranslateX, setFollowTranslateX] = useState('0vw');
-
     const onAnyItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         const target = e.currentTarget;
-        setFollowTranslateX(`${target.offsetLeft + target.offsetWidth / 2}px`);
         document.querySelectorAll(`.${styles.menuItem}`).forEach((el) => {
             el.removeAttribute('data-current');
         });
@@ -43,8 +40,8 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
     }
 
     const onStopClick = () => {
-        setCurrentJob(null);
         setCurrentPage('menu');
+        setCurrentJob(null);
     }
 
     useImperativeHandle(ref, () => ({
@@ -52,10 +49,8 @@ export const SideMenu = forwardRef<SideMenuElement, SideMenuProps>((props, ref) 
     }), []);
 
     return (
-        <div className={styles.wrapper} style={{
-            "--translateX": followTranslateX
-        } as React.CSSProperties}>
-            <ToggleButton 
+        <div className={styles.wrapper}>
+            <ToggleButton
                 onStateChange={props.onActiveChange}
             />
             <span className={styles.follow}></span>

@@ -36,7 +36,7 @@ export namespace DataFecherService {
     export const fetchData = async (): Promise<Nozzle[]> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
-            CapacitorHttp.get({ url: `${ApiBaseUri}/data`, }).then(async (response) => {
+            CapacitorHttp.get({ url: `${ApiBaseUri}/data`, connectTimeout: 1000 }).then(async (response) => {
 
                 const nozzles = await NozzlesService.getNozzles();
                 const flows = response.data.flows;
@@ -50,7 +50,8 @@ export namespace DataFecherService {
                 dispatchEvent('onDataFetched', res);
 
                 resolve(res);
-            });
+            })
+                .catch((reason: any) => { reject(reason) });
         });
     }
 

@@ -13,6 +13,8 @@ import { Job } from './types/job.type';
 import { NozzlesView } from './views/nozzles/nozzles.view';
 import { Settings } from './views/settings/settings.view';
 import { SettingsService } from './services/settings.service';
+import translations from './translations.json';
+console.log(translations);
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
@@ -85,7 +87,9 @@ function App() {
   const refresh = async () => {
     DataFecherService.fetchData().then(() => {
       setIsRefreshing(false);
-    });
+    })
+      .catch(() => {
+      });
   }
 
   const shouldUpdateNozzleEvents = () => {

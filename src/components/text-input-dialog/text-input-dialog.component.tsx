@@ -1,6 +1,6 @@
 import { TextInput, TextInputElement } from '../text-input/text-input.component';
 import styles from './text-input-dialog.module.css';
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
 export type TextInputDialogElement = {
 
@@ -9,6 +9,7 @@ export type TextInputDialogElement = {
 export type TextInputDialogProps = {
     label: string,
     title: string,
+    defaultValue?: string;
     onConfirmClick: (value: string) => void,
     onCancelClick: () => void
 }
@@ -29,6 +30,10 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
         props.onCancelClick();
     };
 
+    useEffect(() => {
+        inputRef?.current?.focus();
+    })
+
     return (
         <div className={styles.background}>
             <div className={styles.wrapper}>
@@ -40,6 +45,7 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
                         label={props.label}
                         className={styles.input}
                         ref={inputRef}
+                        value={props.defaultValue}
                     />
                 </div>
                 <div className={styles.footer}>

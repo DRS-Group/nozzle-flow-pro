@@ -194,6 +194,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                 <TextInputDialog
                     title='Set API Base URI'
                     label='API Base URI'
+                    defaultValue={settings?.apiBaseUrl}
                     onConfirmClick={(value: string) => {
                         SettingsService.setApiBaseUrl(value).then(() => {
                             SettingsService.getSettings().then((settings) => {

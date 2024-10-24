@@ -3,6 +3,7 @@ import { forwardRef, useImperativeHandle, useRef } from 'react';
 
 export type TextInputElement = {
     getValue: () => string;
+    focus: () => void;
 }
 
 export type TextInputProps = {
@@ -18,6 +19,9 @@ export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, re
     useImperativeHandle(ref, () => ({
         getValue: () => {
             return inputRef.current?.value || '';
+        },
+        focus: ()=>{
+            inputRef.current?.focus();
         }
     }), []);
 

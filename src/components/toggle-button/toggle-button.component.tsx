@@ -32,7 +32,7 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
                 setButtonState("off");
                 props.onStateChange("off");
             }
-        }, 3000);
+        }, 1000);
 
         setTimeoutHandle(timer);
     }
