@@ -5,6 +5,7 @@ import styles from './settings.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { Settings as SettingsType } from '../../types/settings.type';
 import { TextInputDialog } from '../../components/text-input-dialog/text-input-dialog.component';
+import { ContextMenu } from '../../components/context-menu/context-menu.component';
 
 // SettingsService.setSettings(defaultSettings);
 
@@ -25,6 +26,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
     const [ApiBaseUriDialogOpen, setApiBaseUriDialogOpen] = useState<boolean>(false);
 
+    const [languageContextMenuPosition, setLanguageContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
+
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -38,8 +41,38 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
         });
     }, []);
 
+    useEffect(() => {
+        const eventHandler = async (settings: SettingsType) => {
+            setSettings(settings);
+        };
+        SettingsService.addEventListener('onSettingsChange', eventHandler);
+        return () => {
+            SettingsService.removeEventListener('onSettingsChange', eventHandler);
+        }
+    }, [settings, setSettings]);
+
     const onBackClick = () => {
         setCurrentPage('menu');
+    }
+
+    const onLanguageClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        const x = e.nativeEvent.clientX;
+        const y = e.nativeEvent.clientY;
+
+        setLanguageContextMenuPosition({ x, y });
+    }
+
+    const onContextMenuBackgroundClick = () => {
+        setLanguageContextMenuPosition(null);
+    }
+
+    const onLogoClick = async () => {
+        const image = await SettingsService.selectImage();
+        const blob = new Blob([image], { type: image.type });
+        console.log(blob)
+        SettingsService.saveFile(blob)
     }
 
     return (
@@ -99,7 +132,9 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 <i className="icon-thin-chevron-right"></i>
                             </div>
                         </div>
-                        <div className={styles.item}>
+                        <div className={styles.item}
+                            onClick={onLanguageClick}
+                        >
                             <div className={styles.itemLeft}>
                                 <span className={styles.itemName}>Language</span>
                             </div>
@@ -174,7 +209,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         </div>
                         <div className={styles.item}
                             onClick={() => {
-
+                                onLogoClick();
                             }}
                         >
                             <div className={styles.itemLeft}>
@@ -206,6 +241,28 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     onCancelClick={() => {
                         setApiBaseUriDialogOpen(false);
                     }}
+                />
+            }
+            {languageContextMenuPosition &&
+
+                <ContextMenu
+                    items={[
+                        {
+                            label: 'English',
+                            onClick: () => {
+                                SettingsService.setLanguage('en-us');
+                            }
+                        },
+                        {
+                            label: 'Português',
+                            onClick: () => {
+                                SettingsService.setLanguage('pt-br');
+                            }
+                        }
+                    ]}
+                    position={languageContextMenuPosition}
+
+                    onBackgroundClick={onContextMenuBackgroundClick}
                 />
             }
         </>

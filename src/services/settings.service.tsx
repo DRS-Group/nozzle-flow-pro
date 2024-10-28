@@ -1,7 +1,7 @@
 import { Preferences } from "@capacitor/preferences";
 import { Settings } from "../types/settings.type";
-
-export const languages = ['en-us', 'pt-br'];
+import { EventHandler } from "../types/event-handler";
+import { Directory, Filesystem, WriteFileResult } from "@capacitor/filesystem";
 
 export const defaultLogoUri = '/images/logo_drs.png';
 export const defaultSettings: Settings = {
@@ -16,6 +16,35 @@ export const defaultSettings: Settings = {
 }
 
 export namespace SettingsService {
+
+    let eventListeners: Map<string, EventHandler<any>[]> = new Map();
+
+    export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
+        const listeners = eventListeners.get(eventName) || [];
+        listeners.push(callback);
+        eventListeners.set(eventName, listeners);
+    }
+
+    export const dispatchEvent = (eventName: string, args?: any) => {
+        const listeners = eventListeners.get(eventName);
+        if (listeners) {
+            listeners.forEach(listener => listener(args));
+        }
+    }
+
+    export const removeEventListener = (eventName: string, callback: EventHandler<any>) => {
+        const listeners = eventListeners.get(eventName);
+        if (listeners) {
+            const index = listeners.indexOf(callback);
+            if (index !== -1) {
+                listeners.splice(index, 1);
+            }
+            if (listeners.length === 0) {
+                eventListeners.delete(eventName);
+            }
+        }
+    }
+
     export const setSettings = async (settings: Settings): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
@@ -55,6 +84,8 @@ export namespace SettingsService {
             Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
                 resolve();
             });
+
+            dispatchEvent('onSettingsChange', settings);
         });
     }
 
@@ -84,5 +115,27 @@ export namespace SettingsService {
                 resolve();
             });
         });
+    }
+
+    export const selectImage = (): Promise<File> => {
+        return new Promise(async (resolve, reject) => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.addEventListener('change', (event: any) => {
+                const file = event.target.files[0];
+
+                resolve(file);
+            });
+            input.click();
+        });
+    }
+
+    export const saveFile = (data: string | Blob) => {
+        Filesystem.writeFile({ data, path: '/teste/teste.svg' }).catch((reason: any) => {
+            console.error(reason);
+        }).then((value: void | WriteFileResult) => {
+            console.log(value)
+        })
     }
 }
