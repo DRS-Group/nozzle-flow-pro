@@ -13,8 +13,8 @@ import { Job } from './types/job.type';
 import { NozzlesView } from './views/nozzles/nozzles.view';
 import { Settings } from './views/settings/settings.view';
 import { SettingsService } from './services/settings.service';
-import translations from './translations.json';
-console.log(translations);
+import { TranslationServices } from './services/translations.service';
+import { ColorInputDialog } from './components/color-input-dialog/color-input-dialog.component';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
@@ -27,7 +27,6 @@ export const NavFunctionsContext = createContext<any>(undefined);
 export const JobContext = createContext<any>(undefined);
 
 export const SpeedContext = createContext<number>(3);
-
 
 export type SpeedSimulatorElement = {
   getSpeed: () => number;
@@ -71,11 +70,35 @@ export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorPr
   );
 });
 
+
+export function useTranslate() {
+  const [currentLanguage, setCurrentLanguage] = useState<'en-us' | 'pt-br'>('en-us');
+
+  useEffect(() => {
+    SettingsService.getSettingOrDefault('language', 'en-us').then((language) => {
+      setCurrentLanguage(language);
+    });
+
+    const eventHandler = async (language: 'en-us' | 'pt-br') => {
+      setCurrentLanguage(language);
+    };
+    SettingsService.addEventListener('onLanguageChanged', eventHandler);
+    return () => {
+      DataFecherService.removeEventListener('onLanguageChanged', eventHandler);
+    }
+
+  }, [setCurrentLanguage, currentLanguage]);
+
+  return (term: string) => TranslationServices.translate(term, currentLanguage);
+}
+
 function App() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const [currentPage, setCurrentPage] = useState<Page>('menu');
   const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
+
+  const [currentLanguage, setCurrentLanguage] = useState<'en-us' | 'pt-br'>('en-us');
 
   const [speed, setSpeed] = useState<number>(3);
   const [active, setActive] = useState<'on' | 'off'>('off');
@@ -99,7 +122,112 @@ function App() {
   }
 
   useEffect(() => {
-  }, [currentJob?.nozzleEvents]);
+    SettingsService.getSettingOrDefault('language', 'en-us').then((language) => {
+      setCurrentLanguage(language);
+    });
+
+    const eventHandler = async (language: 'en-us' | 'pt-br') => {
+      setCurrentLanguage(language);
+    };
+    SettingsService.addEventListener('onLanguageChanged', eventHandler);
+    return () => {
+      DataFecherService.removeEventListener('onLanguageChanged', eventHandler);
+    }
+
+  }, [setCurrentLanguage, currentLanguage]);
+
+  useEffect(() => {
+    SettingsService.getSettingOrDefault('interfaceScale', 1).then((interfaceScale) => {
+      const root = document.documentElement;
+      const fontSize = 16 * interfaceScale;
+      root.style.setProperty('font-size', `${fontSize}px`);
+    });
+
+    const eventHandler = async (interfaceScale: number) => {
+      const root = document.documentElement;
+      const fontSize = 16 * interfaceScale;
+      root.style.setProperty('font-size', `${fontSize}px`);
+    }
+
+    SettingsService.addEventListener('onInterfaceScaleChanged', eventHandler);
+
+    return () => {
+      SettingsService.removeEventListener('onInterfaceScaleChanged', eventHandler);
+    }
+  }, []);
+
+  useEffect(() => {
+    SettingsService.getSettingOrDefault('primaryColor', '#466905').then((color) => {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', color);
+    });
+
+    const eventHandler = async (color: string) => {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', color);
+    }
+
+    SettingsService.addEventListener('onPrimaryColorChanged', eventHandler);
+
+    return () => {
+      SettingsService.removeEventListener('onPrimaryColorChanged', eventHandler);
+    }
+  }, []);
+
+  useEffect(() => {
+    SettingsService.getSettingOrDefault('secondaryColor', '#ffffff').then((color) => {
+      const root = document.documentElement;
+      root.style.setProperty('--secondary-color', color);
+    });
+
+    const eventHandler = async (color: string) => {
+      const root = document.documentElement;
+      root.style.setProperty('--secondary-color', color);
+    }
+
+    SettingsService.addEventListener('onSecondaryColorChanged', eventHandler);
+
+    return () => {
+      SettingsService.removeEventListener('onSecondaryColorChanged', eventHandler);
+    }
+  }, []);
+
+  useEffect(() => {
+    SettingsService.getSettingOrDefault('primaryFontColor', '#000000').then((color) => {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-font-color', color);
+    });
+
+    const eventHandler = async (color: string) => {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-font-color', color);
+    }
+
+    SettingsService.addEventListener('onPrimaryFontColorChanged', eventHandler);
+
+    return () => {
+      SettingsService.removeEventListener('onPrimaryFontColorChanged', eventHandler);
+    }
+  }, []);
+
+  useEffect(() => {
+    SettingsService.getSettingOrDefault('secondaryFontColor', '#ffffff').then((color) => {
+      const root = document.documentElement;
+      root.style.setProperty('--secondary-font-color', color);
+    });
+
+    const eventHandler = async (color: string) => {
+      const root = document.documentElement;
+      root.style.setProperty('--secondary-font-color', color);
+    }
+
+    SettingsService.addEventListener('onSecondaryFontColorChanged', eventHandler);
+
+    return () => {
+      SettingsService.removeEventListener('onSecondaryFontColorChanged', eventHandler);
+    }
+  }, []);
+
 
   useEffect(() => {
     if (!currentJob) return;
@@ -345,7 +473,7 @@ function App() {
           </div>
         </JobContext.Provider>
       </NavFunctionsContext.Provider>
-    </SpeedContext.Provider>
+    </SpeedContext.Provider >
   );
 }
 

@@ -1,22 +1,194 @@
 [
-    [
-        {
-            "term": "Teste",
-            "language": "pt-br"
-        },
-        {
-            "term": "Test",
-            "language": "en-us"
-        }
-    ],
-    [
-        {
-            "term": "Macaco",
-            "language": "pt-br"
-        },
-        {
-            "term": "Monkey",
-            "language": "en-us"
-        }
-    ]
+    {
+        "en-us": "Development",
+        "pt-br": "Desenvolvimento"
+    },
+    {
+        "en-us": "API Base URL",
+        "pt-br": "URL Base da API"
+    },
+    {
+        "en-us": "General",
+        "pt-br": "Geral"
+    },
+    {
+        "en-us": "Language",
+        "pt-br": "Idioma"
+    },
+    {
+        "en-us": "Primary color",
+        "pt-br": "Cor primária"
+    },
+    {
+        "en-us": "Secondary color",
+        "pt-br": "Cor secundária"
+    },
+    {
+        "en-us": "Primary font color",
+        "pt-br": "Cor da fonte primária"
+    },
+    {
+        "en-us": "Secondary font color",
+        "pt-br": "Cor da fonte secundária"
+    },
+    {
+        "en-us": "Interface scale",
+        "pt-br": "Escala da interface"
+    },
+    {
+        "en-us": "Settings",
+        "pt-br": "Configurações"
+    },
+    {
+        "en-us": "Reset settings",
+        "pt-br": "Redefinir configurações"
+    },
+    {
+        "en-us": "Cancel",
+        "pt-br": "Cancelar"
+    },
+    {
+        "en-us": "Logo",
+        "pt-br": "Logo"
+    },
+    {
+        "en-us": "Style",
+        "pt-br": "Estilo"
+    },
+    {
+        "en-us": "Jobs",
+        "pt-br": "Trabalhos"
+    },
+    {
+        "en-us": "Nozzles",
+        "pt-br": "Bicos"
+    },
+    {
+        "en-us": "Reset nozzles",
+        "pt-br": "Redefinir bicos"
+    },
+    {
+        "en-us": "Save",
+        "pt-br": "Salvar"
+    },
+    {
+        "en-us": "Nozzle count",
+        "pt-br": "Quantidade de bicos"
+    },
+    {
+        "en-us": "Confirm",
+        "pt-br": "Confirmar"
+    },
+    {
+        "en-us": "Are you sure you want to clear all nozzles?",
+        "pt-br": "Você tem certeza que deseja redefinir os bicos?"
+    },
+    {
+        "en-us": "Yes",
+        "pt-br": "Sim"
+    },
+    {
+        "en-us": "No",
+        "pt-br": "Não"
+    },
+    {
+        "en-us": "Clear nozzles",
+        "pt-br": "Redefinir bicos"
+    },
+    {
+        "en-us": "Create Job",
+        "pt-br": "Criar Trabalho"
+    },
+    {
+        "en-us": "Title",
+        "pt-br": "Título"
+    },
+    {
+        "en-us": "Time before alert (milliseconds)",
+        "pt-br": "Tempo antes do alerta (milissegundos)"
+    },
+    {
+        "en-us": "New Job",
+        "pt-br": "Novo Trabalho"
+    },
+    {
+        "en-us": "Expected flow (L/ha)",
+        "pt-br": "Fluxo esperado (L/ha)"
+    },
+    {
+        "en-us": "Variation margin (%)",
+        "pt-br": "Margem de variação (%)"
+    },
+    {
+        "en-us": "Calibrate nozzle",
+        "pt-br": "Calibrar bico"
+    },
+    {
+        "en-us": "Calibrate nozzles",
+        "pt-br": "Calibrar bicos"
+    },
+    {
+        "en-us": "Pulses/Liter",
+        "pt-br": "Pulsos/Litro"
+    },
+    {
+        "en-us": "pulses/L",
+        "pt-br": "pulsos/L"
+    },
+    {
+        "en-us": "Rename",
+        "pt-br": "Renomear"
+    },
+    {
+        "en-us": "Ignore",
+        "pt-br": "Ignorar"
+    },
+    {
+        "en-us": "Unignore",
+        "pt-br": "Designorar"
+    },
+    {
+        "en-us": "Unignore nozzle",
+        "pt-br": "Designorar bico"
+    },
+    {
+        "en-us": "Are you sure you want to ignore this nozzle?",
+        "pt-br": "Você tem certeza que deseja ignorar este bico?"
+    },
+    {
+        "en-us": "Are you sure you want to unignore this nozzle?",
+        "pt-br": "Você tem certeza que deseja designorar este bico?"
+    },
+    {
+        "en-us": "Calibrate",
+        "pt-br": "Calibrar"
+    },
+    {
+        "en-us": "Delete Job",
+        "pt-br": "Deletar Trabalho"
+    },
+    {
+        "en-us": "Are you sure you want to delete this job?",
+        "pt-br": "Você tem certeza que deseja deletar este trabalho?"
+    },
+    {
+        "en-us": "Delete",
+        "pt-br": "Deletar"
+    },
+    {
+        "en-us": "Logs",
+        "pt-br": "Registros"
+    },
+    {
+        "en-us": "Continue",
+        "pt-br": "Continuar"
+    },
+    {
+        "en-us": "Change nozzle name",
+        "pt-br": "Alterar nome do bico"
+    },
+    {
+        "en-us": "Nozzle name",
+        "pt-br": "Nome do bico"
+    }
 ]

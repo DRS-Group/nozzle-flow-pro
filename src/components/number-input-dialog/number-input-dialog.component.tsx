@@ -1,6 +1,8 @@
 import styles from './number-input-dialog.module.css';
 import { NumberInput, NumberInputElement } from '../number-input/number-input.component';
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
+import { useTranslate } from '../../App';
+import { TranslationServices } from '../../services/translations.service';
 
 export type NumberInputDialogElement = {
 
@@ -14,6 +16,7 @@ export type NumberInputDialogProps = {
 }
 
 export const NumberInputDialog = forwardRef<NumberInputDialogElement, NumberInputDialogProps>((props, ref) => {
+    const translate = useTranslate();
     const inputRef = useRef<NumberInputElement>(null);
 
     useImperativeHandle(ref, () => ({
@@ -47,13 +50,13 @@ export const NumberInputDialog = forwardRef<NumberInputDialogElement, NumberInpu
                         onClick={onConfirmClick}
                         className={styles.button}
                     >
-                        Confirm
+                        {translate('Confirm')}
                     </button>
                     <button
                         onClick={onCancelClick}
                         className={styles.button}
                     >
-                        Cancel
+                        {translate('Cancel')}
                     </button>
                 </div>
             </div>

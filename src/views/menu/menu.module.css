@@ -8,6 +8,8 @@
 
     flex-direction: column;
     gap: 1rem;
+
+    background-color: var(--secondary-color);
 }
 
 .logo {
@@ -46,5 +48,5 @@
 
 .item span {
     margin-top: auto;
-    color: white;
+    color: var(--secondary-font-color);
 }

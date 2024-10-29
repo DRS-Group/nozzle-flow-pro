@@ -1,6 +1,7 @@
-import { NavFunctionsContext } from '../../App';
+import { NavFunctionsContext, useTranslate } from '../../App';
 import { DataFecherService } from '../../services/data-fetcher.service';
 import { SettingsService } from '../../services/settings.service';
+import { TranslationServices } from '../../services/translations.service';
 import styles from './menu.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 
@@ -14,6 +15,7 @@ export type MenuProps = {
 }
 
 export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
+    const translate = useTranslate();
     const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
     const [logo, setLogo] = useState<string>('');
 
@@ -48,19 +50,19 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
                     onClick={onJobsClick}
                 >
                     <img src="/images/briefcase.svg" />
-                    <span>Jobs</span>
+                    <span>{translate('Jobs')}</span>
                 </div>
                 <div className={styles.item}
                     onClick={onNozzlesClick}
                 >
                     <img src="/images/nozzle.svg" />
-                    <span>Nozzles</span>
+                    <span>{translate('Nozzles')}</span>
                 </div>
                 <div className={styles.item}
                     onClick={onSettingsClick}
                 >
                     <img src="/images/settings.svg" />
-                    <span>Settings</span>
+                    <span>{translate('Settings')}</span>
                 </div>
             </div>
         </div>

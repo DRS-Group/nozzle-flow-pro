@@ -1,4 +1,4 @@
-import { JobContext } from '../../App';
+import { JobContext, useTranslate } from '../../App';
 import { ContextMenu, ContextMenuItem } from '../../components/context-menu/context-menu.component';
 import { NumberInputDialog } from '../../components/number-input-dialog/number-input-dialog.component';
 import { NumberInput } from '../../components/number-input/number-input.component';
@@ -7,6 +7,7 @@ import { TopBar } from '../../components/top-bar/top-bar.component';
 import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
 import { DataFecherService } from '../../services/data-fetcher.service';
 import { NozzlesService } from '../../services/nozzles.service';
+import { TranslationServices } from '../../services/translations.service';
 import { Nozzle } from '../../types/nozzle.type';
 import styles from './nozzles.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
@@ -20,6 +21,7 @@ export type NozzlesViewProps = {
 }
 
 export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((props, ref) => {
+    const translate = useTranslate();
     const { currentJob, setCurrentJob } = useContext<any>(JobContext);
 
     const [contextMenuNozzleIndex, setContextMenuNozzleIndex] = useState<number | null>(null);
@@ -93,7 +95,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
         const contextMenuNozzle = nozzles[contextMenuNozzleIndex];
 
         items.push({
-            label: 'Rename',
+            label: translate('Rename'),
             onClick: () => {
                 setChangeNameDialogNozzleIndex(contextMenuNozzleIndex);
                 setChangeNameDialogOpen(true);
@@ -106,7 +108,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
 
         if (contextMenuNozzle.ignored) {
             items.push({
-                label: 'Unignore',
+                label: translate('Unignore'),
                 onClick: () => {
                     setUnignoreNozzleDialogNozzleIndex(contextMenuNozzleIndex);
                     setUnignoreNozzleDialogOpen(true);
@@ -119,7 +121,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
         }
         else {
             items.push({
-                label: 'Ignore',
+                label: translate('Ignore'),
                 onClick: () => {
                     setIgnoreNozzleDialogNozzleIndex(contextMenuNozzleIndex);
                     setIgnoreNozzleDialogOpen(true);
@@ -132,7 +134,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
         }
 
         items.push({
-            label: 'calibrate',
+            label: translate('Calibrate'),
             onClick: () => {
                 setCalibrateDialogNozzleIndex(contextMenuNozzleIndex);
                 setCalibrateDialogOpen(true);
@@ -156,7 +158,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 {!currentJob &&
                     <TopBar
                         onBackClick={onBackClick}
-                        title='Nozzles'
+                        title={translate('Nozzles')}
                     />
                 }
                 <div
@@ -212,8 +214,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             )}
             {clearNozzlesDialogOpen &&
                 <YesNoDialog
-                    title='Clear nozzles'
-                    message='Are you sure you want to clear all nozzles?'
+                    title={translate('Clear nozzles')}
+                    message={translate('Are you sure you want to clear all nozzles?')}
                     onYesClick={async () => {
                         NozzlesService.clearNozzles();
                         NozzlesService.getNozzles().then((nozzles) => {
@@ -230,8 +232,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {syncNozzlesDialogOpen &&
                 <NumberInputDialog
-                    label='Nozzle count'
-                    title='Reset nozzles'
+                    label={translate('Nozzle count')}
+                    title={translate('Reset nozzles')}
                     onConfirmClick={(value) => {
                         NozzlesService.generateNozzles(value).then((nozzles) => {
                             setNozzles(nozzles);
@@ -269,8 +271,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {ignoreNozzleDialogOpen && ignoreNozzleDialogNozzleIndex !== null &&
                 <YesNoDialog
-                    title='Ignore nozzle'
-                    message='Are you sure you want to ignore this nozzle?'
+                    title={translate('Ignore nozzle')}
+                    message={translate('Are you sure you want to ignore this nozzle?')}
                     onYesClick={() => {
                         const nozzle = nozzles[ignoreNozzleDialogNozzleIndex];
                         nozzle.ignored = true;
@@ -287,8 +289,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {unignoreNozzleDialogOpen && unignoreNozzleDialogNozzleIndex !== null &&
                 <YesNoDialog
-                    title='Unignore nozzle'
-                    message='Are you sure you want to unignore this nozzle?'
+                    title={translate('Unignore nozzle')}
+                    message={translate('Are you sure you want to unignore this nozzle?')}
                     onYesClick={() => {
                         const nozzle = nozzles[unignoreNozzleDialogNozzleIndex];
                         nozzle.ignored = false;
@@ -305,8 +307,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {changeNameDialogOpen && changeNameDialogNozzleIndex !== null &&
                 <TextInputDialog
-                    label='Nozzle name'
-                    title='Change nozzle name'
+                    label={translate('Nozzle name')}
+                    title={translate('Change nozzle name')}
                     onConfirmClick={(name) => {
                         const nozzle = nozzles[changeNameDialogNozzleIndex];
                         nozzle.name = name;
@@ -323,8 +325,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {calibrateDialogOpen && calibrateDialogNozzleIndex !== null &&
                 <NumberInputDialog
-                    label='Pulses/Liter'
-                    title='Calibrate nozzle'
+                    label={translate('Pulses/Liter')}
+                    title={translate('Calibrate nozzle')}
                     onConfirmClick={(value) => {
                         DataFecherService.calibrateNozzle(calibrateDialogNozzleIndex, value).then(async () => {
                             const nozzle = nozzles[calibrateDialogNozzleIndex];
@@ -346,8 +348,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {calibrateDialogOpen && calibrateDialogNozzleIndex === null &&
                 <NumberInputDialog
-                    label='Pulses/Liter'
-                    title='Calibrate nozzles'
+                    label={translate('Pulses/Liter')}
+                    title={translate('Calibrate nozzles')}
                     onConfirmClick={async (value) => {
                         DataFecherService.calibrateAllNozzles(value).then(async () => {
                             const nozzles = await NozzlesService.getNozzles();
@@ -386,6 +388,7 @@ type NozzleItemProps = {
 }
 
 const NozzleItem = forwardRef<NozzleItemElement, NozzleItemProps>((props, ref) => {
+    const translate = useTranslate();
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -406,7 +409,7 @@ const NozzleItem = forwardRef<NozzleItemElement, NozzleItemProps>((props, ref) =
                 {/* <span>{props.nozzle.id}</span> */}
             </div>
             <div className={styles.right}>
-                <span>{props.nozzle.pulsesPerLiter} pulses/L</span>
+                <span>{props.nozzle.pulsesPerLiter} {translate('pulses/L')}</span>
             </div>
         </div>
     )

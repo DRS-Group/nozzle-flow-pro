@@ -13,7 +13,7 @@
 }
 
 .backButton {
-    color: white;
+    color: var(--secondary-font-color);
     font-size: 1rem;
     height: 100%;
     aspect-ratio: 1/1;
@@ -28,5 +28,5 @@
     top: 50%;
     transform: translate(-50%, -50%);
 
-    color: white;
+    color: var(--secondary-font-color);
 }

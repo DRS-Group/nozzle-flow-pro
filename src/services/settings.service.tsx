@@ -16,7 +16,6 @@ export const defaultSettings: Settings = {
 }
 
 export namespace SettingsService {
-
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
 
     export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
@@ -85,7 +84,23 @@ export namespace SettingsService {
                 resolve();
             });
 
-            dispatchEvent('onSettingsChange', settings);
+            dispatchEvent('onLanguageChanged', language);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setInterfaceScale = async (interfaceScale: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.interfaceScale = interfaceScale;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onInterfaceScaleChanged', interfaceScale);
+            dispatchEvent('onSettingsChanged', settings);
         });
     }
 
@@ -114,6 +129,66 @@ export namespace SettingsService {
             Preferences.set({ key: 'logoUri', value: logoUri }).then(() => {
                 resolve();
             });
+        });
+    }
+
+    export const setPrimaryColor = async (primaryColor: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.primaryColor = primaryColor;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onPrimaryColorChanged', primaryColor);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setSecondaryColor = async (secondaryColor: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.secondaryColor = secondaryColor;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onSecondaryColorChanged', secondaryColor);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setPrimaryFontColor = async (primaryFontColor: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.primaryFontColor = primaryFontColor;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onPrimaryFontColorChanged', primaryFontColor);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setSecondaryFontColor = async (secondaryFontColor: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.secondaryFontColor = secondaryFontColor;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onSecondaryFontColorChanged', secondaryFontColor);
+            dispatchEvent('onSettingsChanged', settings);
         });
     }
 

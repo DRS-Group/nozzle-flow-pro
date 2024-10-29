@@ -3,6 +3,8 @@
     flex-direction: column;
     overflow: auto;
     flex-grow: 1;
+
+    background-color: var(--secondary-color);
 }
 
 .section:not(:last-child) {

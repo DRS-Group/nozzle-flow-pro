@@ -1,3 +1,5 @@
+import { useTranslate } from '../../App';
+import { TranslationServices } from '../../services/translations.service';
 import styles from './yes-no-dialog.module.css';
 import { forwardRef, useImperativeHandle } from 'react';
 
@@ -13,6 +15,8 @@ export type DialogProps = {
 }
 
 export const YesNoDialog = forwardRef<DialogElement, DialogProps>((props, ref) => {
+    const translate = useTranslate();
+
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -39,13 +43,13 @@ export const YesNoDialog = forwardRef<DialogElement, DialogProps>((props, ref) =
                         onClick={onYesClick}
                         className={styles.button}
                     >
-                        Yes
+                        {translate('Yes')}
                     </button>
                     <button
                         onClick={onNoClick}
                         className={styles.button}
                     >
-                        No
+                        {translate('No')}
                     </button>
                 </div>
             </div>

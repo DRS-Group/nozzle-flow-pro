@@ -14,7 +14,7 @@
     height: fit-content;
     width: fit-content;
 
-    background-color: white;
+    background-color: var(--secondary-color);
 
     left: 50%;
     top: 50%;
@@ -36,7 +36,7 @@
 }
 
 .header span {
-    color: white;
+    color: var(--secondary-font-color);
     font-size: 1.25rem;
 }
 
@@ -62,7 +62,7 @@
 
 .footer button {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--secondary-font-color);
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;

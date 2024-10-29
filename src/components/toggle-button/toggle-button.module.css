@@ -47,7 +47,7 @@
 }
 
 .label {
-    color: white;
+    color: var(--secondary-font-color);
     font-size: 0.75rem;
 
     margin-top: auto;

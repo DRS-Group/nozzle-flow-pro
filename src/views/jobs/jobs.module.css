@@ -5,6 +5,7 @@
     justify-content: flex-start;
     height: 100%;
     width: 100%;
+    background-color: var(--secondary-color);
 }
 
 .content {
@@ -52,7 +53,7 @@
 
     box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
 
-    color: white;
+    color: var(--secondary-font-color);
     font-size: 1.25rem;
 
     display: flex;
@@ -75,7 +76,7 @@
 .noJobsContent>button {
     border: none;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--secondary-font-color);
     border-radius: 100vh;
     padding: 0.75rem 1rem;
     box-sizing: border-box;

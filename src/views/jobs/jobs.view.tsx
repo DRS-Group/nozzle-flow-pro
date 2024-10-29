@@ -1,4 +1,4 @@
-import { JobContext, NavFunctionsContext } from '../../App';
+import { JobContext, NavFunctionsContext, useTranslate } from '../../App';
 import { ContextMenu } from '../../components/context-menu/context-menu.component';
 import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
@@ -16,6 +16,7 @@ export type JobsProps = {
 }
 
 export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
+    const translate = useTranslate();
     const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
     const { currentJob, setCurrentJob } = useContext(JobContext);
 
@@ -64,7 +65,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
             <div className={styles.wrapper}>
                 <TopBar
                     onBackClick={onBackClick}
-                    title='Jobs'
+                    title={translate('Jobs')}
                 />
                 {jobs.length > 0 && (
                     <div className={styles.content}>
@@ -79,7 +80,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                 )}
                 {jobs.length === 0 && (
                     <div className={styles.noJobsContent}>
-                        <button onClick={onAddButtonClick}>Create Job</button>
+                        <button onClick={onAddButtonClick}>{translate('Create Job')}</button>
                     </div>
                 )}
             </div>
@@ -95,7 +96,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                     position={contextMenuPosition}
                     items={[
                         {
-                            label: 'Continue',
+                            label: translate('Continue'),
                             onClick: () => {
                                 setCurrentJob(contextMenuJob);
                                 setCurrentPage('dataView');
@@ -106,7 +107,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                             icon: <i className="icon-play"></i>
                         },
                         {
-                            label: 'Logs',
+                            label: translate('Logs'),
                             onClick: () => {
                                 console.log('Logs');
 
@@ -116,7 +117,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                             icon: <i className="icon-file-clock-outline"></i>
                         },
                         {
-                            label: 'Delete',
+                            label: translate('Delete'),
                             onClick: () => {
                                 setDeleteJobDialogJob(contextMenuJob);
                                 setDeleteJobDialogOpen(true);
@@ -130,8 +131,8 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
             )}
             {deleteJobDialogOpen &&
                 <YesNoDialog
-                    title='Delete Job'
-                    message='Are you sure you want to delete this job?'
+                    title={translate('Delete Job')}
+                    message={translate('Are you sure you want to delete this job?')}
                     onYesClick={() => {
 
                         JobsService.removeJob(deleteJobDialogJob!).then(() => {

@@ -1,4 +1,4 @@
-import { JobContext, NavFunctionsContext } from '../../App';
+import { JobContext, NavFunctionsContext, useTranslate } from '../../App';
 import { DateTimeInput } from '../../components/datetime-input/datetime-input.component';
 import { NumberInput } from '../../components/number-input/number-input.component';
 import { TextInput, TextInputElement } from '../../components/text-input/text-input.component';
@@ -17,6 +17,7 @@ export type CreateJobProps = {
 }
 
 export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, ref) => {
+    const translate = useTranslate();
     const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
     const { currentJob, setCurrentJob } = useContext(JobContext);
 
@@ -51,31 +52,31 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
             <div className={styles.wrapper}>
                 <TopBar
                     onBackClick={onBackClick}
-                    title='Create Job'
+                    title={translate('Create Job')}
                 />
                 <div className={styles.content}>
                     <TextInput
-                        label='Title'
+                        label={translate('Title')}
                         className={styles.titleInput}
                         ref={titleInputRef}
                         value='New Job'
                     />
                     <NumberInput
-                        label='Time before alert (milliseconds)'
+                        label={translate('Time before alert (milliseconds)')}
                         className={styles.durationToleranceInput}
                         value='7000'
                         decimals={0}
                         ref={durationToleranceInputRef}
                     />
                     <NumberInput
-                        label='Expected flow (L/ha)'
+                        label={translate('Expected flow (L/ha)')}
                         className={styles.expectedFlow}
                         value='2.5'
                         decimals={2}
                         ref={expectedFlowInputRef}
                     />
                     <NumberInput
-                        label='Variation margin (%)'
+                        label={translate('Variation margin (%)')}
                         className={styles.flowToleranceInput}
                         value='5'
                         decimals={2}

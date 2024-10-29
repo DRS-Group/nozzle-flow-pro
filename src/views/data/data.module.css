@@ -3,6 +3,7 @@
     width: 100%;
     display: flex;
     overflow: hidden;
+    background-color: var(--secondary-color);
 }
 
 .syncWrapper {
@@ -18,7 +19,7 @@
 .syncWrapper button {
     margin-top: 1rem;
     background-color: var(--primary-color);
-    color: white;
+    color: var(--secondary-font-color);
     border: none;
     padding: 1rem 2rem;
     border-radius: 2rem;

@@ -12,7 +12,7 @@
     height: 100%;
     width: 100%;
 
-    background-color: white;
+    background-color: var(--secondary-color);
 
     box-sizing: border-box;
 }
@@ -163,21 +163,21 @@
     background-color: var(--target-color);
     padding: 0.25rem;
     border-radius: 0.25rem;
-    color: white;
+    color: var(--secondary-font-color);
 }
 
 .maxTargetLine span {
     background-color: var(--max-target-color);
     padding: 0.25rem;
     border-radius: 0.25rem;
-    color: white;
+    color: var(--secondary-font-color);
 }
 
 .minTargetLine span {
     background-color: var(--min-target-color);
     padding: 0.25rem;
     border-radius: 0.25rem;
-    color: white;
+    color: var(--secondary-font-color);
 }
 
 .bars {
