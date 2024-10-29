@@ -6,6 +6,7 @@ import { JobsService } from '../../services/jobs.service';
 import { Job } from '../../types/job.type';
 import styles from './jobs.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { on } from 'events';
 
 export type JobsElement = {
 
@@ -17,7 +18,7 @@ export type JobsProps = {
 
 export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
     const translate = useTranslate();
-    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
+    const { currentPage, setCurrentPage, setOppenedFromMenu } = useContext(NavFunctionsContext);
     const { currentJob, setCurrentJob } = useContext(JobContext);
 
     const [contextMenuJob, setContextMenuJob] = useState<Job | null>(null);
@@ -58,6 +59,15 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
 
     const onAddButtonClick = () => {
         setCurrentPage('createJob');
+    }
+
+    const onLogsClick = () => {
+        setOppenedFromMenu(true);
+        setCurrentJob({ ...contextMenuJob, nozzleEvents: contextMenuJob?.nozzleEvents });
+        setCurrentPage('logs');
+
+        setContextMenuJob(null);
+        setContextMenuPosition(null);
     }
 
     return (
@@ -109,10 +119,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                         {
                             label: translate('Logs'),
                             onClick: () => {
-                                console.log('Logs');
-
-                                setContextMenuJob(null);
-                                setContextMenuPosition(null);
+                                onLogsClick();
                             },
                             icon: <i className="icon-file-clock-outline"></i>
                         },

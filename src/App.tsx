@@ -15,16 +15,19 @@ import { Settings } from './views/settings/settings.view';
 import { SettingsService } from './services/settings.service';
 import { TranslationServices } from './services/translations.service';
 import { ColorInputDialog } from './components/color-input-dialog/color-input-dialog.component';
+import { Logs } from './views/logs/logs.view';
+import { JobsService } from './services/jobs.service';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
   .catch(console.warn);
 
 
-export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView' | 'nozzles' | 'settings';
+export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView' | 'nozzles' | 'settings' | 'logs';
 
 export const NavFunctionsContext = createContext<any>(undefined);
 export const JobContext = createContext<any>(undefined);
+export const AdminContext = createContext<any>(false);
 
 export const SpeedContext = createContext<number>(3);
 
@@ -37,12 +40,25 @@ export type SpeedSimulatorProps = {
 }
 
 export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorProps>((props, ref) => {
+  const [opacity, setOpacity] = useState<number>(0);
+  const [timeoutHandle, setTimeoutHandle] = useState<NodeJS.Timeout | null>(null);
+
   const [speed, setSpeed] = useState<number>(3);
   useImperativeHandle(ref, () => ({
     getSpeed: () => {
       return speed;
     }
   }), []);
+
+  const onTouchStart = () => {
+    setOpacity(1);
+    const timer = setTimeout(() => {
+      setOpacity(0);
+      clearTimeout(timer);
+    }, 2000);
+
+    setTimeoutHandle(timer);
+  };
 
   return (
     <div style={{
@@ -55,8 +71,11 @@ export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorPr
       left: '5rem',
       height: '2rem',
       zIndex: 100,
-      opacity: 0.5,
-    }}>
+      opacity: opacity,
+      transition: 'opacity 0.5s'
+    }}
+      onTouchStart={onTouchStart}
+    >
       <input type='range' min={0} max={15} defaultValue={speed} step={0.1} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
         setSpeed(parseFloat(e.target.value));
         props.onSpeedChange(parseFloat(e.target.value));
@@ -69,7 +88,6 @@ export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorPr
     </div>
   );
 });
-
 
 export function useTranslate() {
   const [currentLanguage, setCurrentLanguage] = useState<'en-us' | 'pt-br'>('en-us');
@@ -95,8 +113,11 @@ export function useTranslate() {
 function App() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
   const [currentPage, setCurrentPage] = useState<Page>('menu');
   const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
+  const [oppenedFromMenu, setOppenedFromMenu] = useState<boolean>(false);
 
   const [currentLanguage, setCurrentLanguage] = useState<'en-us' | 'pt-br'>('en-us');
 
@@ -337,7 +358,7 @@ function App() {
       }
     }
 
-    let newEvents = [...currentJob.nozzleEvents];
+    let newEvents = [...currentJob?.nozzleEvents];
 
     for (let event of eventsToAdd) {
       newEvents.push(event);
@@ -351,6 +372,7 @@ function App() {
     if (eventsToAdd.length > 0 || eventsToModify.length > 0) {
       currentJob.nozzleEvents = newEvents;
       setCurrentJob(currentJob);
+      JobsService.updateJob(currentJob);
     }
   }
 
@@ -400,7 +422,7 @@ function App() {
   }, [currentJob, setSpeed, setNozzleSpacing, speed, nozzleSpacing, active, activeButtonState]);
 
   useEffect(() => {
-    if (!isRefreshing && currentJob) {
+    if (!isRefreshing && currentJob && oppenedFromMenu === false) {
       const interval = setInterval(() => {
         setIsRefreshing(true);
         refresh();
@@ -408,7 +430,7 @@ function App() {
       return () => clearInterval(interval);
     }
 
-  }, [isRefreshing, currentJob]);
+  }, [isRefreshing, currentJob, oppenedFromMenu, setCurrentJob]);
 
   const calculateTargetValue = () => {
     if (!currentJob) return
@@ -421,56 +443,64 @@ function App() {
 
   return (
     <SpeedContext.Provider value={speed}>
-      <NavFunctionsContext.Provider value={{ currentPage, setCurrentPage }}>
+      <NavFunctionsContext.Provider value={{ currentPage, setCurrentPage, oppenedFromMenu, setOppenedFromMenu }}>
         <JobContext.Provider value={{ currentJob, setCurrentJob }} >
           <SpeedSimulator ref={speedSimulatorRef} onSpeedChange={(speed: number) => { setSpeed(speed) }} />
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            {
-              currentPage === 'menu' &&
-              <Menu
-                onJobsClick={() => setCurrentPage('jobs')}
-                onNozzlesClick={() => setCurrentPage('nozzles')}
-              />
-            }
-            {
-              currentPage === 'jobs' &&
-              <Jobs
-                onBackClick={() => setCurrentPage('menu')}
-              />
-            }
-            {
-              currentPage === 'createJob' &&
-              <CreateJob />
-            }
-            {
-              currentPage === 'dataView' &&
-              <DataView />
-            }
-            {
-              currentPage === 'nozzles' &&
-              <NozzlesView
-                onBackClick={() => setCurrentPage('menu')}
-              />
-            }
-            {
-              currentPage === 'settings' &&
-              <Settings />
-            }
-            {
-              (currentPage === 'dataView' || (currentPage === 'nozzles' && currentJob) || (currentPage === 'settings' && currentJob)) &&
-              <SideMenu
-                onActiveChange={(active) => setActiveButtonState(active)}
-              />
-            }
-            {getFirstNozzleUnviewedTriggeredEvent() &&
-              <AlertModal
-                event={getFirstNozzleUnviewedTriggeredEvent()!}
-                onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
-                onOkForAllClick={markAllEventsAsViewed}
-                totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
-              />
-            }
-          </div>
+          <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+              {
+                currentPage === 'menu' &&
+                <Menu
+                  onJobsClick={() => setCurrentPage('jobs')}
+                  onNozzlesClick={() => setCurrentPage('nozzles')}
+                />
+              }
+              {
+                currentPage === 'jobs' &&
+                <Jobs
+                  onBackClick={() => setCurrentPage('menu')}
+                />
+              }
+              {
+                currentPage === 'createJob' &&
+                <CreateJob />
+              }
+              {
+                currentPage === 'dataView' &&
+                <DataView />
+              }
+              {
+                currentPage === 'nozzles' &&
+                <NozzlesView
+                  onBackClick={() => setCurrentPage('menu')}
+                />
+              }
+              {
+                currentPage === 'settings' &&
+                <Settings />
+              }
+              {
+                currentPage === 'logs' &&
+                <Logs
+                  onBackClick={() => setCurrentPage('jobs')}
+                />
+              }
+              {
+                (currentPage === 'dataView' || (currentPage === 'nozzles' && currentJob) || (currentPage === 'settings' && currentJob) || (currentPage === 'logs' && currentJob && !oppenedFromMenu)) &&
+                <SideMenu
+                  onActiveChange={(active) => setActiveButtonState(active)}
+                />
+              }
+              {getFirstNozzleUnviewedTriggeredEvent() &&
+                <AlertModal
+                  event={getFirstNozzleUnviewedTriggeredEvent()!}
+                  onOkClick={() => { markEventAsViewed(getFirstNozzleUnviewedTriggeredEvent()!) }}
+                  onOkForAllClick={markAllEventsAsViewed}
+                  totalEvents={getTotalNozzleUnviewedTriggeredEvents()}
+                />
+              }
+            </div>
+          </AdminContext.Provider>
         </JobContext.Provider>
       </NavFunctionsContext.Provider>
     </SpeedContext.Provider >

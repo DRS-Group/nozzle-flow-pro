@@ -1,4 +1,4 @@
-import { JobContext, NavFunctionsContext, useTranslate } from '../../App';
+import { AdminContext, JobContext, NavFunctionsContext, useTranslate } from '../../App';
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { defaultLogoUri, defaultSettings, SettingsService } from '../../services/settings.service';
 import styles from './settings.module.css';
@@ -22,6 +22,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const { currentJob, setCurrentJob } = useContext(JobContext);
     const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
 
+    const { isAdmin, setIsAdmin } = useContext(AdminContext);
+
     const [settings, setSettings] = useState<SettingsType | null>(null);
     const [logoUri, setLogoUri] = useState<string>('');
 
@@ -30,9 +32,12 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [secondaryColorDialogOpen, setSecondaryColorDialogOpen] = useState<boolean>(false);
     const [primaryFontColorDialogOpen, setPrimaryFontColorDialogOpen] = useState<boolean>(false);
     const [secondaryFontColorDialogOpen, setSecondaryFontColorDialogOpen] = useState<boolean>(false);
+    const [adminPasswordDialogOpen, setAdminPasswordDialogOpen] = useState<boolean>(false);
 
     const [languageContextMenuPosition, setLanguageContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [interfaceScaleContextMenuPosition, setInterfaceScaleContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
+    const [volumeUnitContextMenuPosition, setVolumeUnitContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
+    const [areaUnitContextMenuPosition, setAreaUnitContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
 
     useImperativeHandle(ref, () => ({
 
@@ -79,6 +84,24 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
         setInterfaceScaleContextMenuPosition({ x, y });
     }
 
+    const onVolumeUnitClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        const x = e.nativeEvent.clientX;
+        const y = e.nativeEvent.clientY;
+
+        setVolumeUnitContextMenuPosition({ x, y });
+    }
+
+    const onAreaUnitClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        const x = e.nativeEvent.clientX;
+        const y = e.nativeEvent.clientY;
+
+        setAreaUnitContextMenuPosition({ x, y });
+    }
+
     const onContextMenuBackgroundClick = () => {
         setLanguageContextMenuPosition(null);
     }
@@ -99,54 +122,58 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                 />
             }
             <div className={styles.content}>
-                <div className={styles.section}>
-                    <div className={styles.sectionTitle}>
-                        {translate('Development')}
-                    </div>
-                    <div className={styles.sectionContent}>
-                        <div className={styles.item}
-                            onClick={() => {
-                                SettingsService.setSettings(defaultSettings).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
+                {isAdmin &&
+                    <div className={styles.section}>
+                        <div className={styles.sectionTitle}>
+                            {translate('Development')}
+                        </div>
+                        <div className={styles.sectionContent}>
+                            <div className={styles.item}
+                                onClick={() => {
+                                    SettingsService.setSettings(defaultSettings).then(() => {
+                                        SettingsService.getSettings().then((settings) => {
+                                            setSettings(settings);
+                                        });
                                     });
-                                });
-                                SettingsService.setLogoUri(defaultLogoUri).then(() => {
-                                    SettingsService.getLogoUri().then((logoUri) => {
-                                        setLogoUri(logoUri);
+                                    SettingsService.setLogoUri(defaultLogoUri).then(() => {
+                                        SettingsService.getLogoUri().then((logoUri) => {
+                                            setLogoUri(logoUri);
+                                        });
                                     });
-                                });
-                            }}
-                        >
-                            <div className={styles.itemLeft}>
-                                <span className={styles.itemName}>{translate('Reset settings')}</span>
-                            </div>
-                            <div className={styles.itemRight}>
-                                <i className="icon-thin-chevron-right"></i>
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Reset settings')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
                 <div className={styles.section}>
                     <div className={styles.sectionTitle}>
                         {translate('General')}
                     </div>
                     <div className={styles.sectionContent}>
-                        <div className={styles.item}
-                            onClick={() => {
-                                setApiBaseUriDialogOpen(true);
-                            }}
-                        >
-                            <div className={styles.itemLeft}>
-                                <span className={styles.itemName}>{translate('API Base URL')}</span>
-                            </div>
-                            <div className={styles.itemRight}>
-                                <div className={styles.itemValue}>
-                                    <span>{settings?.apiBaseUrl}</span>
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setApiBaseUriDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('API Base URL')}</span>
                                 </div>
-                                <i className="icon-thin-chevron-right"></i>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <span>{settings?.apiBaseUrl}</span>
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
                             </div>
-                        </div>
+                        }
                         <div className={styles.item}
                             onClick={onLanguageClick}
                         >
@@ -164,69 +191,110 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                 </div>
                 <div className={styles.section}>
                     <div className={styles.sectionTitle}>
-                        {translate('Style')}
+                        {translate('Units of measurement')}
                     </div>
                     <div className={styles.sectionContent}>
                         <div className={styles.item}
-                            onClick={() => {
-                                setPrimaryColorDialogOpen(true);
-                            }}
+                            onClick={onVolumeUnitClick}
                         >
                             <div className={styles.itemLeft}>
-                                <span className={styles.itemName}>{translate('Primary color')}</span>
+                                <span className={styles.itemName}>{translate('Volume')}</span>
                             </div>
                             <div className={styles.itemRight}>
                                 <div className={styles.itemValue}>
-                                    <div className={styles.colorBox} style={{ backgroundColor: settings?.primaryColor }}></div>
+                                    <span>{settings?.volumeUnit}</span>
                                 </div>
-                                <i className="icon-thin-chevron-right"></i>
+                                <i className="icon-unfold-more-horizontal"></i>
                             </div>
                         </div>
                         <div className={styles.item}
-                            onClick={() => {
-                                setSecondaryColorDialogOpen(true);
-                            }}
+                            onClick={onAreaUnitClick}
                         >
                             <div className={styles.itemLeft}>
-                                <span className={styles.itemName}>{translate('Secondary color')}</span>
+                                <span className={styles.itemName}>{translate('Area')}</span>
                             </div>
                             <div className={styles.itemRight}>
                                 <div className={styles.itemValue}>
-                                    <div className={styles.colorBox} style={{ backgroundColor: settings?.secondaryColor }}></div>
+                                    <span>{settings?.areaUnit}</span>
                                 </div>
-                                <i className="icon-thin-chevron-right"></i>
+                                <i className="icon-unfold-more-horizontal"></i>
                             </div>
                         </div>
-                        <div className={styles.item}
-                            onClick={() => {
-                                setPrimaryFontColorDialogOpen(true);
-                            }}
-                        >
-                            <div className={styles.itemLeft}>
-                                <span className={styles.itemName}>{translate('Primary font color')}</span>
-                            </div>
-                            <div className={styles.itemRight}>
-                                <div className={styles.itemValue}>
-                                    <div className={styles.colorBox} style={{ backgroundColor: settings?.primaryFontColor }}></div>
+                    </div>
+                </div>
+                <div className={styles.section}>
+                    <div className={styles.sectionTitle}>
+                        {translate('Style')}
+                    </div>
+                    <div className={styles.sectionContent}>
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setPrimaryColorDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Primary color')}</span>
                                 </div>
-                                <i className="icon-thin-chevron-right"></i>
-                            </div>
-                        </div>
-                        <div className={styles.item}
-                            onClick={() => {
-                                setSecondaryFontColorDialogOpen(true);
-                            }}
-                        >
-                            <div className={styles.itemLeft}>
-                                <span className={styles.itemName}>{translate('Secondary font color')}</span>
-                            </div>
-                            <div className={styles.itemRight}>
-                                <div className={styles.itemValue}>
-                                    <div className={styles.colorBox} style={{ backgroundColor: settings?.secondaryFontColor }}></div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <div className={styles.colorBox} style={{ backgroundColor: settings?.primaryColor }}></div>
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
                                 </div>
-                                <i className="icon-thin-chevron-right"></i>
                             </div>
-                        </div>
+                        }
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setSecondaryColorDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Secondary color')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <div className={styles.colorBox} style={{ backgroundColor: settings?.secondaryColor }}></div>
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
+                            </div>
+                        }
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setPrimaryFontColorDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Primary font color')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <div className={styles.colorBox} style={{ backgroundColor: settings?.primaryFontColor }}></div>
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
+                            </div>
+                        }
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setSecondaryFontColorDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Secondary font color')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <div className={styles.colorBox} style={{ backgroundColor: settings?.secondaryFontColor }}></div>
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
+                            </div>
+                        }
                         <div className={styles.item}
                             onClick={onInterfaceScaleClick}
                         >
@@ -240,20 +308,57 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 <i className="icon-unfold-more-horizontal"></i>
                             </div>
                         </div>
-                        <div className={styles.item}
-                            onClick={() => {
-                                onLogoClick();
-                            }}
-                        >
-                            <div className={styles.itemLeft}>
-                                <span className={styles.itemName}>{translate('Logo')}</span>
-                            </div>
-                            <div className={styles.itemRight}>
-                                <div className={styles.itemValue}>
-                                    <img src={logoUri} />
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    onLogoClick();
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Logo')}</span>
                                 </div>
-                                <i className="icon-thin-chevron-right"></i>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <img src={logoUri} />
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
                             </div>
+                        }
+                    </div>
+                    <div className={styles.section}>
+                        <div className={styles.sectionTitle}>
+                            {translate('Advanced')}
+                        </div>
+                        <div className={styles.sectionContent}>
+                            {!isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
+                                        setAdminPasswordDialogOpen(true);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Enter administrator mode')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
+                                        setIsAdmin(false);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Exit administrator mode')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -370,6 +475,68 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     onBackgroundClick={onContextMenuBackgroundClick}
                 />
             }
+            {volumeUnitContextMenuPosition &&
+                <ContextMenu
+                    items={[
+                        {
+                            label: translate('Liters'),
+                            onClick: () => {
+                                SettingsService.setVolumeUnit('L').then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        },
+                        {
+                            label: translate('Gallons'),
+                            onClick: () => {
+                                SettingsService.setVolumeUnit('gal').then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        }
+                    ]}
+                    position={volumeUnitContextMenuPosition}
+
+                    onBackgroundClick={() => {
+                        setVolumeUnitContextMenuPosition(null);
+                    }}
+                />
+            }
+            {areaUnitContextMenuPosition &&
+                <ContextMenu
+                    items={[
+                        {
+                            label: translate('Hectares'),
+                            onClick: () => {
+                                SettingsService.setAreaUnit('ha').then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        },
+                        {
+                            label: translate('Square meters'),
+                            onClick: () => {
+                                SettingsService.setAreaUnit('m²').then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        }
+                    ]}
+                    position={areaUnitContextMenuPosition}
+
+                    onBackgroundClick={() => {
+                        setAreaUnitContextMenuPosition(null);
+                    }}
+                />
+            }
             {interfaceScaleContextMenuPosition &&
                 <ContextMenu
                     items={[
@@ -428,6 +595,25 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
                     onBackgroundClick={() => {
                         setInterfaceScaleContextMenuPosition(null);
+                    }}
+                />
+            }
+            {adminPasswordDialogOpen &&
+                <TextInputDialog
+                    title={translate('Admin access')}
+                    label={translate('Admin password')}
+                    type='password'
+                    onConfirmClick={(value: string) => {
+                        if (value === 'admin') {
+                            setIsAdmin(true);
+                            setAdminPasswordDialogOpen(false);
+                        }
+                        else {
+                            alert('Wrong password');
+                        }
+                    }}
+                    onCancelClick={() => {
+                        setAdminPasswordDialogOpen(false);
                     }}
                 />
             }

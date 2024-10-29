@@ -81,7 +81,7 @@
     },
     {
         "en-us": "Are you sure you want to clear all nozzles?",
-        "pt-br": "Você tem certeza que deseja redefinir os bicos?"
+        "pt-br": "Você tem certeza que deseja limpar todos os bicos?"
     },
     {
         "en-us": "Yes",
@@ -93,7 +93,7 @@
     },
     {
         "en-us": "Clear nozzles",
-        "pt-br": "Redefinir bicos"
+        "pt-br": "Limpar bicos"
     },
     {
         "en-us": "Create Job",
@@ -148,6 +148,10 @@
         "pt-br": "Designorar"
     },
     {
+        "en-us": "Ignore nozzle",
+        "pt-br": "Ignorar bico"
+    },
+    {
         "en-us": "Unignore nozzle",
         "pt-br": "Designorar bico"
     },
@@ -190,5 +194,73 @@
     {
         "en-us": "Nozzle name",
         "pt-br": "Nome do bico"
+    },
+    {
+        "en-us": "Date",
+        "pt-br": "Data"
+    },
+    {
+        "en-us": "Data",
+        "pt-br": "Dados"
+    },
+    {
+        "en-us": "Description",
+        "pt-br": "Descrição"
+    },
+    {
+        "en-us": "Add nozzles",
+        "pt-br": "Adicionar bicos"
+    },
+    {
+        "en-us": "Units of measurement",
+        "pt-br": "Unidades de medida"
+    },
+    {
+        "en-us": "Volume",
+        "pt-br": "Volume"
+    },
+    {
+        "en-us": "Area",
+        "pt-br": "Área"
+    },
+    {
+        "en-us": "Liters",
+        "pt-br": "Litros"
+    },
+    {
+        "en-us": "Gallons",
+        "pt-br": "Galões"
+    },
+    {
+        "en-us": "Hectares",
+        "pt-br": "Hectares"
+    },
+    {
+        "en-us": "Square meters",
+        "pt-br": "Metros quadrados"
+    },
+    {
+        "en-us": "Stop",
+        "pt-br": "Parar"
+    },
+    {
+        "en-us": "Advanced",
+        "pt-br": "Avançado"
+    },
+    {
+        "en-us": "Enter administrator mode",
+        "pt-br": "Entrar no modo administrador"
+    },
+    {
+        "en-us": "Exit administrator mode",
+        "pt-br": "Sair do modo administrador"
+    },
+    {
+        "en-us": "Admin password",
+        "pt-br": "Senha de administrador"
+    },
+    {
+        "en-us": "Admin access",
+        "pt-br": "Acesso de administrador"
     }
 ]

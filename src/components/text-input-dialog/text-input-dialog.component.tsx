@@ -11,7 +11,8 @@ export type TextInputDialogProps = {
     title: string,
     defaultValue?: string;
     onConfirmClick: (value: string) => void,
-    onCancelClick: () => void
+    onCancelClick: () => void,
+    type?: 'text' | 'password';
 }
 
 export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialogProps>((props, ref) => {
@@ -46,6 +47,7 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
                         className={styles.input}
                         ref={inputRef}
                         value={props.defaultValue}
+                        type={props.type}
                     />
                 </div>
                 <div className={styles.footer}>

@@ -7,4 +7,6 @@ export type Settings = {
     interfaceScale: number;
     nozzleSpacing: number;
     apiBaseUrl: string;
+    volumeUnit: string;
+    areaUnit: string;
 }

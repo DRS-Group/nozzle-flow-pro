@@ -1,6 +1,7 @@
 html {
   overflow: hidden;
   --primary-color: #466905;
+  --primary-font-color: #000000;
 }
 
 body {
@@ -8,6 +9,10 @@ body {
   overflow: hidden;
   margin: 0;
   padding: 0;
+}
+
+* {
+  color: var(--primary-font-color);
 }
 
 #root {

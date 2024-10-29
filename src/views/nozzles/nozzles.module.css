@@ -76,7 +76,13 @@
     justify-content: center;
     transition: 200ms;
 
+    & * {
+        color: var(--secondary-font-color);
+    }
+
 }
+
+
 
 .menuButton[data-state="open"] {
     width: 3.5rem;

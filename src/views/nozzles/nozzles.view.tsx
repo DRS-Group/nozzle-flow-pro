@@ -200,9 +200,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 )}
                 {nozzles === undefined || nozzles.length === 0 &&
                     <div className={styles.syncWrapper}>
-                        <span>There is no synchronized nozzle.</span>
-                        <span>Click the button bellow to synchronize.</span>
-                        <button className={styles.syncButton} onClick={onSyncNozzlesClick}>Synchronize</button>
+                        <button className={styles.syncButton} onClick={onSyncNozzlesClick}>{translate('Add nozzles')}</button>
                     </div>
                 }
             </div>
@@ -244,30 +242,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     onCancelClick={() => {
                         setSyncNozzlesDialogOpen(false);
                     }}
-
                 />
-                // <YesNoDialog
-                //     title='Sync nozzles'
-                //     message='Are you sure you want to resync all nozzles?'
-                //     onYesClick={() => {
-                //         // DataFecherService.syncNozzles().then(() => {
-                //         //     NozzlesService.getActiveNozzles().then((nozzles) => {
-                //         //         nozzles = nozzles.sort((a, b) => a.index - b.index);
-                //         //         setNozzles(nozzles);
-                //         //     });
-                //         // });
-
-                //         NozzlesService.generateNozzles(20).then((nozzles) => {
-                //             setNozzles(nozzles);
-                //         });
-
-                //         setSyncNozzlesDialogOpen(false);
-                //     }}
-
-                //     onNoClick={() => {
-                //         setSyncNozzlesDialogOpen(false);
-                //     }}
-                // />
             }
             {ignoreNozzleDialogOpen && ignoreNozzleDialogNozzleIndex !== null &&
                 <YesNoDialog

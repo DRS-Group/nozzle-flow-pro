@@ -14,6 +14,7 @@ export type TextInputProps = {
     disabled?: boolean;
     value?: string;
     onChange?: (value: string) => void;
+    type?: 'text' | 'password';
 }
 
 export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, ref) => {
@@ -36,7 +37,7 @@ export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, re
         <div className={`${styles.wrapper} ${props.className}`}>
             <input
                 className={styles.input}
-                type='text'
+                type={props.type || 'text'}
                 placeholder=' '
                 disabled={props.disabled}
                 ref={inputRef}

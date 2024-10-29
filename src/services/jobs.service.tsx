@@ -9,6 +9,10 @@ export namespace JobsService {
                 let jobs = JSON.parse(result.value || '[]') as Job[];
                 jobs.forEach(job => {
                     job.creationDate = new Date(job.creationDate);
+                    job.nozzleEvents.forEach(event => {
+                        event._startTime = new Date(event._startTime);
+                        if (event._endTime) event._endTime = new Date(event._endTime);
+                    });
                 });
                 resolve(jobs);
             });
@@ -63,7 +67,7 @@ export namespace JobsService {
         return new Promise(async (resolve, reject) => {
             let jobs = await getJobs();
 
-            let index = jobs.findIndex(j => j.title === job.title);
+            let index = jobs.findIndex(j => j.id === job.id);
 
             jobs[index] = job;
 

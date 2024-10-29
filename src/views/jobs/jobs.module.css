@@ -61,6 +61,10 @@
     justify-content: center;
 }
 
+.addButton * {
+    color: var(--secondary-font-color);
+}
+
 .noJobsContent {
     display: flex;
     flex-direction: column;

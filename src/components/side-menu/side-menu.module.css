@@ -84,4 +84,6 @@
 .stopButton span,
 .stopButton i {
     font-size: 0.75rem;
+    color: var(--secondary-font-color);
+    opacity: 0.75;
 }

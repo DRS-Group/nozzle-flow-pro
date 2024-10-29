@@ -12,7 +12,9 @@ export const defaultSettings: Settings = {
     primaryFontColor: '#000000',
     secondaryFontColor: '#ffffff',
     interfaceScale: 1,
-    nozzleSpacing: 1
+    nozzleSpacing: 1,
+    volumeUnit: 'L',
+    areaUnit: 'ha'
 }
 
 export namespace SettingsService {
@@ -188,6 +190,36 @@ export namespace SettingsService {
             });
 
             dispatchEvent('onSecondaryFontColorChanged', secondaryFontColor);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setVolumeUnit = async (volumeUnit: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.volumeUnit = volumeUnit;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onVolumeUnitChanged', volumeUnit);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setAreaUnit = async (areaUnit: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.areaUnit = areaUnit;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onAreaUnitChanged', areaUnit);
             dispatchEvent('onSettingsChanged', settings);
         });
     }

@@ -43,6 +43,10 @@
     justify-content: center;
 }
 
+.confirmButton * {
+    color: var(--secondary-font-color);
+}
+
 .titleInput,
 .durationToleranceInput,
 .expectedFlow,
