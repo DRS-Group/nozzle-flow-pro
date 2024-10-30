@@ -51,7 +51,10 @@ export namespace DataFecherService {
 
                 resolve(res);
             })
-                .catch((reason: any) => { reject(reason) });
+                .catch((reason: any) => {
+                    reject(reason);
+                    alert(reason);
+                });
         });
     }
 

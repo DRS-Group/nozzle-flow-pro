@@ -326,40 +326,40 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             </div>
                         }
                     </div>
-                    <div className={styles.section}>
-                        <div className={styles.sectionTitle}>
-                            {translate('Advanced')}
-                        </div>
-                        <div className={styles.sectionContent}>
-                            {!isAdmin &&
-                                <div className={styles.item}
-                                    onClick={() => {
-                                        setAdminPasswordDialogOpen(true);
-                                    }}
-                                >
-                                    <div className={styles.itemLeft}>
-                                        <span className={styles.itemName}>{translate('Enter administrator mode')}</span>
-                                    </div>
-                                    <div className={styles.itemRight}>
-                                        <i className="icon-thin-chevron-right"></i>
-                                    </div>
+                </div>
+                <div className={styles.section}>
+                    <div className={styles.sectionTitle}>
+                        {translate('Advanced')}
+                    </div>
+                    <div className={styles.sectionContent}>
+                        {!isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setAdminPasswordDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Enter administrator mode')}</span>
                                 </div>
-                            }
-                            {isAdmin &&
-                                <div className={styles.item}
-                                    onClick={() => {
-                                        setIsAdmin(false);
-                                    }}
-                                >
-                                    <div className={styles.itemLeft}>
-                                        <span className={styles.itemName}>{translate('Exit administrator mode')}</span>
-                                    </div>
-                                    <div className={styles.itemRight}>
-                                        <i className="icon-thin-chevron-right"></i>
-                                    </div>
+                                <div className={styles.itemRight}>
+                                    <i className="icon-thin-chevron-right"></i>
                                 </div>
-                            }
-                        </div>
+                            </div>
+                        }
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setIsAdmin(false);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Exit administrator mode')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -571,9 +571,29 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             }
                         },
                         {
+                            label: '1.25x',
+                            onClick: () => {
+                                SettingsService.setInterfaceScale(1.25).then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        },
+                        {
                             label: '1.5x',
                             onClick: () => {
                                 SettingsService.setInterfaceScale(1.5).then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        },
+                        {
+                            label: '1.75x',
+                            onClick: () => {
+                                SettingsService.setInterfaceScale(1.75).then(() => {
                                     SettingsService.getSettings().then((settings) => {
                                         setSettings(settings);
                                     });

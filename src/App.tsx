@@ -42,6 +42,7 @@ export type SpeedSimulatorProps = {
 export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorProps>((props, ref) => {
   const [opacity, setOpacity] = useState<number>(0);
   const [timeoutHandle, setTimeoutHandle] = useState<NodeJS.Timeout | null>(null);
+  const [timer, setTimer] = useState<NodeJS.Timeout | undefined>(undefined)
 
   const [speed, setSpeed] = useState<number>(3);
   useImperativeHandle(ref, () => ({
@@ -52,13 +53,19 @@ export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorPr
 
   const onTouchStart = () => {
     setOpacity(1);
+    clearTimeout(timer)
+    setTimer(undefined);
+  };
+
+  const onTouchEnd = () => {
     const timer = setTimeout(() => {
       setOpacity(0);
       clearTimeout(timer);
     }, 2000);
 
+    setTimer(timer);
     setTimeoutHandle(timer);
-  };
+  }
 
   return (
     <div style={{
@@ -69,12 +76,13 @@ export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorPr
       top: 0,
       right: '5rem',
       left: '5rem',
-      height: '2rem',
+      height: '4rem',
       zIndex: 100,
       opacity: opacity,
       transition: 'opacity 0.5s'
     }}
       onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       <input type='range' min={0} max={15} defaultValue={speed} step={0.1} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
         setSpeed(parseFloat(e.target.value));
