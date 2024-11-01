@@ -17,6 +17,8 @@ import { TranslationServices } from './services/translations.service';
 import { ColorInputDialog } from './components/color-input-dialog/color-input-dialog.component';
 import { Logs } from './views/logs/logs.view';
 import { JobsService } from './services/jobs.service';
+import { Settings as SettingsType } from './types/settings.type';
+
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
@@ -105,12 +107,12 @@ export function useTranslate() {
       setCurrentLanguage(language);
     });
 
-    const eventHandler = async (language: 'en-us' | 'pt-br') => {
-      setCurrentLanguage(language);
+    const eventHandler = async (settings: SettingsType) => {
+      setCurrentLanguage(settings.language);
     };
-    SettingsService.addEventListener('onLanguageChanged', eventHandler);
+    SettingsService.addEventListener('onSettingsChanged', eventHandler);
     return () => {
-      DataFecherService.removeEventListener('onLanguageChanged', eventHandler);
+      DataFecherService.removeEventListener('onSettingsChanged', eventHandler);
     }
 
   }, [setCurrentLanguage, currentLanguage]);
@@ -127,8 +129,6 @@ function App() {
   const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
   const [oppenedFromMenu, setOppenedFromMenu] = useState<boolean>(false);
 
-  const [currentLanguage, setCurrentLanguage] = useState<'en-us' | 'pt-br'>('en-us');
-
   const [speed, setSpeed] = useState<number>(3);
   const [active, setActive] = useState<'on' | 'off'>('off');
   const [activeButtonState, setActiveButtonState] = useState<'on' | 'off' | 'auto'>('auto');
@@ -141,6 +141,7 @@ function App() {
       setIsRefreshing(false);
     })
       .catch(() => {
+        setIsRefreshing(false);
       });
   }
 
@@ -151,37 +152,22 @@ function App() {
   }
 
   useEffect(() => {
-    SettingsService.getSettingOrDefault('language', 'en-us').then((language) => {
-      setCurrentLanguage(language);
-    });
-
-    const eventHandler = async (language: 'en-us' | 'pt-br') => {
-      setCurrentLanguage(language);
-    };
-    SettingsService.addEventListener('onLanguageChanged', eventHandler);
-    return () => {
-      DataFecherService.removeEventListener('onLanguageChanged', eventHandler);
-    }
-
-  }, [setCurrentLanguage, currentLanguage]);
-
-  useEffect(() => {
     SettingsService.getSettingOrDefault('interfaceScale', 1).then((interfaceScale) => {
       const root = document.documentElement;
       const fontSize = 16 * interfaceScale;
       root.style.setProperty('font-size', `${fontSize}px`);
     });
 
-    const eventHandler = async (interfaceScale: number) => {
+    const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
-      const fontSize = 16 * interfaceScale;
+      const fontSize = 16 * settings.interfaceScale;
       root.style.setProperty('font-size', `${fontSize}px`);
     }
 
-    SettingsService.addEventListener('onInterfaceScaleChanged', eventHandler);
+    SettingsService.addEventListener('onSettingsChanged', eventHandler);
 
     return () => {
-      SettingsService.removeEventListener('onInterfaceScaleChanged', eventHandler);
+      SettingsService.removeEventListener('onSettingsChanged', eventHandler);
     }
   }, []);
 
@@ -191,15 +177,15 @@ function App() {
       root.style.setProperty('--primary-color', color);
     });
 
-    const eventHandler = async (color: string) => {
+    const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
-      root.style.setProperty('--primary-color', color);
+      root.style.setProperty('--primary-color', settings.primaryColor);
     }
 
-    SettingsService.addEventListener('onPrimaryColorChanged', eventHandler);
+    SettingsService.addEventListener('onSettingsChanged', eventHandler);
 
     return () => {
-      SettingsService.removeEventListener('onPrimaryColorChanged', eventHandler);
+      SettingsService.removeEventListener('onSettingsChanged', eventHandler);
     }
   }, []);
 
@@ -209,15 +195,15 @@ function App() {
       root.style.setProperty('--secondary-color', color);
     });
 
-    const eventHandler = async (color: string) => {
+    const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
-      root.style.setProperty('--secondary-color', color);
+      root.style.setProperty('--secondary-color', settings.secondaryColor);
     }
 
-    SettingsService.addEventListener('onSecondaryColorChanged', eventHandler);
+    SettingsService.addEventListener('onSettingsChanged', eventHandler);
 
     return () => {
-      SettingsService.removeEventListener('onSecondaryColorChanged', eventHandler);
+      SettingsService.removeEventListener('onSettingsChanged', eventHandler);
     }
   }, []);
 
@@ -227,15 +213,15 @@ function App() {
       root.style.setProperty('--primary-font-color', color);
     });
 
-    const eventHandler = async (color: string) => {
+    const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
-      root.style.setProperty('--primary-font-color', color);
+      root.style.setProperty('--primary-font-color', settings.primaryFontColor);
     }
 
-    SettingsService.addEventListener('onPrimaryFontColorChanged', eventHandler);
+    SettingsService.addEventListener('onSettingsChanged', eventHandler);
 
     return () => {
-      SettingsService.removeEventListener('onPrimaryFontColorChanged', eventHandler);
+      SettingsService.removeEventListener('onSettingsChanged', eventHandler);
     }
   }, []);
 
@@ -245,15 +231,15 @@ function App() {
       root.style.setProperty('--secondary-font-color', color);
     });
 
-    const eventHandler = async (color: string) => {
+    const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
-      root.style.setProperty('--secondary-font-color', color);
+      root.style.setProperty('--secondary-font-color', settings.secondaryFontColor);
     }
 
-    SettingsService.addEventListener('onSecondaryFontColorChanged', eventHandler);
+    SettingsService.addEventListener('onSettingsChanged', eventHandler);
 
     return () => {
-      SettingsService.removeEventListener('onSecondaryFontColorChanged', eventHandler);
+      SettingsService.removeEventListener('onSettingsChanged', eventHandler);
     }
   }, []);
 
@@ -434,7 +420,7 @@ function App() {
       const interval = setInterval(() => {
         setIsRefreshing(true);
         refresh();
-      }, 100);
+      }, 1000);
       return () => clearInterval(interval);
     }
 

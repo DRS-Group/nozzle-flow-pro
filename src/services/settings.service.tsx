@@ -2,6 +2,7 @@ import { Preferences } from "@capacitor/preferences";
 import { Settings } from "../types/settings.type";
 import { EventHandler } from "../types/event-handler";
 import { Directory, Filesystem, WriteFileResult } from "@capacitor/filesystem";
+import { DataFecherService } from "./data-fetcher.service";
 
 export const defaultLogoUri = '/images/logo_drs.png';
 export const defaultSettings: Settings = {
@@ -14,7 +15,8 @@ export const defaultSettings: Settings = {
     interfaceScale: 1,
     nozzleSpacing: 1,
     volumeUnit: 'L',
-    areaUnit: 'ha'
+    areaUnit: 'ha',
+    interval: 1000
 }
 
 export namespace SettingsService {
@@ -50,6 +52,7 @@ export namespace SettingsService {
         return new Promise(async (resolve, reject) => {
             Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
                 resolve();
+                dispatchEvent('onSettingsChanged', settings);
             });
         });
     }
@@ -76,7 +79,7 @@ export namespace SettingsService {
         });
     }
 
-    export const setLanguage = async (language: string): Promise<void> => {
+    export const setLanguage = async (language: 'en-us' | 'pt-br'): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             let settings = await getSettings();
 
@@ -244,5 +247,22 @@ export namespace SettingsService {
         }).then((value: void | WriteFileResult) => {
             console.log(value)
         })
+    }
+
+    export const setInterval = async (interval: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.interval = interval;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            DataFecherService.setInterval(interval);
+
+            dispatchEvent('onIntervalChanged', interval);
+            dispatchEvent('onSettingsChanged', settings);
+        });
     }
 }

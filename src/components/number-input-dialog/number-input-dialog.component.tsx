@@ -12,7 +12,8 @@ export type NumberInputDialogProps = {
     label: string,
     title: string,
     onConfirmClick: (value: number) => void,
-    onCancelClick: () => void
+    onCancelClick: () => void,
+    defaultValue?: number
 }
 
 export const NumberInputDialog = forwardRef<NumberInputDialogElement, NumberInputDialogProps>((props, ref) => {
@@ -43,6 +44,7 @@ export const NumberInputDialog = forwardRef<NumberInputDialogElement, NumberInpu
                         label={props.label}
                         className={styles.input}
                         ref={inputRef}
+                        value={props.defaultValue}
                     />
                 </div>
                 <div className={styles.footer}>

@@ -64,21 +64,21 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                     <NumberInput
                         label={translate('Time before alert (milliseconds)')}
                         className={styles.durationToleranceInput}
-                        value='7000'
+                        value={7000}
                         decimals={0}
                         ref={durationToleranceInputRef}
                     />
                     <NumberInput
                         label={translate('Expected flow (L/ha)')}
                         className={styles.expectedFlow}
-                        value='2.5'
+                        value={2.5}
                         decimals={2}
                         ref={expectedFlowInputRef}
                     />
                     <NumberInput
                         label={translate('Variation margin (%)')}
                         className={styles.flowToleranceInput}
-                        value='5'
+                        value={5}
                         decimals={2}
                         ref={flowToleranceInputRef}
                     />

@@ -262,5 +262,17 @@
     {
         "en-us": "Admin access",
         "pt-br": "Acesso de administrador"
+    },
+    {
+        "en-us": "Set refresh interval",
+        "pt-br": "Definir intervalo de atualização"
+    },
+    {
+        "en-us": "Refresh interval (ms)",
+        "pt-br": "Intervalo de atualização (ms)"
+    },
+    {
+        "en-us": "Refresh interval",
+        "pt-br": "Intervalo de atualização"
     }
 ]

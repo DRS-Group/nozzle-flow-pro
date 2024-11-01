@@ -91,4 +91,19 @@ export namespace DataFecherService {
             });
         });
     }
+
+    export const setInterval = async (value: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+
+            CapacitorHttp.post(
+                {
+                    url: `${ApiBaseUri}/interval`,
+                    params: { interval: value.toString() },
+                }
+            ).then(async (response) => {
+                resolve();
+            });
+        });
+    }
 }

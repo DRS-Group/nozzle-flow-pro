@@ -1,5 +1,5 @@
 export type Settings = {
-    language: string;
+    language: 'en-us' | 'pt-br';
     primaryColor: string;
     secondaryColor: string;
     primaryFontColor: string;
@@ -9,4 +9,5 @@ export type Settings = {
     apiBaseUrl: string;
     volumeUnit: string;
     areaUnit: string;
+    interval: number;
 }

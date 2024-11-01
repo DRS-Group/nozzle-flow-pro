@@ -9,7 +9,7 @@ export type NumberInputProps = {
     label: string;
     className?: string;
     disabled?: boolean;
-    value?: string;
+    value?: number;
     decimals?: number;
 }
 

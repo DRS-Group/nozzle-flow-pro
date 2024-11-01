@@ -7,6 +7,7 @@ import { Settings as SettingsType } from '../../types/settings.type';
 import { TextInputDialog } from '../../components/text-input-dialog/text-input-dialog.component';
 import { ContextMenu } from '../../components/context-menu/context-menu.component';
 import { ColorInputDialog } from '../../components/color-input-dialog/color-input-dialog.component';
+import { NumberInputDialog } from '../../components/number-input-dialog/number-input-dialog.component';
 
 export type SettingsElement = {
 
@@ -28,6 +29,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [logoUri, setLogoUri] = useState<string>('');
 
     const [ApiBaseUriDialogOpen, setApiBaseUriDialogOpen] = useState<boolean>(false);
+    const [refreshIntervalDialogOpen, setRefreshIntervalDialogOpen] = useState<boolean>(false);
     const [primaryColorDialogOpen, setPrimaryColorDialogOpen] = useState<boolean>(false);
     const [secondaryColorDialogOpen, setSecondaryColorDialogOpen] = useState<boolean>(false);
     const [primaryFontColorDialogOpen, setPrimaryFontColorDialogOpen] = useState<boolean>(false);
@@ -169,6 +171,23 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 <div className={styles.itemRight}>
                                     <div className={styles.itemValue}>
                                         <span>{settings?.apiBaseUrl}</span>
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
+                            </div>
+                        }
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setRefreshIntervalDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Refresh interval')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <span>{settings?.interval}ms</span>
                                     </div>
                                     <i className="icon-thin-chevron-right"></i>
                                 </div>
@@ -378,6 +397,24 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     }}
                     onCancelClick={() => {
                         setApiBaseUriDialogOpen(false);
+                    }}
+                />
+            }
+            {refreshIntervalDialogOpen &&
+                <NumberInputDialog
+                    title={translate('Set refresh interval')}
+                    label={translate('Refresh interval (ms)')}
+                    defaultValue={settings?.interval}
+                    onConfirmClick={(value: number) => {
+                        SettingsService.setInterval(value).then(() => {
+                            SettingsService.getSettings().then((settings) => {
+                                setSettings(settings);
+                            });
+                        });
+                        setRefreshIntervalDialogOpen(false);
+                    }}
+                    onCancelClick={() => {
+                        setRefreshIntervalDialogOpen(false);
                     }}
                 />
             }
