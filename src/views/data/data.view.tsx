@@ -3,7 +3,7 @@ import styles from './data.module.css';
 import { BarChart, ChartData, Dataset } from "../../components/bar-chart/bar-chart.component";
 import { DataFecherService } from "../../services/data-fetcher.service";
 import { Nozzle } from "../../types/nozzle.type";
-import { JobContext, SpeedContext, useTranslate } from "../../App";
+import { JobContext, NavFunctionsContext, SpeedContext, useTranslate } from "../../App";
 import { NozzlesService } from "../../services/nozzles.service";
 import { YesNoDialog } from "../../components/yes-no-dialog/yes-no-dialog.component";
 import { SettingsService } from "../../services/settings.service";
@@ -19,6 +19,7 @@ export type DataViewProps = {
 export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) => {
     const translate = useTranslate();
     const { currentJob, setCurrentJob } = useContext<any>(JobContext);
+    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
 
     const [chartData, setChartData] = useState<ChartData>({ datasets: [] });
     const [nozzles, setNozzles] = useState<Nozzle[]>([]);
@@ -85,7 +86,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     }
 
     const onSyncClick = () => {
-        // DataFecherService.syncNozzles();
+        setCurrentPage('nozzles');
     }
 
     const calculateTargetValue = () => {
@@ -98,7 +99,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     return (
         <>
             <div className={styles.wrapper}>
-                {nozzles != undefined && nozzles.length >= 1 &&
+                {nozzles.length >= 1 &&
                     <BarChart
                         chartData={chartData}
                         targetValue={calculateTargetValue()}
@@ -106,11 +107,11 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                         onClick={onBarClick}
                     ></BarChart>
                 }
-                {nozzles === undefined || nozzles.length === 0 &&
+                {nozzles.length === 0 &&
                     <div className={styles.syncWrapper}>
-                        <span>There is no synchronized nozzle.</span>
-                        <span>Click the button bellow to synchronize.</span>
-                        <button className={styles.syncButton} onClick={onSyncClick}>Synchronize</button>
+                        <span>{translate('There is no registered nozzle.')}</span>
+                        <span>{translate('Click the button bellow to go to nozzles page.')}</span>
+                        <button className={styles.syncButton} onClick={onSyncClick}>{translate('Nozzles')}</button>
                     </div>
                 }
                 <span className={styles.jobTitle}>{currentJob.title}</span>

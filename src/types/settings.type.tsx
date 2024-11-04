@@ -10,4 +10,5 @@ export type Settings = {
     volumeUnit: string;
     areaUnit: string;
     interval: number;
+    useDefaultLogo: boolean;
 }

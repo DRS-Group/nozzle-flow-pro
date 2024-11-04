@@ -1,10 +1,10 @@
 import { Preferences } from "@capacitor/preferences";
 import { Settings } from "../types/settings.type";
 import { EventHandler } from "../types/event-handler";
-import { Directory, Filesystem, WriteFileResult } from "@capacitor/filesystem";
 import { DataFecherService } from "./data-fetcher.service";
+import { Directory, Encoding, FileInfo, Filesystem, ReaddirResult, WriteFileResult } from "@capacitor/filesystem";
+import { Capacitor } from "@capacitor/core";
 
-export const defaultLogoUri = '/images/logo_drs.png';
 export const defaultSettings: Settings = {
     language: 'en-us',
     apiBaseUrl: 'http://localhost:3000',
@@ -16,7 +16,8 @@ export const defaultSettings: Settings = {
     nozzleSpacing: 1,
     volumeUnit: 'L',
     areaUnit: 'ha',
-    interval: 1000
+    interval: 1000,
+    useDefaultLogo: true,
 }
 
 export namespace SettingsService {
@@ -121,19 +122,82 @@ export namespace SettingsService {
         });
     }
 
-    export const getLogoUri = async (): Promise<string> => {
+    export const getLogoUri = (): Promise<string> => {
         return new Promise(async (resolve, reject) => {
-            Preferences.get({ key: 'logoUri' }).then((result) => {
-                resolve(result.value || defaultLogoUri);
-            });
+            const useDefaultLogo: boolean = await getSettingOrDefault('useDefaultLogo', defaultSettings.useDefaultLogo);
+
+            const DEFAULT_LOGO_URI = '/images/logo_drs.png';
+
+            if (useDefaultLogo) {
+                resolve(DEFAULT_LOGO_URI);
+                return;
+            }
+
+            const logoImageName: string | undefined = (await Filesystem.readdir({
+                path: 'NozzleFlowPro',
+                directory: Directory.Documents
+            })).files.find((file: FileInfo) => file.name.split('.')[0] === 'logo')?.name;
+
+            if (!logoImageName) {
+                resolve(DEFAULT_LOGO_URI);
+                return;
+            }
+
+            const logoFilePath: string = (await Filesystem.getUri({
+                directory: Directory.Documents,
+                path: `NozzleFlowPro/${logoImageName}`
+            })).uri;
+
+            resolve(Capacitor.convertFileSrc(logoFilePath));
         });
     }
 
-    export const setLogoUri = async (logoUri: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            Preferences.set({ key: 'logoUri', value: logoUri }).then(() => {
-                resolve();
+    export const setLogo = async (image?: File): Promise<void> => {
+        function getBase64(file: File): Promise<string> {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
             });
+        }
+
+        return new Promise(async (resolve, reject) => {
+            const logos: string[] = (await Filesystem.readdir({
+                path: 'NozzleFlowPro',
+                directory: Directory.Documents
+            })).files.filter((file: FileInfo) => file.name.split('.')[0] === 'logo').map((file: FileInfo) => file.name);
+
+            for (const logo of logos) {
+                await Filesystem.deleteFile({
+                    path: `NozzleFlowPro/${logo}`,
+                    directory: Directory.Documents
+                });
+            }
+
+            if (!image) {
+                const settings = await getSettings();
+                settings.useDefaultLogo = true;
+                await setSettings(settings);
+                resolve();
+                dispatchEvent('onSettingsChanged', settings);
+            }
+            else {
+                const base64 = await getBase64(image);
+
+                await Filesystem.writeFile({
+                    data: base64,
+                    directory: Directory.Documents,
+                    path: `NozzleFlowPro/logo.${image.type.split('/')[1]}`,
+                    recursive: true
+                });
+
+                const settings = await getSettings();
+                settings.useDefaultLogo = false;
+                await setSettings(settings);
+                resolve();
+                dispatchEvent('onSettingsChanged', settings);
+            }
         });
     }
 
@@ -239,14 +303,6 @@ export namespace SettingsService {
             });
             input.click();
         });
-    }
-
-    export const saveFile = (data: string | Blob) => {
-        Filesystem.writeFile({ data, path: '/teste/teste.svg' }).catch((reason: any) => {
-            console.error(reason);
-        }).then((value: void | WriteFileResult) => {
-            console.log(value)
-        })
     }
 
     export const setInterval = async (interval: number): Promise<void> => {

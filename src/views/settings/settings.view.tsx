@@ -1,6 +1,6 @@
 import { AdminContext, JobContext, NavFunctionsContext, useTranslate } from '../../App';
 import { TopBar } from '../../components/top-bar/top-bar.component';
-import { defaultLogoUri, defaultSettings, SettingsService } from '../../services/settings.service';
+import { defaultSettings, SettingsService } from '../../services/settings.service';
 import styles from './settings.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { Settings as SettingsType } from '../../types/settings.type';
@@ -46,17 +46,17 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     }), []);
 
     useEffect(() => {
-        SettingsService.getSettings().then((settings) => {
+        SettingsService.getSettings().then(async (settings) => {
             setSettings(settings);
-        });
-        SettingsService.getLogoUri().then((logoUri) => {
-            setLogoUri(logoUri);
+            setLogoUri(await SettingsService.getLogoUri());
         });
     }, []);
 
     useEffect(() => {
         const eventHandler = async (settings: SettingsType) => {
             setSettings(settings);
+            setLogoUri(await SettingsService.getLogoUri());
+            
         };
         SettingsService.addEventListener('onSettingsChanged', eventHandler);
         return () => {
@@ -109,10 +109,12 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     }
 
     const onLogoClick = async () => {
-        const image = await SettingsService.selectImage();
-        const blob = new Blob([image], { type: image.type });
-        console.log(blob)
-        SettingsService.saveFile(blob)
+        try {
+            const image = await SettingsService.selectImage();
+            SettingsService.setLogo(image);
+        } catch (error) {
+            alert(error);
+        }
     }
 
     return (
@@ -135,11 +137,6 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                     SettingsService.setSettings(defaultSettings).then(() => {
                                         SettingsService.getSettings().then((settings) => {
                                             setSettings(settings);
-                                        });
-                                    });
-                                    SettingsService.setLogoUri(defaultLogoUri).then(() => {
-                                        SettingsService.getLogoUri().then((logoUri) => {
-                                            setLogoUri(logoUri);
                                         });
                                     });
                                 }}

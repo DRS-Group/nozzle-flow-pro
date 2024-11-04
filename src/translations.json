@@ -274,5 +274,17 @@
     {
         "en-us": "Refresh interval",
         "pt-br": "Intervalo de atualização"
+    },
+    {
+        "en-us": "There is no registered nozzle.",
+        "pt-br": "Não há bico registrado."
+    },
+    {
+        "en-us": "Click the button bellow to go to nozzles page.",
+        "pt-br": "Clique no botão abaixo para ir para a página de bicos."
+    },
+    {
+        "en-us": "Go to nozzles",
+        "pt-br": "Ir para bicos"
     }
 ]

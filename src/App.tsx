@@ -14,11 +14,9 @@ import { NozzlesView } from './views/nozzles/nozzles.view';
 import { Settings } from './views/settings/settings.view';
 import { SettingsService } from './services/settings.service';
 import { TranslationServices } from './services/translations.service';
-import { ColorInputDialog } from './components/color-input-dialog/color-input-dialog.component';
 import { Logs } from './views/logs/logs.view';
 import { JobsService } from './services/jobs.service';
 import { Settings as SettingsType } from './types/settings.type';
-
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
@@ -29,7 +27,7 @@ export type Page = 'jobs' | 'menu' | 'createJob' | 'dataView' | 'nozzles' | 'set
 
 export const NavFunctionsContext = createContext<any>(undefined);
 export const JobContext = createContext<any>(undefined);
-export const AdminContext = createContext<any>(false);
+export const AdminContext = createContext<any>(true);
 
 export const SpeedContext = createContext<number>(3);
 
@@ -123,7 +121,7 @@ export function useTranslate() {
 function App() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(true);
 
   const [currentPage, setCurrentPage] = useState<Page>('menu');
   const [currentJob, setCurrentJob] = useState<Job | undefined>(undefined);
@@ -416,11 +414,16 @@ function App() {
   }, [currentJob, setSpeed, setNozzleSpacing, speed, nozzleSpacing, active, activeButtonState]);
 
   useEffect(() => {
+    if (currentJob)
+      refresh();
+  }, [currentJob,]);
+
+  useEffect(() => {
     if (!isRefreshing && currentJob && oppenedFromMenu === false) {
       const interval = setInterval(() => {
         setIsRefreshing(true);
         refresh();
-      }, 1000);
+      }, 100);
       return () => clearInterval(interval);
     }
 
