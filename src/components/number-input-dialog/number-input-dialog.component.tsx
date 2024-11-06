@@ -1,8 +1,7 @@
 import styles from './number-input-dialog.module.css';
 import { NumberInput, NumberInputElement } from '../number-input/number-input.component';
 import { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
-import { useTranslate } from '../../App';
-import { TranslationServices } from '../../services/translations.service';
+import { useTranslate } from '../../hooks/useTranslate';
 
 export type NumberInputDialogElement = {
 

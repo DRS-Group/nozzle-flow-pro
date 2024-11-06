@@ -1,4 +1,4 @@
-import { AdminContext, JobContext, NavFunctionsContext, useTranslate } from '../../App';
+import { AdminContext } from '../../App';
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { defaultSettings, SettingsService } from '../../services/settings.service';
 import styles from './settings.module.css';
@@ -8,6 +8,8 @@ import { TextInputDialog } from '../../components/text-input-dialog/text-input-d
 import { ContextMenu } from '../../components/context-menu/context-menu.component';
 import { ColorInputDialog } from '../../components/color-input-dialog/color-input-dialog.component';
 import { NumberInputDialog } from '../../components/number-input-dialog/number-input-dialog.component';
+import { useTranslate } from '../../hooks/useTranslate';
+import { useNavigation } from '../../hooks/useNavigation';
 
 export type SettingsElement = {
 
@@ -19,9 +21,7 @@ export type SettingsProps = {
 
 export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) => {
     const translate = useTranslate();
-
-    const { currentJob, setCurrentJob } = useContext(JobContext);
-    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
+    const navigation = useNavigation();
 
     const { isAdmin, setIsAdmin } = useContext(AdminContext);
 
@@ -56,7 +56,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
         const eventHandler = async (settings: SettingsType) => {
             setSettings(settings);
             setLogoUri(await SettingsService.getLogoUri());
-            
+
         };
         SettingsService.addEventListener('onSettingsChanged', eventHandler);
         return () => {
@@ -65,7 +65,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     }, [settings, setSettings]);
 
     const onBackClick = () => {
-        setCurrentPage('menu');
+        navigation.navigateBack();
     }
 
     const onLanguageClick = (e: React.MouseEvent) => {
@@ -119,7 +119,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
     return (
         <>
-            {!currentJob &&
+            {navigation.previousPage === 'menu' &&
                 <TopBar
                     onBackClick={onBackClick}
                     title={translate('Settings')}

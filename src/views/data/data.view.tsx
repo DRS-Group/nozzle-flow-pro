@@ -3,10 +3,12 @@ import styles from './data.module.css';
 import { BarChart, ChartData, Dataset } from "../../components/bar-chart/bar-chart.component";
 import { DataFecherService } from "../../services/data-fetcher.service";
 import { Nozzle } from "../../types/nozzle.type";
-import { JobContext, NavFunctionsContext, SpeedContext, useTranslate } from "../../App";
 import { NozzlesService } from "../../services/nozzles.service";
 import { YesNoDialog } from "../../components/yes-no-dialog/yes-no-dialog.component";
 import { SettingsService } from "../../services/settings.service";
+import { useTranslate } from "../../hooks/useTranslate";
+import { useNavigation } from "../../hooks/useNavigation";
+import { useCurrentJob } from "../../hooks/useCurrentJob";
 
 export type DataViewElement = {
 
@@ -18,8 +20,8 @@ export type DataViewProps = {
 
 export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) => {
     const translate = useTranslate();
-    const { currentJob, setCurrentJob } = useContext<any>(JobContext);
-    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
+    const navigation = useNavigation();
+    const currentJob = useCurrentJob();
 
     const [chartData, setChartData] = useState<ChartData>({ datasets: [] });
     const [nozzles, setNozzles] = useState<Nozzle[]>([]);
@@ -30,8 +32,6 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
     const [ignoreNozzleDialogNozlleIndex, setIgnoreNozzleDialogNozzleIndex] = useState<number | null>(null);
     const [unignoreNozzleDialogNozlleIndex, setUnignoreNozzleDialogNozzleIndex] = useState<number | null>(null);
-
-    const speedContextValue = useContext(SpeedContext);
 
     useImperativeHandle(ref, () => ({
 
@@ -58,8 +58,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             if (!nozzles) return;
 
             setNozzles(nozzles);
-            // setSpeed(speed);
-            setSpeed(speedContextValue);
+            setSpeed(speed);
             setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.1));
         }
 
@@ -68,7 +67,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         return () => {
             DataFecherService.removeEventListener('onDataFetched', eventHandler);
         }
-    }, [setNozzles, setSpeed, setNozzleSpacing, speedContextValue]);
+    }, [setNozzles, setSpeed, setNozzleSpacing]);
 
     const onBarClick = async (nozzleIndex: number) => {
         const nozzle = nozzles[nozzleIndex];
@@ -86,76 +85,79 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     }
 
     const onSyncClick = () => {
-        setCurrentPage('nozzles');
+        navigation.navigate('nozzles');
     }
 
     const calculateTargetValue = () => {
+        if (currentJob.job === null) return 0;
         // Nozzle expected flow in liters per second;
-        const expectedFlow = currentJob.expectedFlow;
+        const expectedFlow = currentJob.job.expectedFlow;
 
         return (speed * nozzleSpacing * expectedFlow) / 1;
     }
 
     return (
         <>
-            <div className={styles.wrapper}>
-                {nozzles.length >= 1 &&
-                    <BarChart
-                        chartData={chartData}
-                        targetValue={calculateTargetValue()}
-                        tolerance={currentJob.tolerance}
-                        onClick={onBarClick}
-                    ></BarChart>
+            {currentJob.job && (<>
+                <div className={styles.wrapper}>
+                    {nozzles.length >= 1 &&
+                        <BarChart
+                            chartData={chartData}
+                            targetValue={calculateTargetValue()}
+                            tolerance={currentJob.job!.tolerance}
+                            onClick={onBarClick}
+                        ></BarChart>
+                    }
+                    {nozzles.length === 0 &&
+                        <div className={styles.syncWrapper}>
+                            <span>{translate('There is no registered nozzle.')}</span>
+                            <span>{translate('Click the button bellow to go to nozzles page.')}</span>
+                            <button className={styles.syncButton} onClick={onSyncClick}>{translate('Nozzles')}</button>
+                        </div>
+                    }
+                    <span className={styles.jobTitle}>{currentJob.job?.title}</span>
+                </div >
+                {ignoreNozzleDialogOpen &&
+                    <YesNoDialog
+                        title={translate('Ignore nozzle')}
+                        message={translate('Are you sure you want to ignore this nozzle?')}
+                        onYesClick={() => {
+                            if (ignoreNozzleDialogNozlleIndex === null) return;
+                            const nozzle = nozzles[ignoreNozzleDialogNozlleIndex];
+                            nozzle.ignored = true;
+                            NozzlesService.updateNozzle(nozzle, ignoreNozzleDialogNozlleIndex);
+
+                            setIgnoreNozzleDialogOpen(false);
+                            setIgnoreNozzleDialogNozzleIndex(null);
+                        }}
+
+                        onNoClick={() => {
+                            setIgnoreNozzleDialogOpen(false);
+                            setIgnoreNozzleDialogNozzleIndex(null);
+                        }}
+                    />
                 }
-                {nozzles.length === 0 &&
-                    <div className={styles.syncWrapper}>
-                        <span>{translate('There is no registered nozzle.')}</span>
-                        <span>{translate('Click the button bellow to go to nozzles page.')}</span>
-                        <button className={styles.syncButton} onClick={onSyncClick}>{translate('Nozzles')}</button>
-                    </div>
+                {unignoreNozzleDialogOpen &&
+                    <YesNoDialog
+                        title={translate('Unignore nozzle')}
+                        message={translate('Are you sure you want to unignore this nozzle?')}
+                        onYesClick={() => {
+                            if (unignoreNozzleDialogNozlleIndex === null) return;
+                            const nozzle = nozzles[unignoreNozzleDialogNozlleIndex];
+                            nozzle.ignored = false;
+                            NozzlesService.updateNozzle(nozzle, unignoreNozzleDialogNozlleIndex);
+
+                            setUnignoreNozzleDialogOpen(false);
+                            setUnignoreNozzleDialogNozzleIndex(null);
+                        }}
+
+                        onNoClick={() => {
+                            setUnignoreNozzleDialogOpen(false);
+                            setUnignoreNozzleDialogNozzleIndex(null);
+                        }}
+                    />
                 }
-                <span className={styles.jobTitle}>{currentJob.title}</span>
-            </div >
-            {ignoreNozzleDialogOpen &&
-                <YesNoDialog
-                    title={translate('Ignore nozzle')}
-                    message={translate('Are you sure you want to ignore this nozzle?')}
-                    onYesClick={() => {
-                        if (ignoreNozzleDialogNozlleIndex === null) return;
-                        const nozzle = nozzles[ignoreNozzleDialogNozlleIndex];
-                        nozzle.ignored = true;
-                        NozzlesService.updateNozzle(nozzle, ignoreNozzleDialogNozlleIndex);
-
-                        setIgnoreNozzleDialogOpen(false);
-                        setIgnoreNozzleDialogNozzleIndex(null);
-                    }}
-
-                    onNoClick={() => {
-                        setIgnoreNozzleDialogOpen(false);
-                        setIgnoreNozzleDialogNozzleIndex(null);
-                    }}
-                />
-            }
-            {unignoreNozzleDialogOpen &&
-                <YesNoDialog
-                    title={translate('Unignore nozzle')}
-                    message={translate('Are you sure you want to unignore this nozzle?')}
-                    onYesClick={() => {
-                        if (unignoreNozzleDialogNozlleIndex === null) return;
-                        const nozzle = nozzles[unignoreNozzleDialogNozlleIndex];
-                        nozzle.ignored = false;
-                        NozzlesService.updateNozzle(nozzle, unignoreNozzleDialogNozlleIndex);
-
-                        setUnignoreNozzleDialogOpen(false);
-                        setUnignoreNozzleDialogNozzleIndex(null);
-                    }}
-
-                    onNoClick={() => {
-                        setUnignoreNozzleDialogOpen(false);
-                        setUnignoreNozzleDialogNozzleIndex(null);
-                    }}
-                />
-            }
+            </>)}
         </>
     )
 });

@@ -13,7 +13,7 @@ export const defaultSettings: Settings = {
     primaryFontColor: '#000000',
     secondaryFontColor: '#ffffff',
     interfaceScale: 1,
-    nozzleSpacing: 1,
+    nozzleSpacing: 0.6,
     volumeUnit: 'L',
     areaUnit: 'ha',
     interval: 1000,

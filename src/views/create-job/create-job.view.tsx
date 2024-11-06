@@ -1,12 +1,14 @@
-import { JobContext, NavFunctionsContext, useTranslate } from '../../App';
-import { DateTimeInput } from '../../components/datetime-input/datetime-input.component';
 import { NumberInput } from '../../components/number-input/number-input.component';
 import { TextInput, TextInputElement } from '../../components/text-input/text-input.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
+import { useCurrentJob } from '../../hooks/useCurrentJob';
+import { useJobs } from '../../hooks/useJobs';
+import { useNavigation } from '../../hooks/useNavigation';
+import { useTranslate } from '../../hooks/useTranslate';
 import { JobsService } from '../../services/jobs.service';
 import { Job } from '../../types/job.type';
 import styles from './create-job.module.css';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
 
 export type CreateJobElement = {
 
@@ -18,8 +20,9 @@ export type CreateJobProps = {
 
 export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, ref) => {
     const translate = useTranslate();
-    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
-    const { currentJob, setCurrentJob } = useContext(JobContext);
+    const navigation = useNavigation();
+    const jobs = useJobs();
+    const currentJob = useCurrentJob();
 
     const titleInputRef = useRef<TextInputElement>(null);
     const durationToleranceInputRef = useRef<TextInputElement>(null);
@@ -31,7 +34,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
     }), []);
 
     const onBackClick = () => {
-        setCurrentPage('jobs');
+        navigation.navigateBack();
     }
 
     const onConfirmButtonClick = () => {
@@ -41,9 +44,17 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
         const expectedFlow = parseFloat(expectedFlowInputRef.current!.getValue()) / 10000;
         const flowTolerance = parseFloat(flowToleranceInputRef.current!.getValue()) / 100;
 
-        JobsService.addJob(new Job(title, expectedFlow, flowTolerance, durationTolerance)).then((job: Job) => {
-            setCurrentJob(job);
-            setCurrentPage('dataView');
+        JobsService.saveJob({
+            title: title,
+            durationTolerance: durationTolerance,
+            expectedFlow: expectedFlow,
+            creationDate: new Date(),
+            tolerance: flowTolerance,
+            nozzleEvents: [],
+            id: jobs.generateId()
+        }).then((job: Job) => {
+            currentJob.set(job.id);
+            navigation.navigate('dataView');
         });
     }
 

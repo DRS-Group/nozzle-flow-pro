@@ -1,25 +1,24 @@
-import { JobContext, NavFunctionsContext, useTranslate } from '../../App';
 import { ContextMenu } from '../../components/context-menu/context-menu.component';
 import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
-import { JobsService } from '../../services/jobs.service';
 import { Job } from '../../types/job.type';
 import styles from './jobs.module.css';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
-import { on } from 'events';
+import { forwardRef, useImperativeHandle, useState } from 'react';
+import { useTranslate } from '../../hooks/useTranslate';
+import { useNavigation } from '../../hooks/useNavigation';
+import { useCurrentJob } from '../../hooks/useCurrentJob';
+import { useJobs } from '../../hooks/useJobs';
 
-export type JobsElement = {
+export type JobsElement = {}
 
-}
-
-export type JobsProps = {
-    onBackClick: () => void;
-}
+export type JobsProps = {}
 
 export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
     const translate = useTranslate();
-    const { currentPage, setCurrentPage, setOppenedFromMenu } = useContext(NavFunctionsContext);
-    const { currentJob, setCurrentJob } = useContext(JobContext);
+    const navigation = useNavigation();
+    const jobs = useJobs();
+    const currentJob = useCurrentJob();
+
 
     const [contextMenuJob, setContextMenuJob] = useState<Job | null>(null);
     const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
@@ -27,24 +26,12 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
     const [deleteJobDialogOpen, setDeleteJobDialogOpen] = useState<boolean>(false);
     const [deleteJobDialogJob, setDeleteJobDialogJob] = useState<Job | null>(null);
 
-    const [jobs, setJobs] = useState<Job[]>([]);
-
     useImperativeHandle(ref, () => ({
 
     }), []);
 
-    useEffect(() => {
-        refreshJobs();
-    }, []);
-
-    const refreshJobs = () => {
-        JobsService.getJobs().then((jobs) => {
-            setJobs(jobs);
-        });
-    }
-
     const onBackClick = () => {
-        props.onBackClick();
+        navigation.navigateBack();
     }
 
     const onJobItemClick = (job: Job, position: { x: number, y: number }) => {
@@ -58,13 +45,13 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
     }
 
     const onAddButtonClick = () => {
-        setCurrentPage('createJob');
+        navigation.navigate('createJob');
     }
 
     const onLogsClick = () => {
-        setOppenedFromMenu(true);
-        setCurrentJob({ ...contextMenuJob, nozzleEvents: contextMenuJob?.nozzleEvents });
-        setCurrentPage('logs');
+        if (!contextMenuJob) return;
+        currentJob.set(contextMenuJob.id);
+        navigation.navigate('logs');
 
         setContextMenuJob(null);
         setContextMenuPosition(null);
@@ -77,9 +64,9 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                     onBackClick={onBackClick}
                     title={translate('Jobs')}
                 />
-                {jobs.length > 0 && (
+                {jobs.jobs.length > 0 && (
                     <div className={styles.content}>
-                        {jobs.map((job, index) => (
+                        {jobs.jobs.map((job, index) => (
                             <JobItem
                                 key={index}
                                 job={job}
@@ -88,7 +75,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                         ))}
                     </div>
                 )}
-                {jobs.length === 0 && (
+                {jobs.jobs.length === 0 && (
                     <div className={styles.noJobsContent}>
                         <button onClick={onAddButtonClick}>{translate('Create Job')}</button>
                     </div>
@@ -108,8 +95,9 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                         {
                             label: translate('Continue'),
                             onClick: () => {
-                                setCurrentJob(contextMenuJob);
-                                setCurrentPage('dataView');
+                                currentJob.set(contextMenuJob.id);
+                                navigation.navigate('dataView');
+                                navigation.clearHistory();
 
                                 setContextMenuJob(null);
                                 setContextMenuPosition(null);
@@ -142,9 +130,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                     message={translate('Are you sure you want to delete this job?')}
                     onYesClick={() => {
 
-                        JobsService.removeJob(deleteJobDialogJob!).then(() => {
-                            refreshJobs();
-                        });
+                        jobs.remove(deleteJobDialogJob!.id);
 
                         setDeleteJobDialogOpen(false);
                         setDeleteJobDialogJob(null);

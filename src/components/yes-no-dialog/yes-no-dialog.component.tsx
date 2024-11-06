@@ -1,5 +1,4 @@
-import { useTranslate } from '../../App';
-import { TranslationServices } from '../../services/translations.service';
+import { useTranslate } from '../../hooks/useTranslate';
 import styles from './yes-no-dialog.module.css';
 import { forwardRef, useImperativeHandle } from 'react';
 

@@ -1,4 +1,4 @@
-import { useTranslate } from '../../App';
+import { useTranslate } from '../../hooks/useTranslate';
 import styles from './text-input.module.css';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 

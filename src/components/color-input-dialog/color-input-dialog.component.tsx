@@ -2,7 +2,7 @@ import { HexColorPicker } from 'react-colorful';
 import styles from './color-input-dialog.module.css';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { TextInput, TextInputElement } from '../text-input/text-input.component';
-import { useTranslate } from '../../App';
+import { useTranslate } from '../../hooks/useTranslate';
 
 export type ColorInputDialogElement = {
 

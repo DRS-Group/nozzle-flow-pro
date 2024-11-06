@@ -3,6 +3,7 @@ import { Nozzle } from '../types/nozzle.type';
 import { EventHandler } from '../types/event-handler';
 import { NozzlesService } from './nozzles.service';
 import { SettingsService } from './settings.service';
+import { ESPData } from '../types/ESP-data.type';
 
 export namespace DataFecherService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
@@ -33,19 +34,19 @@ export namespace DataFecherService {
         }
     }
 
-    export const fetchData = async (): Promise<Nozzle[]> => {
+    export const fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
             CapacitorHttp.get({ url: `${ApiBaseUri}/data`, connectTimeout: 1000 }).then(async (response) => {
-
                 const nozzles = await NozzlesService.getNozzles();
                 const flows = response.data.flows;
+                const active = response.data.active;
 
                 for (let i = 0; i < nozzles.length; i++) {
                     nozzles[i].flow = flows[i] || 0;
                 }
 
-                const res = { ...response.data, nozzles: nozzles, speed: 1 }
+                const res: ESPData = { active: active, nozzles: nozzles, speed: 1 }
 
                 dispatchEvent('onDataFetched', res);
 

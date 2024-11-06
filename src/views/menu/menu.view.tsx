@@ -1,22 +1,17 @@
-import { NavFunctionsContext, useTranslate } from '../../App';
-import { DataFecherService } from '../../services/data-fetcher.service';
+import { useNavigation } from '../../hooks/useNavigation';
+import { useTranslate } from '../../hooks/useTranslate';
 import { SettingsService } from '../../services/settings.service';
-import { TranslationServices } from '../../services/translations.service';
 import styles from './menu.module.css';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 
-export type MenuElement = {
+export type MenuElement = {}
 
-}
-
-export type MenuProps = {
-    onJobsClick: () => void;
-    onNozzlesClick: () => void;
-}
+export type MenuProps = {}
 
 export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
     const translate = useTranslate();
-    const { currentPage, setCurrentPage } = useContext(NavFunctionsContext);
+    const navigation = useNavigation();
+
     const [logo, setLogo] = useState<string>('');
 
     useImperativeHandle(ref, () => ({
@@ -30,15 +25,15 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
     }, []);
 
     const onJobsClick = () => {
-        props.onJobsClick();
+        navigation.navigate('jobs');
     }
 
     const onNozzlesClick = () => {
-        props.onNozzlesClick();
+        navigation.navigate('nozzles');
     }
 
     const onSettingsClick = () => {
-        setCurrentPage('settings');
+        navigation.navigate('settings');
     }
 
     return (

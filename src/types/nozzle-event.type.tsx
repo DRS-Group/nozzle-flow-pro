@@ -12,6 +12,17 @@ export class NozzleEvent extends Event {
         this._nozzle = nozzle;
     }
 
+    static async fromJson(json: string) {
+        const data = JSON.parse(json);
+        const nozzle = await NozzlesService.getNozzleByIndex(data.nozzleIndex);
+        let event = new NozzleEvent(data.title, data.description, new Date(data.startTime), data.endTime ? new Date(data.endTime) : undefined, data.nozzleIndex, nozzle, data.triggered);
+        event._id = data.id;
+        event._viewed = data.viewed;
+        event._triggered = data.triggered;
+        
+        return event;
+    }
+
     get nozzleIndex(): number {
         return this._nozzleIndex;
     }

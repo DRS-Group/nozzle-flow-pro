@@ -1,28 +1,24 @@
-import { JobContext, useTranslate } from '../../App';
 import { ContextMenu, ContextMenuItem } from '../../components/context-menu/context-menu.component';
 import { NumberInputDialog } from '../../components/number-input-dialog/number-input-dialog.component';
-import { NumberInput } from '../../components/number-input/number-input.component';
 import { TextInputDialog } from '../../components/text-input-dialog/text-input-dialog.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
+import { useCurrentJob } from '../../hooks/useCurrentJob';
+import { useNavigation } from '../../hooks/useNavigation';
+import { useTranslate } from '../../hooks/useTranslate';
 import { DataFecherService } from '../../services/data-fetcher.service';
 import { NozzlesService } from '../../services/nozzles.service';
-import { TranslationServices } from '../../services/translations.service';
 import { Nozzle } from '../../types/nozzle.type';
 import styles from './nozzles.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 
-export type NozzlesViewElement = {
+export type NozzlesViewElement = {}
 
-}
-
-export type NozzlesViewProps = {
-    onBackClick: () => void;
-}
+export type NozzlesViewProps = {}
 
 export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((props, ref) => {
     const translate = useTranslate();
-    const { currentJob, setCurrentJob } = useContext<any>(JobContext);
+    const navigation = useNavigation();
 
     const [contextMenuNozzleIndex, setContextMenuNozzleIndex] = useState<number | null>(null);
     const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
@@ -149,13 +145,13 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     }
 
     const onBackClick = () => {
-        props.onBackClick();
+        navigation.navigateBack();
     }
 
     return (
         <>
             <div className={styles.wrapper}>
-                {!currentJob &&
+                {navigation.previousPage === 'menu' &&
                     <TopBar
                         onBackClick={onBackClick}
                         title={translate('Nozzles')}
