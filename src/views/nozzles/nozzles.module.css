@@ -60,52 +60,47 @@
     bottom: 1rem;
     right: 1rem;
 
-    width: 3rem;
-    height: 3rem;
+    width: 4rem;
+    height: 4rem;
 
     background-color: var(--primary-color);
     border-radius: 50%;
 
     box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
 
-    color: var(--secondary-font-color);
-    font-size: 1.25rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: 200ms;
-
-    & * {
-        color: var(--secondary-font-color);
-    }
-
 }
 
+.menuButton>i {
+    color: var(--secondary-font-color);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: center center;
+    transform: translate(-50%, -50%);
+    transition: 200ms;
+}
 
+.menuButton>i::before {
+    width: 1.75rem;
+}
 
 .menuButton[data-state="open"] {
-    width: 3.5rem;
-    height: 3.5rem;
     transition: 200ms;
 }
 
 .menuButton[data-state="open"]>i {
-    scale: 1.17;
-    transform: rotate(135deg);
+    transform: translate(-50%, -50%) rotate(45deg);
     transition: 200ms;
 }
 
-.menuButton:not([data-state="open"])>i {
-    transform: rotate(0deg);
-    transition: 200ms;
-}
-
-.menuButton .menuItem {
+.menuItem {
     position: absolute;
+    bottom: 0.25rem;
+    right: 0.25rem;
 
-    width: 3rem;
-    height: 3rem;
+    width: 3.5rem;
+    height: 3.5rem;
 
     background-color: var(--primary-color);
     border-radius: 50%;
@@ -113,21 +108,23 @@
     box-shadow: none;
 
     color: var(--secondary-font-color);
-    font-size: 1.25rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    transform: translate(0, 0);
-
+    pointer-events: none;
     z-index: -1;
     transition: 200ms;
 }
 
-.menuButton:not([data-state="open"]) .menuItem {
-    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
-    pointer-events: none;
+.menuItem>i {
+    color: var(--secondary-font-color);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: center center;
+    transform: translate(-50%, -50%);
+    transition: 200ms;
+}
+
+.menuItem>i::before {
+    width: 1.5rem;
 }
 
 .menuButton[data-state="open"] .menuItem {
@@ -136,17 +133,17 @@
 
 
 .menuButton[data-state="open"] .refreshButton {
-    transform: translate(-0rem, -4rem);
+    transform: translate(-0rem, -4.25rem);
     transition: 200ms;
 }
 
 .menuButton[data-state="open"] .calibrateButton {
-    transform: translate(-0rem, -7.5rem);
+    transform: translate(-0rem, -8.25rem);
     transition: 200ms;
 }
 
 .menuButton[data-state="open"] .clearButton {
-    transform: translate(0rem, -11rem);
+    transform: translate(0rem, -12.25rem);
     transition: 200ms;
 }
 

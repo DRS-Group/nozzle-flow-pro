@@ -1,5 +1,3 @@
-import { ScreenReader } from "@capacitor/screen-reader";
-
 export namespace SoundsService {
     const alertSound = new Audio('/sounds/alert.mp3');
     const clickSound = new Audio('/sounds/click.mp3');
@@ -12,10 +10,6 @@ export namespace SoundsService {
             }
             await audio.play();
         });
-    }
-
-    export const textToSpeech = async (text: string, language: string): Promise<void> => {
-        ScreenReader.speak({ value: text, language: 'en' });
     }
 
     export const playAlertSound = async (): Promise<void> => {

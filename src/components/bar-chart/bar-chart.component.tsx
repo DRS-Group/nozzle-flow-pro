@@ -163,15 +163,16 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
 
     useEffect(() => {
         setStyle({
-            ...style,
             height: `${props.height * 100}%`,
-            opacity: props.opacity || 1
+            opacity: props.opacity || 1,
+            backgroundColor: style.backgroundColor
         });
     }, [props.height, props.opacity]);
 
     useEffect(() => {
         setStyle({
-            ...style,
+            height: style.height,
+            opacity: style.opacity,
             backgroundColor: props.color
         });
     }, [props.color]);

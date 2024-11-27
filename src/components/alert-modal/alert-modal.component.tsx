@@ -20,9 +20,7 @@ export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props,
     }), []);
 
     useEffect(() => {
-        SoundsService.playAlertSound().then(() => {
-            SoundsService.textToSpeech(props.event.title, 'en');
-        });
+        SoundsService.playAlertSound();
 
         const interval = setInterval(() => {
             SoundsService.playAlertSound();

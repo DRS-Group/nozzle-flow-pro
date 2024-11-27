@@ -13,6 +13,9 @@ const config: CapacitorConfig = {
       enabled: true
     },
   },
+  android: {
+    minWebViewVersion: 55,
+  },
 };
 
 export default config;

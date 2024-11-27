@@ -45,24 +45,29 @@
     bottom: 1rem;
     right: 1rem;
 
-    width: 3rem;
-    height: 3rem;
+    width: 4rem;
+    height: 4rem;
 
     background-color: var(--primary-color);
     border-radius: 50%;
 
     box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
 
-    color: var(--secondary-font-color);
-    font-size: 1.25rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: 200ms;
 }
 
-.addButton * {
+.addButton>i {
     color: var(--secondary-font-color);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: center center;
+    transform: translate(-50%, -50%);
+    transition: 200ms;
+}
+
+.addButton>i::before {
+    width: 1.75rem;
 }
 
 .noJobsContent {

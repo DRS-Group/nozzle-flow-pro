@@ -19,7 +19,11 @@ import { useCurrentJob } from './hooks/useCurrentJob';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
-  .catch(console.warn);
+  .catch(() => {
+    document.onclick = () => {
+      document.documentElement.requestFullscreen();
+    }
+  });
 
 export const AdminContext = createContext<any>(true);
 
@@ -168,9 +172,9 @@ function App() {
         {
           (
             navigation.currentPage === 'dataView' ||
-            (navigation.currentPage === 'nozzles' && currentJob) ||
-            (navigation.currentPage === 'settings' && currentJob) ||
-            (navigation.currentPage === 'logs' && currentJob)
+            (navigation.currentPage === 'nozzles' && currentJob.job != null) ||
+            (navigation.currentPage === 'settings' && currentJob.job != null) ||
+            (navigation.currentPage === 'logs' && currentJob.job != null)
           ) &&
           <BottomMenu
             onActiveChange={(active) => setActiveButtonState(active)}
