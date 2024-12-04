@@ -20,6 +20,7 @@ import { useAdmin } from './hooks/useAdmin';
 import { TextInputDialog } from './components/text-input-dialog/text-input-dialog.component';
 import { useTranslate } from './hooks/useTranslate';
 import { services } from './dependency-injection';
+import { NozzlesService } from './services/nozzles.service';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
@@ -45,6 +46,17 @@ function App() {
 
   useEffect(() => {
     navigation.navigate('menu');
+
+    SettingsService.getSettings().then((settings: SettingsType) => {
+      NozzlesService.getNozzles().then((nozzles: Nozzle[]) => {
+        nozzles.map((nozzle: Nozzle, index) => {
+          services.dataFetcherService.calibrateNozzle(index, nozzle.pulsesPerLiter);
+        });
+      });
+      const interval = settings.interval;
+      services.dataFetcherService.setInterval(interval);
+    });
+
   }, []);
 
   useEffect(() => {
