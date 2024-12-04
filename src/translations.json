@@ -294,5 +294,17 @@
     {
         "en-us": "Nozzle",
         "pt-br": "Bico"
+    },
+    {
+        "en-us": "Nozzle spacing",
+        "pt-br": "Espaçamento entre bicos"
+    },
+    {
+        "en-us": "Nozzle spacing (cm)",
+        "pt-br": "Espaçamento entre bicos (cm)"
+    },
+    {
+        "en-us": "Set nozzle spacing",
+        "pt-br": "Definir espaçamento entre bicos"
     }
 ]

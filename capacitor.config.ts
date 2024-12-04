@@ -13,10 +13,10 @@ const config: CapacitorConfig = {
     minWebViewVersion: 106,
   },
 
-  server: {
-    cleartext: true,
-    url: 'http://192.168.0.129:3001',
-  },
+  // server: {
+  //   cleartext: true,
+  //   url: 'http://192.168.0.129:3001',
+  // },
 };
 
 export default config;

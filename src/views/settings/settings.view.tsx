@@ -35,6 +35,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [primaryFontColorDialogOpen, setPrimaryFontColorDialogOpen] = useState<boolean>(false);
     const [secondaryFontColorDialogOpen, setSecondaryFontColorDialogOpen] = useState<boolean>(false);
     const [adminPasswordDialogOpen, setAdminPasswordDialogOpen] = useState<boolean>(false);
+    const [nozzleSpacingDialogOpen, setNozzleSpacingDialogOpen] = useState<boolean>(false);
 
     const [languageContextMenuPosition, setLanguageContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [interfaceScaleContextMenuPosition, setInterfaceScaleContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
@@ -185,6 +186,23 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 <div className={styles.itemRight}>
                                     <div className={styles.itemValue}>
                                         <span>{settings?.interval}ms</span>
+                                    </div>
+                                    <i className="icon-thin-chevron-right"></i>
+                                </div>
+                            </div>
+                        }
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={() => {
+                                    setNozzleSpacingDialogOpen(true);
+                                }}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Nozzle spacing')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <span>{(settings?.nozzleSpacing || 0.6) * 100}cm</span>
                                     </div>
                                     <i className="icon-thin-chevron-right"></i>
                                 </div>
@@ -412,6 +430,24 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     }}
                     onCancelClick={() => {
                         setRefreshIntervalDialogOpen(false);
+                    }}
+                />
+            }
+            {nozzleSpacingDialogOpen &&
+                <NumberInputDialog
+                    title={translate('Set nozzle spacing')}
+                    label={translate('Nozzle spacing (cm)')}
+                    defaultValue={(settings?.nozzleSpacing || 0.6) * 100}
+                    onConfirmClick={(value: number) => {
+                        SettingsService.setNozzleSpacing(value / 100).then(() => {
+                            SettingsService.getSettings().then((settings) => {
+                                setSettings(settings);
+                            });
+                        });
+                        setNozzleSpacingDialogOpen(false);
+                    }}
+                    onCancelClick={() => {
+                        setNozzleSpacingDialogOpen(false);
                     }}
                 />
             }

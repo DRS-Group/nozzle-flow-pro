@@ -325,6 +325,21 @@ export namespace SettingsService {
         });
     }
 
+    export const setNozzleSpacing = async (nozzleSpacing: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.nozzleSpacing = nozzleSpacing;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onNozzleSpacingChanged', nozzleSpacing);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
     export const getIsAdmin = (): boolean => {
         return isAdmin;
     }
@@ -338,7 +353,7 @@ export namespace SettingsService {
     export const setAdminPassword = async (password: string): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             await Preferences.set({ key: 'adminPassword', value: sha256(password).toString() });
-            
+
             dispatchEvent('onAdminPasswordChanged');
 
             resolve();
