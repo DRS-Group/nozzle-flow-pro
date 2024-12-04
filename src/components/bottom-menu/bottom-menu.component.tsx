@@ -4,6 +4,7 @@ import { ToggleButton } from "../toggle-button/toggle-button.component";
 import { useTranslate } from "../../hooks/useTranslate";
 import { NavigationService } from "../../services/navigation.service";
 import { useCurrentJob } from "../../hooks/useCurrentJob";
+import { useNavigation } from "../../hooks/useNavigation";
 
 export type BottomMenuElement = {
 
@@ -16,6 +17,7 @@ export type BottomMenuProps = {
 export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props, ref) => {
     const translate = useTranslate();
     const currentJob = useCurrentJob();
+    const navigation = useNavigation();
 
 
     // const onAnyItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -28,27 +30,27 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
     // }
 
     const onDataClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        NavigationService.navigate('dataView');
+        navigation.navigate('dataView');
 
     }
 
     const onNozzlesClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        NavigationService.navigate('nozzles');
+        navigation.navigate('nozzles');
 
     }
 
     const onLogsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        NavigationService.navigate('logs');
+        navigation.navigate('logs');
 
     }
 
     const onSettingsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        NavigationService.navigate('settings');
+        navigation.navigate('settings');
 
     }
 
     const onStopClick = () => {
-        NavigationService.navigate('menu');
+        navigation.navigate('menu');
         currentJob.set(null);
     }
 
@@ -62,10 +64,10 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
                 onStateChange={props.onActiveChange}
             />
             <div className={styles.content}>
-                <button className={styles.menuItem} data-current={NavigationService.getCurrentPage() === 'dataView'} onClick={onDataClick}><i className="icon-chart-bar"></i><span>{translate('Data')}</span></button>
-                <button className={styles.menuItem} data-current={NavigationService.getCurrentPage() === 'nozzles'} onClick={onNozzlesClick}><i className="icon-nozzle"></i><span>{translate('Nozzles')}</span></button>
-                <button className={styles.menuItem} data-current={NavigationService.getCurrentPage() === 'logs'} onClick={onLogsClick}><i className="icon-file-clock-outline"></i><span>{translate('Logs')}</span></button>
-                <button className={styles.menuItem} data-current={NavigationService.getCurrentPage() === 'settings'} onClick={onSettingsClick}><i className="icon-cog"></i><span>{translate('Settings')}</span></button>
+                <button className={styles.menuItem} data-current={navigation.currentPage === 'dataView'} onClick={onDataClick}><i className="icon-chart-bar"></i><span>{translate('Data')}</span></button>
+                <button className={styles.menuItem} data-current={navigation.currentPage === 'nozzles'} onClick={onNozzlesClick}><i className="icon-nozzle"></i><span>{translate('Nozzles')}</span></button>
+                <button className={styles.menuItem} data-current={navigation.currentPage === 'logs'} onClick={onLogsClick}><i className="icon-file-clock-outline"></i><span>{translate('Logs')}</span></button>
+                <button className={styles.menuItem} data-current={navigation.currentPage === 'settings'} onClick={onSettingsClick}><i className="icon-cog"></i><span>{translate('Settings')}</span></button>
             </div>
             <button className={styles.stopButton} onClick={onStopClick}><i className="icon-stop"></i><span>{translate('Stop')}</span></button>
         </div>

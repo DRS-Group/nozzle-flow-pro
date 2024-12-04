@@ -1,4 +1,3 @@
-import { AdminContext } from '../../App';
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { defaultSettings, SettingsService } from '../../services/settings.service';
 import styles from './settings.module.css';
@@ -10,6 +9,7 @@ import { ColorInputDialog } from '../../components/color-input-dialog/color-inpu
 import { NumberInputDialog } from '../../components/number-input-dialog/number-input-dialog.component';
 import { useTranslate } from '../../hooks/useTranslate';
 import { useNavigation } from '../../hooks/useNavigation';
+import { useAdmin } from '../../hooks/useAdmin';
 
 export type SettingsElement = {
 
@@ -23,7 +23,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const translate = useTranslate();
     const navigation = useNavigation();
 
-    const { isAdmin, setIsAdmin } = useContext(AdminContext);
+    const { isAdmin, enterAdminMode, exitAdminMode, checkPassword } = useAdmin();
 
     const [settings, setSettings] = useState<SettingsType | null>(null);
     const [logoUri, setLogoUri] = useState<string>('');
@@ -365,7 +365,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         {isAdmin &&
                             <div className={styles.item}
                                 onClick={() => {
-                                    setIsAdmin(false);
+                                    exitAdminMode();
                                 }}
                             >
                                 <div className={styles.itemLeft}>
@@ -658,13 +658,14 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label={translate('Admin password')}
                     type='password'
                     onConfirmClick={(value: string) => {
-                        if (value === 'admin') {
-                            setIsAdmin(true);
-                            setAdminPasswordDialogOpen(false);
-                        }
-                        else {
-                            alert('Wrong password');
-                        }
+                        checkPassword(value).then((isCorrect) => {
+                            if (isCorrect) {
+                                enterAdminMode();
+                                setAdminPasswordDialogOpen(false);
+                            } else {
+                                alert(translate('Incorrect password'));
+                            }
+                        });
                     }}
                     onCancelClick={() => {
                         setAdminPasswordDialogOpen(false);

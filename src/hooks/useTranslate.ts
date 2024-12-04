@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { SettingsService } from "../services/settings.service";
-import { DataFecherService } from "../services/data-fetcher.service";
 import { Settings as SettingsType } from "../types/settings.type";
 import { TranslationServices } from "../services/translations.service";
 
@@ -17,7 +16,7 @@ export function useTranslate() {
         };
         SettingsService.addEventListener('onSettingsChanged', eventHandler);
         return () => {
-            DataFecherService.removeEventListener('onSettingsChanged', eventHandler);
+            SettingsService.removeEventListener('onSettingsChanged', eventHandler);
         }
 
     }, [setCurrentLanguage, currentLanguage]);

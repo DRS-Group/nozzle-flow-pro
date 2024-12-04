@@ -1,3 +1,4 @@
+import { useTranslate } from '../../hooks/useTranslate';
 import { TextInput, TextInputElement } from '../text-input/text-input.component';
 import styles from './text-input-dialog.module.css';
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
@@ -11,12 +12,13 @@ export type TextInputDialogProps = {
     title: string,
     defaultValue?: string;
     onConfirmClick: (value: string) => void,
-    onCancelClick: () => void,
+    onCancelClick?: () => void,
     type?: 'text' | 'password';
 }
 
 export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialogProps>((props, ref) => {
     const inputRef = useRef<TextInputElement>(null);
+    const translate = useTranslate();
 
     useImperativeHandle(ref, () => ({
 
@@ -28,7 +30,7 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
     };
 
     const onCancelClick = () => {
-        props.onCancelClick();
+        props.onCancelClick!();
     };
 
     useEffect(() => {
@@ -55,14 +57,17 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
                         onClick={onConfirmClick}
                         className={styles.button}
                     >
-                        Confirm
+                        {translate('Confirm')}
                     </button>
-                    <button
-                        onClick={onCancelClick}
-                        className={styles.button}
-                    >
-                        Cancel
-                    </button>
+                    {
+                        props.onCancelClick &&
+                        <button
+                            onClick={onCancelClick}
+                            className={styles.button}
+                        >
+                            {translate('Cancel')}
+                        </button>
+                    }
                 </div>
             </div>
         </div>

@@ -1,21 +1,35 @@
 import { Preferences } from "@capacitor/preferences";
 import { Job } from "../types/job.type";
-import { BaseService } from "../types/base-service.type";
+import { BaseService, IBaseService } from "../types/base-service.type";
 import { generateFlowAboveExpectedNozzleEvent, generateFlowBelowExpectedNozzleEvent, NozzleEvent } from "../types/nozzle-event.type";
 import { ESPData } from "../types/ESP-data.type";
 import { SettingsService } from "./settings.service";
 import { DataFecherService } from "./data-fetcher.service";
 import { NavigationService } from "./navigation.service";
 import { JobRepository } from "../repositories/job.repository";
+import { services } from "../dependency-injection";
 
-export abstract class JobsService extends BaseService {
-    private static currentJob: Job | null = null;
+export type JobsServiceEvents = 'onCurrentJobChanged' | 'onJobsChanged' | 'onCurrentJobNozzleEventsUpdated' | 'onNozzleEventTriggered';
 
-    public static getCurrentJob = (): Job | null => {
+export interface IJobsService extends IBaseService<JobsServiceEvents> {
+    getCurrentJob: () => Job | null;
+    setCurrentJob: (jobId: string | null) => Promise<void>;
+    saveJob: (job: Job) => Promise<Job>;
+    removeJob: (jobId: string) => Promise<void>;
+    updateCurrentJobNozzleEvents: (espData: ESPData) => Promise<void>;
+    getJobById: (jobId: string) => Promise<Job | null>;
+    getJobs: () => Promise<Job[]>;
+    generateJobId: () => string;
+}
+
+export class JobsService extends BaseService<JobsServiceEvents> implements IJobsService {
+    private currentJob: Job | null = null;
+
+    public getCurrentJob = (): Job | null => {
         return this.currentJob;
     }
 
-    public static setCurrentJob = async (jobId: string | null) => {
+    public setCurrentJob = async (jobId: string | null) => {
         if (jobId === null) {
             this.currentJob = null;
             this.dispatchEvent('onCurrentJobChanged', null);
@@ -26,7 +40,7 @@ export abstract class JobsService extends BaseService {
         this.dispatchEvent('onCurrentJobChanged', this.currentJob);
     }
 
-    public static saveJob = async (job: Job): Promise<Job> => {
+    public saveJob = async (job: Job): Promise<Job> => {
         const savedJob = await JobRepository.save(job);
         if (savedJob.id === this.currentJob?.id) {
             await this.setCurrentJob(savedJob.id);
@@ -34,7 +48,7 @@ export abstract class JobsService extends BaseService {
         return savedJob;
     }
 
-    public static removeJob = async (jobId: string): Promise<void> => {
+    public removeJob = async (jobId: string): Promise<void> => {
         if (this.currentJob?.id === jobId) {
             await this.setCurrentJob(null);
         }
@@ -44,7 +58,7 @@ export abstract class JobsService extends BaseService {
         this.dispatchEvent('onJobsChanged', await this.getJobs());
     }
 
-    public static updateCurrentJobNozzleEvents = (espData: ESPData): Promise<void> => {
+    public updateCurrentJobNozzleEvents = (espData: ESPData): Promise<void> => {
         const calculateTargetValue = (job: Job, speed: number, nozzleSpacing: number) => {
             // Nozzle expected flow in liters per second;
             const expectedFlow = job.expectedFlow;
@@ -55,7 +69,6 @@ export abstract class JobsService extends BaseService {
         return new Promise(async (resolve, reject) => {
             const currentJob = this.getCurrentJob();
             const nozzles = espData.nozzles;
-            const active = espData.active;
             const speed = espData.speed;
             const nozzleSpacing = await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
 
@@ -83,7 +96,6 @@ export abstract class JobsService extends BaseService {
                     return event.endTime === undefined;
                 });
 
-                // TODO: Calculate expected flow
                 const expectedFlow = calculateTargetValue(currentJob, speed, nozzleSpacing) || 0;
 
                 const isNozzleFlowAboveExpected = nozzle.flow !== null && nozzle.flow > expectedFlow * (1 + currentJob.tolerance);
@@ -142,64 +154,79 @@ export abstract class JobsService extends BaseService {
                         }
                     }
                 }
-
-                let newEvents = [...currentJob?.nozzleEvents];
-
-                for (let event of eventsToAdd) {
-                    newEvents.push(event);
-                }
-
-                for (let event of eventsToModify) {
-                    const eventIndex = newEvents.findIndex((e) => e.id === event.id);
-                    newEvents[eventIndex] = event;
-                }
-
-                if (eventsToAdd.length > 0 || eventsToModify.length > 0) {
-                    currentJob.nozzleEvents = newEvents;
-                    this.currentJob = currentJob;
-                    this.dispatchEvent('onCurrentJobNozzleEventsUpdated', currentJob);
-                }
-
-                resolve();
             }
+
+            let newEvents = [...currentJob?.nozzleEvents];
+
+            for (let event of eventsToAdd) {
+                newEvents.push(event);
+            }
+
+            for (let event of eventsToModify) {
+                const eventIndex = newEvents.findIndex((e) => e.id === event.id);
+                newEvents[eventIndex] = event;
+            }
+
+            if (eventsToAdd.length > 0 || eventsToModify.length > 0) {
+                currentJob.nozzleEvents = newEvents;
+                this.currentJob = currentJob;
+                await JobRepository.save(currentJob);
+                this.dispatchEvent('onCurrentJobNozzleEventsUpdated', currentJob);
+            }
+
+            resolve();
         });
     }
 
-    public static getJobById = async (jobId: string): Promise<Job | null> => {
+    public getJobById = async (jobId: string): Promise<Job | null> => {
         const jobs = await JobRepository.get();
         const job = jobs.find((job) => job.id === jobId) ?? null;
         return job;
     }
 
-    public static getJobs = async (): Promise<Job[]> => {
+    public getJobs = async (): Promise<Job[]> => {
         return await JobRepository.get();
     }
 
-    public static generateJobId = (): string => {
+    public generateJobId = (): string => {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
+
+    constructor() {
+        super();
+
+        const refreshData = async (): Promise<void> => {
+            return new Promise(async (resolve, reject) => {
+                services.dataFetcherService.fetchData()
+                    .then(async (espData) => {
+                        await this.updateCurrentJobNozzleEvents(espData);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    })
+                    .finally(() => {
+                        resolve();
+                    });
+            });
+        };
+
+        const onCurrentJobChangedHandler = async () => {
+            if (this.getCurrentJob() === null) return;
+            if (services.navigationService.getPreviousPage() === 'jobs') return;
+
+            const refreshBegin = new Date();
+            await refreshData();
+            const refreshEnd = new Date();
+            const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
+            const nextTimeout = 100 - refreshDuration;
+
+            setTimeout(() => {
+                onCurrentJobChangedHandler();
+            }, nextTimeout);
+
+        }
+
+
+        this.addEventListener('onCurrentJobChanged', onCurrentJobChangedHandler);
+    }
 }
-
-const refreshData = async (): Promise<void> => {
-    const espData = await DataFecherService.fetchData();
-    await JobsService.updateCurrentJobNozzleEvents(espData);
-}
-
-
-const onJobChangedHandler = async () => {
-    if (JobsService.getCurrentJob() === null) return;
-    if (NavigationService.getPreviousPage() === 'jobs') return;
-
-    const refreshBegin = new Date();
-    await refreshData();
-    const refreshEnd = new Date();
-    const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
-
-    const nextTimeout = 1000 - refreshDuration;
-
-    setTimeout(() => {
-        onJobChangedHandler();
-    }, nextTimeout);
-};
-
-JobsService.addEventListener('onCurrentJobChanged', onJobChangedHandler);

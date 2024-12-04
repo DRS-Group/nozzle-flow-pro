@@ -4,17 +4,18 @@ const config: CapacitorConfig = {
   appId: 'com.drsgroup.nozzleflowpro',
   appName: 'nozzleflow-pro',
   webDir: 'build',
-  server: {
-    hostname: 'localhost:3001',
-    cleartext: true,
-  },
   plugins: {
     CapacitorHttp: {
       enabled: true
     },
   },
   android: {
-    minWebViewVersion: 55,
+    minWebViewVersion: 106,
+  },
+
+  server: {
+    cleartext: true,
+    url: 'http://192.168.0.129:3001',
   },
 };
 

@@ -5,6 +5,7 @@ import { SettingsService } from "./settings.service";
 import { DataFecherService } from "./data-fetcher.service";
 import { EventHandler } from "../types/event-handler";
 import { count } from "console";
+import { TranslationServices } from "./translations.service";
 
 export namespace NozzlesService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
@@ -109,7 +110,8 @@ export namespace NozzlesService {
             let nozzles: Nozzle[] = [];
 
             for (let i = 0; i < count; i++) {
-                nozzles.push({ name: `Nozzle ${i + 1}`, flow: null, pulsesPerLiter: 350 });
+                console.log(`${TranslationServices.translate('Nozzle', await TranslationServices.getCurrentLanguage())} ${i + 1}`);
+                nozzles.push({ name: `${TranslationServices.translate('Nozzle', await TranslationServices.getCurrentLanguage())} ${i + 1}`, flow: null, pulsesPerLiter: 350 });
             }
 
             setNozzles(nozzles).then(() => {

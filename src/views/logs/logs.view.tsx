@@ -16,9 +16,15 @@ export const Logs = forwardRef<LogsElement, LogsProps>((props, ref) => {
     const navigation = useNavigation();
     const currentJob = useCurrentJob();
 
+    const [eventsToShow, setEventsToShow] = useState<Event[]>([]);
+
     useImperativeHandle(ref, () => ({
 
     }), []);
+
+    useEffect(() => {
+        setEventsToShow(currentJob.job?.nozzleEvents.filter(event => event.triggered) || []);
+    }, [currentJob.job]);
 
     const onBackClick = () => {
         currentJob.set(null);
@@ -45,7 +51,7 @@ export const Logs = forwardRef<LogsElement, LogsProps>((props, ref) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {currentJob.job?.nozzleEvents.map((event: Event, index: number) => (
+                            {eventsToShow.map((event: Event, index: number) => (
                                 <tr key={index}>
                                     <td>{event._startTime.toLocaleDateString()} {event._startTime.toLocaleTimeString()}</td>
                                     <td>{event._title}</td>

@@ -1,6 +1,7 @@
 import { NumberInput } from '../../components/number-input/number-input.component';
 import { TextInput, TextInputElement } from '../../components/text-input/text-input.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
+import { services } from '../../dependency-injection';
 import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useJobs } from '../../hooks/useJobs';
 import { useNavigation } from '../../hooks/useNavigation';
@@ -44,7 +45,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
         const expectedFlow = parseFloat(expectedFlowInputRef.current!.getValue()) / 10000;
         const flowTolerance = parseFloat(flowToleranceInputRef.current!.getValue()) / 100;
 
-        JobsService.saveJob({
+        services.jobsService.saveJob({
             title: title,
             durationTolerance: durationTolerance,
             expectedFlow: expectedFlow,
@@ -70,7 +71,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         label={translate('Title')}
                         className={styles.titleInput}
                         ref={titleInputRef}
-                        value='New Job'
+                        value={translate('New Job')}
                     />
                     <NumberInput
                         label={translate('Time before alert (milliseconds)')}

@@ -9,6 +9,7 @@ import { SettingsService } from "../../services/settings.service";
 import { useTranslate } from "../../hooks/useTranslate";
 import { useNavigation } from "../../hooks/useNavigation";
 import { useCurrentJob } from "../../hooks/useCurrentJob";
+import { services } from "../../dependency-injection";
 
 export type DataViewElement = {
 
@@ -62,10 +63,10 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.1));
         }
 
-        DataFecherService.addEventListener('onDataFetched', eventHandler);
+        services.dataFetcherService.addEventListener('onDataFetched', eventHandler);
 
         return () => {
-            DataFecherService.removeEventListener('onDataFetched', eventHandler);
+            services.dataFetcherService.removeEventListener('onDataFetched', eventHandler);
         }
     }, [setNozzles, setSpeed, setNozzleSpacing]);
 

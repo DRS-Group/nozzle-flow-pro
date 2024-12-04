@@ -21,6 +21,12 @@ export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, re
     const translate = useTranslate();
     const inputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+        if (props.value) {
+            inputRef.current!.value = props.value;
+        }
+    }, [props.value]);
+
     useImperativeHandle(ref, () => ({
         getValue: () => {
             return inputRef.current?.value || '';
@@ -29,7 +35,7 @@ export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, re
             inputRef.current?.focus();
         },
         setValue: (value: string) => {
-            inputRef.current!.value = translate(value);
+            inputRef.current!.value = value;
         }
     }), []);
 
@@ -41,7 +47,7 @@ export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, re
                 placeholder=' '
                 disabled={props.disabled}
                 ref={inputRef}
-                defaultValue={translate(props.value || '')}
+                defaultValue={props.value || ''}
                 onChange={(e) => props.onChange?.(e.target.value)}
             />
             <label className={styles.label}>{props.label}</label>

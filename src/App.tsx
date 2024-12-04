@@ -16,22 +16,23 @@ import { Logs } from './views/logs/logs.view';
 import { Settings as SettingsType } from './types/settings.type';
 import { useNavigation } from './hooks/useNavigation';
 import { useCurrentJob } from './hooks/useCurrentJob';
+import { useAdmin } from './hooks/useAdmin';
+import { TextInputDialog } from './components/text-input-dialog/text-input-dialog.component';
+import { useTranslate } from './hooks/useTranslate';
+import { services } from './dependency-injection';
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
   .catch(() => {
     document.onclick = () => {
-      document.documentElement.requestFullscreen();
     }
   });
-
-export const AdminContext = createContext<any>(true);
 
 function App() {
   const navigation = useNavigation();
   const currentJob = useCurrentJob();
-
-  const [isAdmin, setIsAdmin] = useState<boolean>(true);
+  const admin = useAdmin();
+  const translate = useTranslate();
 
   const [active, setActive] = useState<'on' | 'off'>('off');
   const [activeButtonState, setActiveButtonState] = useState<'on' | 'off' | 'auto'>('auto');
@@ -45,6 +46,19 @@ function App() {
   useEffect(() => {
     navigation.navigate('menu');
   }, []);
+
+  useEffect(() => {
+    const eventHandler = async (data: any) => {
+      const actice: boolean = data.active;
+      setActive(actice ? 'on' : 'off');
+    }
+
+    services.dataFetcherService.addEventListener('onDataFetched', eventHandler);
+
+    return () => {
+      services.dataFetcherService.removeEventListener('onDataFetched', eventHandler);
+    }
+  }, [setActive]);
 
   useEffect(() => {
     SettingsService.getSettingOrDefault('interfaceScale', 1).then((interfaceScale) => {
@@ -139,58 +153,67 @@ function App() {
   }, []);
 
   return (
-    <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        {
-          navigation.currentPage === 'menu' &&
-          <Menu />
-        }
-        {
-          navigation.currentPage === 'jobs' &&
-          <Jobs />
-        }
-        {
-          navigation.currentPage === 'createJob' &&
-          <CreateJob />
-        }
-        {
-          navigation.currentPage === 'dataView' &&
-          <DataView />
-        }
-        {
-          navigation.currentPage === 'nozzles' &&
-          <NozzlesView />
-        }
-        {
-          navigation.currentPage === 'settings' &&
-          <Settings />
-        }
-        {
-          navigation.currentPage === 'logs' &&
-          <Logs />
-        }
-        {
-          (
-            navigation.currentPage === 'dataView' ||
-            (navigation.currentPage === 'nozzles' && currentJob.job != null) ||
-            (navigation.currentPage === 'settings' && currentJob.job != null) ||
-            (navigation.currentPage === 'logs' && currentJob.job != null)
-          ) &&
-          <BottomMenu
-            onActiveChange={(active) => setActiveButtonState(active)}
-          />
-        }
-        {/* {currentJob.getUnviewedTriggeredEvents().length > 0 &&
-          <AlertModal
-            event={currentJob.getUnviewedTriggeredEvents()[0]}
-            onOkClick={() => { currentJob.markEventAsViewed(currentJob.getUnviewedTriggeredEvents()[0].id) }}
-            onOkForAllClick={currentJob.markAllEventAsViewed}
-            totalEvents={currentJob.getUnviewedTriggeredEvents().length}
-          />
-        }
-        <span>{currentJob.getUnviewedTriggeredEvents().length}</span> */}
-      </div>
-    </AdminContext.Provider>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      {
+        navigation.currentPage === 'menu' &&
+        <Menu />
+      }
+      {
+        navigation.currentPage === 'jobs' &&
+        <Jobs />
+      }
+      {
+        navigation.currentPage === 'createJob' &&
+        <CreateJob />
+      }
+      {
+        navigation.currentPage === 'dataView' &&
+        <DataView />
+      }
+      {
+        navigation.currentPage === 'nozzles' &&
+        <NozzlesView />
+      }
+      {
+        navigation.currentPage === 'settings' &&
+        <Settings />
+      }
+      {
+        navigation.currentPage === 'logs' &&
+        <Logs />
+      }
+      {
+        (
+          navigation.currentPage === 'dataView' ||
+          (navigation.currentPage === 'nozzles' && currentJob.job != null) ||
+          (navigation.currentPage === 'settings' && currentJob.job != null) ||
+          (navigation.currentPage === 'logs' && currentJob.job != null)
+        ) &&
+        <BottomMenu
+          onActiveChange={(active) => setActiveButtonState(active)}
+        />
+      }
+      {
+        admin.isPasswordSet === false &&
+        <TextInputDialog
+          title={translate("Set Admin Password")}
+          label={translate("Admin password")}
+          type="password"
+          onConfirmClick={(password) => {
+            admin.setPassword(password);
+          }}
+        />
+      }
+      {
+        currentJob.getUnviewedTriggeredEvents().length > 0 && (activeButtonState === 'on' || (activeButtonState === 'auto' && active === 'on')) &&
+        <AlertModal
+          event={currentJob.getUnviewedTriggeredEvents()[0]}
+          onOkClick={() => { currentJob.markEventAsViewed(currentJob.getUnviewedTriggeredEvents()[0].id) }}
+          onOkForAllClick={currentJob.markAllEventAsViewed}
+          totalEvents={currentJob.getUnviewedTriggeredEvents().length}
+        />
+      }
+    </div>
   );
 }
 

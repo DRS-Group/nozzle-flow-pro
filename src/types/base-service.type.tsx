@@ -1,22 +1,27 @@
 import { EventHandler } from "../types/event-handler";
 
-export abstract class BaseService {
-    private static eventListeners: Map<string, EventHandler<any>[]> = new Map();
+export interface IBaseService<T extends string> {
+    addEventListener: (eventName: T, callback: EventHandler<any>) => void;
+    removeEventListener: (eventName: T, callback: EventHandler<any>) => void;
+}
 
-    public static addEventListener = (eventName: string, callback: EventHandler<any>) => {
+export abstract class BaseService<T extends string> implements IBaseService<T> {
+    private eventListeners: Map<T, EventHandler<any>[]> = new Map();
+
+    public addEventListener = (eventName: T, callback: EventHandler<any>) => {
         const listeners = this.eventListeners.get(eventName) || [];
         listeners.push(callback);
         this.eventListeners.set(eventName, listeners);
     }
 
-    protected static dispatchEvent = (eventName: string, args?: any) => {
+    protected dispatchEvent = (eventName: T, args?: any) => {
         const listeners = this.eventListeners.get(eventName);
         if (listeners) {
             listeners.forEach(listener => listener(args));
         }
     }
 
-    public static removeEventListener = (eventName: string, callback: EventHandler<any>) => {
+    public removeEventListener = (eventName: T, callback: EventHandler<any>) => {
         const listeners = this.eventListeners.get(eventName);
         if (listeners) {
             const index = listeners.indexOf(callback);

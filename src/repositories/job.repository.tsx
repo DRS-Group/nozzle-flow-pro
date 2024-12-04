@@ -24,7 +24,7 @@ export abstract class JobRepository {
         }
 
         let jobs = await this.get();
-        
+
         const index = jobs.findIndex(j => j.id === job.id);
         if (index === -1) {
             jobs.push(job);

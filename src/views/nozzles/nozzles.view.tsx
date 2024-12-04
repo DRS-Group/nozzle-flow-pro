@@ -3,6 +3,7 @@ import { NumberInputDialog } from '../../components/number-input-dialog/number-i
 import { TextInputDialog } from '../../components/text-input-dialog/text-input-dialog.component';
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
+import { services } from '../../dependency-injection';
 import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useNavigation } from '../../hooks/useNavigation';
 import { useTranslate } from '../../hooks/useTranslate';
@@ -299,7 +300,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     label={translate('Pulses/Liter')}
                     title={translate('Calibrate nozzle')}
                     onConfirmClick={(value) => {
-                        DataFecherService.calibrateNozzle(calibrateDialogNozzleIndex, value).then(async () => {
+                        services.dataFetcherService.calibrateNozzle(calibrateDialogNozzleIndex, value).then(async () => {
                             const nozzle = nozzles[calibrateDialogNozzleIndex];
                             nozzle.pulsesPerLiter = value;
                             await NozzlesService.updateNozzle(nozzle, calibrateDialogNozzleIndex);
@@ -322,7 +323,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     label={translate('Pulses/Liter')}
                     title={translate('Calibrate nozzles')}
                     onConfirmClick={async (value) => {
-                        DataFecherService.calibrateAllNozzles(value).then(async () => {
+                        services.dataFetcherService.calibrateAllNozzles(value).then(async () => {
                             const nozzles = await NozzlesService.getNozzles();
                             for (let i = 0; i < nozzles.length; i++) {
                                 nozzles[i].pulsesPerLiter = value;

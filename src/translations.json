@@ -286,5 +286,13 @@
     {
         "en-us": "Go to nozzles",
         "pt-br": "Ir para bicos"
+    },
+    {
+        "en-us": "Set Admin Password",
+        "pt-br": "Definir Senha de Administrador"
+    },
+    {
+        "en-us": "Nozzle",
+        "pt-br": "Bico"
     }
 ]

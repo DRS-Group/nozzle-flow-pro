@@ -1,21 +1,41 @@
-import { BaseService } from "../types/base-service.type";
+import { BaseService, IBaseService } from "../types/base-service.type";
 import { Page } from "../types/page.type";
 
-export abstract class NavigationService extends BaseService {
-    private static currentPage: Page = 'menu';
-    private static navigationHistory: Page[] = [];
 
-    public static navigate = (page: Page) => {
+type navigationServiceEvents = 'onNavigate';
+
+export interface INavigationService extends IBaseService<navigationServiceEvents> {
+    navigate: (page: Page) => void;
+    getCurrentPage: () => Page;
+    navigateBack: () => void;
+    getPreviousPage: () => Page | undefined;
+    clearHistory: () => void;
+}
+
+export interface INavigationService extends IBaseService<navigationServiceEvents> {
+    navigate: (page: Page) => void;
+    getCurrentPage: () => Page;
+    navigateBack: () => void;
+    getPreviousPage: () => Page | undefined;
+    clearHistory: () => void;
+}
+
+export class NavigationService extends BaseService<navigationServiceEvents> implements INavigationService {
+    private currentPage: Page = 'menu';
+    private navigationHistory: Page[] = ['menu'];
+
+    public navigate = (page: Page) => {
+        if (page === this.currentPage) return;
         this.currentPage = page;
         this.navigationHistory.push(page);
         this.dispatchEvent('onNavigate', page);
     }
 
-    public static getCurrentPage = () => {
+    public getCurrentPage = () => {
         return this.currentPage;
     }
 
-    public static navigateBack = () => {
+    public navigateBack = () => {
         const previousPage = this.getPreviousPage();
         if (previousPage === undefined) return;
 
@@ -24,11 +44,11 @@ export abstract class NavigationService extends BaseService {
         this.dispatchEvent('onNavigate', previousPage);
     }
 
-    public static getPreviousPage = (): Page | undefined => {
+    public getPreviousPage = (): Page | undefined => {
         return this.navigationHistory[this.navigationHistory.length - 2];
     }
 
-    public static clearHistory = () => {
+    public clearHistory = () => {
         this.navigationHistory = [this.getCurrentPage()];
     }
 }

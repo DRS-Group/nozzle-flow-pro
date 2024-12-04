@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Job } from "../types/job.type";
-import { JobsService } from "../services/jobs.service";
+import { services } from "../dependency-injection";
 
 export function useJobs() {
+    const jobsService = services.jobsService;
+
     const [jobs, setJobs] = useState<Job[]>([]);
 
     useEffect(() => {
-        JobsService.getJobs().then(jobs => {
+        jobsService.getJobs().then(jobs => {
             setJobs(jobs);
         });
 
@@ -14,16 +16,16 @@ export function useJobs() {
             setJobs(jobs);
         }
 
-        JobsService.addEventListener('onJobsChanged', eventHandler);
+        jobsService.addEventListener('onJobsChanged', eventHandler);
 
         return () => {
-            JobsService.removeEventListener('onJobsChanged', eventHandler);
+            jobsService.removeEventListener('onJobsChanged', eventHandler);
         }
     }, [setJobs]);
 
-    const remove = JobsService.removeJob;
+    const remove = jobsService.removeJob;
 
-    const generateId = JobsService.generateJobId;
+    const generateId = jobsService.generateJobId;
 
     return { jobs, remove, generateId };
 }

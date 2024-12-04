@@ -4,6 +4,8 @@ import { EventHandler } from "../types/event-handler";
 import { DataFecherService } from "./data-fetcher.service";
 import { Directory, Encoding, FileInfo, Filesystem, ReaddirResult, WriteFileResult } from "@capacitor/filesystem";
 import { Capacitor } from "@capacitor/core";
+import sha256 from 'crypto-js/sha256';
+import { services } from "../dependency-injection";
 
 export const defaultSettings: Settings = {
     language: 'en-us',
@@ -22,6 +24,7 @@ export const defaultSettings: Settings = {
 
 export namespace SettingsService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
+    let isAdmin: boolean = false;
 
     export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
         const listeners = eventListeners.get(eventName) || [];
@@ -315,10 +318,44 @@ export namespace SettingsService {
                 resolve();
             });
 
-            DataFecherService.setInterval(interval);
+            services.dataFetcherService.setInterval(interval);
 
             dispatchEvent('onIntervalChanged', interval);
             dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const getIsAdmin = (): boolean => {
+        return isAdmin;
+    }
+
+    export const setIsAdmin = (value: boolean): void => {
+        isAdmin = value;
+
+        dispatchEvent('onIsAdminChanged', value);
+    }
+
+    export const setAdminPassword = async (password: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            await Preferences.set({ key: 'adminPassword', value: sha256(password).toString() });
+            
+            dispatchEvent('onAdminPasswordChanged');
+
+            resolve();
+        });
+    }
+
+    export const checkAdminPassword = async (password: string): Promise<boolean> => {
+        return new Promise(async (resolve, reject) => {
+            const adminPassword = await Preferences.get({ key: 'adminPassword' });
+            resolve(adminPassword.value === sha256(password).toString());
+        });
+    }
+
+    export const isAdminPasswordSet = async (): Promise<boolean> => {
+        return new Promise(async (resolve, reject) => {
+            const adminPassword = await Preferences.get({ key: 'adminPassword' });
+            resolve(adminPassword.value !== null);
         });
     }
 }

@@ -1,36 +1,38 @@
 import { useEffect, useState } from "react";
 import { Page } from "../types/page.type";
-import { NavigationService } from "../services/navigation.service";
+import { services } from "../dependency-injection";
 
 export function useNavigation() {
+    const navigationService = services.navigationService;
+
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [previousPage, setPreviousPage] = useState<Page | undefined>('menu');
 
     useEffect(() => {
-        setCurrentPage(NavigationService.getCurrentPage());
-        setPreviousPage(NavigationService.getPreviousPage());
+        setCurrentPage(navigationService.getCurrentPage());
+        setPreviousPage(navigationService.getPreviousPage());
 
         const eventHandler = async (page: Page) => {
             setCurrentPage(page);
-            setPreviousPage(NavigationService.getPreviousPage());
+            setPreviousPage(navigationService.getPreviousPage());
         };
-        NavigationService.addEventListener('onNavigate', eventHandler);
+        navigationService.addEventListener('onNavigate', eventHandler);
         return () => {
-            NavigationService.removeEventListener('onNavigate', eventHandler);
+            navigationService.removeEventListener('onNavigate', eventHandler);
         }
 
     }, [setCurrentPage, setPreviousPage, currentPage, previousPage]);
 
     const navigate = (page: Page) => {
-        NavigationService.navigate(page);
+        navigationService.navigate(page);
     }
 
     const navigateBack = () => {
-        NavigationService.navigateBack();
+        navigationService.navigateBack();
     }
 
     const clearHistory = () => {
-        NavigationService.clearHistory();
+        navigationService.clearHistory();
     }
 
     return {

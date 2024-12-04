@@ -1,54 +1,35 @@
 import { CapacitorHttp } from '@capacitor/core';
-import { Nozzle } from '../types/nozzle.type';
-import { EventHandler } from '../types/event-handler';
 import { NozzlesService } from './nozzles.service';
 import { SettingsService } from './settings.service';
 import { ESPData } from '../types/ESP-data.type';
+import { BaseService, IBaseService } from '../types/base-service.type';
 
-export namespace DataFecherService {
-    let eventListeners: Map<string, EventHandler<any>[]> = new Map();
+export type DataFecherServiceEvents = 'onDataFetched';
 
-    export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
-        const listeners = eventListeners.get(eventName) || [];
-        listeners.push(callback);
-        eventListeners.set(eventName, listeners);
-    }
+export interface IDataFecherService extends IBaseService<DataFecherServiceEvents> {
+    fetchData: () => Promise<ESPData>;
+    calibrateAllNozzles: (value: number) => Promise<void>;
+    calibrateNozzle: (nozzleIndex: number, value: number) => Promise<void>;
+    setInterval: (value: number) => Promise<void>;
+}
 
-    export const dispatchEvent = (eventName: string, args?: any) => {
-        const listeners = eventListeners.get(eventName);
-        if (listeners) {
-            listeners.forEach(listener => listener(args));
-        }
-    }
-
-    export const removeEventListener = (eventName: string, callback: EventHandler<any>) => {
-        const listeners = eventListeners.get(eventName);
-        if (listeners) {
-            const index = listeners.indexOf(callback);
-            if (index !== -1) {
-                listeners.splice(index, 1);
-            }
-            if (listeners.length === 0) {
-                eventListeners.delete(eventName);
-            }
-        }
-    }
-
-    export const fetchData = async (): Promise<ESPData> => {
+export class DataFecherService extends BaseService<DataFecherServiceEvents> implements IDataFecherService {
+    public fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
             CapacitorHttp.get({ url: `${ApiBaseUri}/data`, connectTimeout: 1000 }).then(async (response) => {
                 const nozzles = await NozzlesService.getNozzles();
                 const flows = response.data.flows;
                 const active = response.data.active;
+                const speed = response.data.speed;
 
                 for (let i = 0; i < nozzles.length; i++) {
                     nozzles[i].flow = flows[i] || 0;
                 }
 
-                const res: ESPData = { active: active, nozzles: nozzles, speed: 1 }
+                const res: ESPData = { active: active, nozzles: nozzles, speed: speed };
 
-                dispatchEvent('onDataFetched', res);
+                this.dispatchEvent('onDataFetched', res);
 
                 resolve(res);
             })
@@ -59,7 +40,7 @@ export namespace DataFecherService {
         });
     }
 
-    export const calibrateAllNozzles = async (value: number): Promise<void> => {
+    public calibrateAllNozzles = async (value: number): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
 
@@ -75,7 +56,7 @@ export namespace DataFecherService {
         });
     }
 
-    export const calibrateNozzle = async (nozzleIndex: number, value: number): Promise<void> => {
+    public calibrateNozzle = async (nozzleIndex: number, value: number): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
 
@@ -93,7 +74,7 @@ export namespace DataFecherService {
         });
     }
 
-    export const setInterval = async (value: number): Promise<void> => {
+    public setInterval = async (value: number): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
 
