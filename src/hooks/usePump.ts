@@ -10,7 +10,6 @@ export function usePump() {
     useEffect(() => {
         setPumpState(pumpService.getState());
         setOverriddenState(pumpService.getOverriddenState());
-        console.log(pumpService.getOverriddenState());
 
         const eventHandler = (state: 'on' | 'off') => {
             setPumpState(state);
@@ -41,7 +40,6 @@ export function usePump() {
 
     const setOverridden = (state: 'on' | 'off' | 'auto') => {
         pumpService.setOverriddenState(state);
-        console.log(pumpService.getOverriddenState());
     }
 
     return {

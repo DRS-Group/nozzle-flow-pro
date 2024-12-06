@@ -30,10 +30,28 @@ export const Logs = forwardRef<LogsElement, LogsProps>((props, ref) => {
         navigation.navigateBack();
     }
 
+    function download() {
+        if (!currentJob.job) return;
+
+        // CSV content
+        let content = 'Start Time,End Time,Title,Description\n';
+        eventsToShow.forEach(event => {
+            content += `${event.startTime.toLocaleDateString()} ${event.startTime.toLocaleTimeString()},${event.endTime ? event.endTime.toLocaleDateString() : ''},${event.title},${event.description}\n`;
+        });
+
+        content = content.replace('<b>', '');
+        content = content.replace('</b>', '');
+
+
+        var FileSaver = require('file-saver');
+        var blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+        FileSaver.saveAs(blob, `${currentJob.job.title}.csv`);
+    }
+
     return (
         <>
             <div className={styles.wrapper}>
-                {navigation.previousPage !== 'menu' &&
+                {navigation.previousPage === 'jobs' &&
                     <TopBar
                         onBackClick={onBackClick}
                         title={translate('Logs') + ' - ' + currentJob.job?.title}
@@ -59,6 +77,12 @@ export const Logs = forwardRef<LogsElement, LogsProps>((props, ref) => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+                <div
+                    className={styles.confirmButton}
+                    onClick={download}
+                >
+                    <i className="icon-export"></i>
                 </div>
             </div>
         </>

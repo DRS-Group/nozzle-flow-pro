@@ -8,6 +8,8 @@
     box-sizing: border-box;
 
     flex-grow: 1;
+
+    flex-grow: 1;
     overflow-y: auto;
     z-index: 0;
 
@@ -15,6 +17,7 @@
 }
 
 .content {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -27,7 +30,7 @@
     z-index: -2;
 }
 
-.table{
+.table {
     width: 100%;
     box-sizing: border-box;
     margin-top: 20px;
@@ -52,4 +55,34 @@
 
 .table tr {
     border-bottom: 0.1rem solid rgb(194, 194, 194);
+}
+
+.confirmButton {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+
+    width: 4rem;
+    height: 4rem;
+
+    background-color: var(--primary-color);
+    border-radius: 50%;
+
+    box-shadow: 0rem 0.1rem 0.15rem 0.15rem rgba(0, 0, 0, 0.15);
+
+    transition: 200ms;
+}
+
+.confirmButton>i {
+    color: var(--secondary-font-color);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: center center;
+    transform: translate(-50%, -50%);
+    transition: 200ms;
+}
+
+.confirmButton>i::before {
+    width: 1.75rem;
 }

@@ -185,7 +185,7 @@ function App() {
           navigation.currentPage === 'dataView' ||
           (navigation.currentPage === 'nozzles' && currentJob.job != null) ||
           (navigation.currentPage === 'settings' && currentJob.job != null) ||
-          (navigation.currentPage === 'logs' && currentJob.job != null)
+          (navigation.currentPage === 'logs' && navigation.previousPage !== 'jobs')
         ) &&
         <BottomMenu />
       }
