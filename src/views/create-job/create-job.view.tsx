@@ -6,7 +6,6 @@ import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useJobs } from '../../hooks/useJobs';
 import { useNavigation } from '../../hooks/useNavigation';
 import { useTranslate } from '../../hooks/useTranslate';
-import { JobsService } from '../../services/jobs.service';
 import { Job } from '../../types/job.type';
 import styles from './create-job.module.css';
 import { forwardRef, useContext, useImperativeHandle, useRef } from 'react';

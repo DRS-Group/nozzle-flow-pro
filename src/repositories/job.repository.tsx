@@ -12,7 +12,18 @@ export abstract class JobRepository {
                 durationTolerance: job.durationTolerance,
                 creationDate: new Date(job.creationDate),
                 id: job.id,
-                nozzleEvents: job.nozzleEvents
+                nozzleEvents: job.nozzleEvents.map((event: any) => {
+                    return {
+                        title: event.title,
+                        description: event.description,
+                        startTime: new Date(event.startTime),
+                        endTime: event.endTime ? new Date(event.endTime) : undefined,
+                        nozzleIndex: event.nozzleIndex,
+                        triggered: event.triggered,
+                        id: event.id,
+                        viewed: event.viewed
+                    };
+                })
             }
         });
         return jobs;

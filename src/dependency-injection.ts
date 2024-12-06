@@ -1,15 +1,15 @@
-import { DataFecherService, IDataFecherService } from "./services/data-fetcher.service";
-import { IJobsService, JobsService } from "./services/jobs.service";
-import { INavigationService, NavigationService } from "./services/navigation.service";
+import { IPumpService as IPumpService } from "./services/pump.service";
+import { ICurrentJobService } from "./services/current-job.service";
+import { IDataFecherService } from "./services/data-fetcher.service";
+import { IJobsService } from "./services/jobs.service";
+import { INavigationService } from "./services/navigation.service";
 
 type ServicesTemplate = {
     jobsService: IJobsService;
     navigationService: INavigationService;
     dataFetcherService: IDataFecherService;
+    currentJobService: ICurrentJobService;
+    pumpService: IPumpService;
 }
 
-export const services: ServicesTemplate = {
-    jobsService: new JobsService(),
-    navigationService: new NavigationService(),
-    dataFetcherService: new DataFecherService()
-};
+export let services: ServicesTemplate = {} as ServicesTemplate;

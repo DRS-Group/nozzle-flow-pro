@@ -1,75 +1,55 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import { Job } from "../types/job.type";
 import { services } from "../dependency-injection";
+import { Event } from "../types/event.type";
 
 export function useCurrentJob() {
-    const jobsService = services.jobsService;
+    const currentJobService = services.currentJobService;
 
     const [job, setJob] = useState<Job | null>(null);
+    const [unviwedTriggeredEvents, setUnviewedTriggeredEvents] = useState<Event[]>([]);
 
     useEffect(() => {
-        setJob(jobsService.getCurrentJob());
-
-        const eventHandler = (job: Job | null) => {
+        currentJobService.getCurrentJob().then(job => {
             setJob(job);
+        });
+
+        const eventHandler = (jobId: string | null) => {
+            currentJobService.getCurrentJob().then(job => {
+                setJob(job);
+
+                if (jobId && job?.nozzleEvents) {
+                    const triggeredEvents = job.nozzleEvents.filter(event => event.triggered && !event.viewed);
+                    setUnviewedTriggeredEvents(triggeredEvents);
+                }
+            });
         }
 
-        jobsService.addEventListener('onCurrentJobChanged', eventHandler);
+        currentJobService.addEventListener('onCurrentJobChanged', eventHandler);
 
         return () => {
-            jobsService.removeEventListener('onCurrentJobChanged', eventHandler);
+            currentJobService.removeEventListener('onCurrentJobChanged', eventHandler);
         }
-    }, [setJob, job]);
-
-    useEffect(() => {
-        setJob(jobsService.getCurrentJob());
-
-        const eventHandler = (job: Job) => {
-            let newJob: Job = { ...job };
-            setJob(newJob);
-        }
-
-        jobsService.addEventListener('onCurrentJobNozzleEventsUpdated', eventHandler);
-
-        return () => {
-            jobsService.removeEventListener('onCurrentJobNozzleEventsUpdated', eventHandler);
-        }
-    }, [setJob, job]);
+    }, [setJob]);
 
     const set = (jobId: string | null) => {
-        jobsService.setCurrentJob(jobId);
-    }
-
-    const save = () => {
-        if (job) jobsService.saveJob(job);
+        currentJobService.setCurrentJob(jobId);
     }
 
     const markEventAsViewed = (eventId: string) => {
-        if (!job) return;
-        const event = job.nozzleEvents.find(e => e.id === eventId);
-        if (!event) return;
-        event.viewed = true;
-        setJob({ ...job });
-        save();
-
+        currentJobService.markEventAsViewed(eventId);
     }
 
-    const markAllEventAsViewed = () => {
-        if (!job) return;
-        job.nozzleEvents.forEach(e => e.viewed = true);
+    const markAllEventsAsViewed = () => {
+        currentJobService.markAllEventsAsViewed();
     }
 
-    const getUnviewedTriggeredEvents = () => {
-        if (!job) return [];
-        return job.nozzleEvents.filter(e => !e.viewed && e.triggered);
-    }
 
     return {
         job,
         set,
-        save,
+        unviwedTriggeredEvents,
         markEventAsViewed,
-        markAllEventAsViewed,
-        getUnviewedTriggeredEvents
+        markAllEventsAsViewed
     }
 }

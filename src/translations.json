@@ -306,5 +306,25 @@
     {
         "en-us": "Set nozzle spacing",
         "pt-br": "Definir espaçamento entre bicos"
+    },
+    {
+        "en-us": "Flow of",
+        "pt-br": "Fluxo de"
+    },
+    {
+        "en-us": "is below the expected value",
+        "pt-br": "está abaixo do valor esperado"
+    },
+    {
+        "en-us": "is above the expected value",
+        "pt-br": "está acima do valor esperado"
+    },
+    {
+        "en-us": "Flow below expected",
+        "pt-br": "Fluxo abaixo do esperado"
+    },
+    {
+        "en-us": "Flow above expected",
+        "pt-br": "Fluxo acima do esperado"
     }
 ]

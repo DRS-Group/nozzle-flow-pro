@@ -28,6 +28,7 @@ export class NavigationService extends BaseService<navigationServiceEvents> impl
         if (page === this.currentPage) return;
         this.currentPage = page;
         this.navigationHistory.push(page);
+        console.log(this.navigationHistory);
         this.dispatchEvent('onNavigate', page);
     }
 

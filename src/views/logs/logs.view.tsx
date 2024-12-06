@@ -3,7 +3,6 @@ import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useNavigation } from '../../hooks/useNavigation';
 import { useTranslate } from '../../hooks/useTranslate';
 import { Event } from '../../types/event.type';
-import { NozzleEvent } from '../../types/nozzle-event.type';
 import styles from './logs.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
 
@@ -53,9 +52,9 @@ export const Logs = forwardRef<LogsElement, LogsProps>((props, ref) => {
                         <tbody>
                             {eventsToShow.map((event: Event, index: number) => (
                                 <tr key={index}>
-                                    <td>{event._startTime.toLocaleDateString()} {event._startTime.toLocaleTimeString()}</td>
-                                    <td>{event._title}</td>
-                                    <td>{event._description}</td>
+                                    <td>{event.startTime.toLocaleDateString()} {event.startTime.toLocaleTimeString()}</td>
+                                    <td>{event.title}</td>
+                                    <td dangerouslySetInnerHTML={{ __html: event.description }}></td>
                                 </tr>
                             ))}
                         </tbody>

@@ -4,8 +4,6 @@ import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen'
 import { DataFecherService } from './services/data-fetcher.service';
 import { DataView } from './views/data/data.view';
 import { Nozzle } from './types/nozzle.type';
-import { generateFlowAboveExpectedNozzleEvent, generateFlowBelowExpectedNozzleEvent, NozzleEvent } from './types/nozzle-event.type';
-import { AlertModal } from './components/alert-modal/alert-modal.component';
 import { Menu } from './views/menu/menu.view';
 import { Jobs } from './views/jobs/jobs.view';
 import { CreateJob } from './views/create-job/create-job.view';
@@ -21,28 +19,29 @@ import { TextInputDialog } from './components/text-input-dialog/text-input-dialo
 import { useTranslate } from './hooks/useTranslate';
 import { services } from './dependency-injection';
 import { NozzlesService } from './services/nozzles.service';
+import { JobsService } from './services/jobs.service';
+import { NavigationService } from './services/navigation.service';
+import { CurrentJobService } from './services/current-job.service';
+import { PumpService } from './services/pump.service';
+import { usePump } from './hooks/usePump';
+import { AlertModal } from './components/alert-modal/alert-modal.component';
+
+services.jobsService = new JobsService();
+services.currentJobService = new CurrentJobService();
+services.navigationService = new NavigationService();
+services.dataFetcherService = new DataFecherService();
+services.pumpService = new PumpService();
 
 AndroidFullScreen.isImmersiveModeSupported()
   .then(() => AndroidFullScreen.immersiveMode())
-  .catch(() => {
-    document.onclick = () => {
-    }
-  });
+  .catch(() => { });
 
 function App() {
   const navigation = useNavigation();
   const currentJob = useCurrentJob();
+  const pump = usePump();
   const admin = useAdmin();
   const translate = useTranslate();
-
-  const [active, setActive] = useState<'on' | 'off'>('off');
-  const [activeButtonState, setActiveButtonState] = useState<'on' | 'off' | 'auto'>('auto');
-
-  const shouldUpdateNozzleEvents = () => {
-    if (activeButtonState === 'off') return false;
-    if (activeButtonState === 'auto' && active === 'off') return false;
-    return true;
-  }
 
   useEffect(() => {
     navigation.navigate('menu');
@@ -58,19 +57,6 @@ function App() {
     });
 
   }, []);
-
-  useEffect(() => {
-    const eventHandler = async (data: any) => {
-      const actice: boolean = data.active;
-      setActive(actice ? 'on' : 'off');
-    }
-
-    services.dataFetcherService.addEventListener('onDataFetched', eventHandler);
-
-    return () => {
-      services.dataFetcherService.removeEventListener('onDataFetched', eventHandler);
-    }
-  }, [setActive]);
 
   useEffect(() => {
     SettingsService.getSettingOrDefault('interfaceScale', 1).then((interfaceScale) => {
@@ -201,9 +187,7 @@ function App() {
           (navigation.currentPage === 'settings' && currentJob.job != null) ||
           (navigation.currentPage === 'logs' && currentJob.job != null)
         ) &&
-        <BottomMenu
-          onActiveChange={(active) => setActiveButtonState(active)}
-        />
+        <BottomMenu />
       }
       {
         admin.isPasswordSet === false &&
@@ -217,12 +201,12 @@ function App() {
         />
       }
       {
-        currentJob.getUnviewedTriggeredEvents().length > 0 && (activeButtonState === 'on' || (activeButtonState === 'auto' && active === 'on')) &&
+        currentJob.unviwedTriggeredEvents.length > 0 && pump.pumpState === 'on' &&
         <AlertModal
-          event={currentJob.getUnviewedTriggeredEvents()[0]}
-          onOkClick={() => { currentJob.markEventAsViewed(currentJob.getUnviewedTriggeredEvents()[0].id) }}
-          onOkForAllClick={currentJob.markAllEventAsViewed}
-          totalEvents={currentJob.getUnviewedTriggeredEvents().length}
+          event={currentJob.unviwedTriggeredEvents[0]}
+          onOkClick={() => { currentJob.markEventAsViewed(currentJob.unviwedTriggeredEvents[0].id) }}
+          onOkForAllClick={currentJob.markAllEventsAsViewed}
+          totalEvents={currentJob.unviwedTriggeredEvents.length}
         />
       }
     </div>

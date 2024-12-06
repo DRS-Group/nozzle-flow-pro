@@ -1,6 +1,6 @@
 import { SoundsService } from '../../services/sounds.service';
 import styles from './toggle-button.module.css';
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 
 export type ToggleButtonElement = {
 
@@ -18,6 +18,10 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
     useImperativeHandle(ref, () => ({
 
     }), []);
+
+    useEffect(() => {
+        setButtonState(props.state || "auto");
+    }, [props.state]);
 
     const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         SoundsService.playClickSound();

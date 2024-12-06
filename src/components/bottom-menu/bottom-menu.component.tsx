@@ -5,29 +5,20 @@ import { useTranslate } from "../../hooks/useTranslate";
 import { NavigationService } from "../../services/navigation.service";
 import { useCurrentJob } from "../../hooks/useCurrentJob";
 import { useNavigation } from "../../hooks/useNavigation";
+import { usePump } from "../../hooks/usePump";
 
 export type BottomMenuElement = {
 
 }
 
 export type BottomMenuProps = {
-    onActiveChange: (active: 'on' | 'off' | 'auto') => void;
 }
 
 export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props, ref) => {
     const translate = useTranslate();
     const currentJob = useCurrentJob();
     const navigation = useNavigation();
-
-
-    // const onAnyItemClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    //     const target = e.currentTarget;
-    //     document.querySelectorAll(`.${styles.menuItem}`).forEach((el) => {
-    //         el.removeAttribute('data-current');
-    //     });
-
-    //     target.setAttribute('data-current', 'true');
-    // }
+    const pump = usePump();
 
     const onDataClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         navigation.navigate('dataView');
@@ -54,6 +45,10 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
         currentJob.set(null);
     }
 
+    const onPumpActiveButtonChange = (active: 'on' | 'off' | 'auto') => {
+        pump.setOverridden(active);
+    }
+
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -61,7 +56,8 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
     return (
         <div className={styles.wrapper}>
             <ToggleButton
-                onStateChange={props.onActiveChange}
+                onStateChange={onPumpActiveButtonChange}
+                state={pump.overriddenState}
             />
             <div className={styles.content}>
                 <button className={styles.menuItem} data-current={navigation.currentPage === 'dataView'} onClick={onDataClick}><i className="icon-chart-bar"></i><span>{translate('Data')}</span></button>

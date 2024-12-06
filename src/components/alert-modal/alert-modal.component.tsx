@@ -39,7 +39,7 @@ export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props,
                     <span>{props.event.title}</span>
                 </div>
                 <div className={styles.content}>
-                    <span>{props.event.getModalMessage}</span>
+                    <span dangerouslySetInnerHTML={{ __html: props.event.description }}></span>
                 </div>
                 <div className={styles.footer}>
                     <button onClick={props.onOkClick}>Ok</button>

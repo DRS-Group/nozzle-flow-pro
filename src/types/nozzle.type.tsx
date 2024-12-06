@@ -1,6 +1,6 @@
 export type Nozzle = {
     name: string;
-    flow: number | null;
+    flow: number;
     pulsesPerLiter: number;
 
     ignored?: boolean;
