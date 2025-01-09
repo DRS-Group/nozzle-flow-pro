@@ -35,13 +35,22 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                         console.error(error);
                     })
                     .finally(() => {
+                        console.log('end');
+                        // setTimeout(() => {
+                        //     resolve()
+                        // }, 1000);
                         resolve();
                     });
             });
         };
 
-        const onCurrentJobChangedHandler = async () => {
-            if (this.currentJobId === null) return;
+        const loop = async () => {
+            if (this.currentJobId === null) {
+                setTimeout(() => {
+                    loop();
+                }, 100);
+                return;
+            };
 
             const previousPage = services.navigationService.getPreviousPage();
             const currentPage = services.navigationService.getCurrentPage();
@@ -51,14 +60,15 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
             await refreshData();
             const refreshEnd = new Date();
             const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
-            const nextTimeout = 100 - refreshDuration;
+            // const nextTimeout = 100 - refreshDuration;
+            const nextTimeout = 1000;
 
             setTimeout(() => {
-                onCurrentJobChangedHandler();
+                loop();
             }, nextTimeout);
         };
 
-        this.addEventListener('onCurrentJobChanged', onCurrentJobChangedHandler);
+        loop();
     }
 
     setCurrentJob = (jobId: string | null) => {

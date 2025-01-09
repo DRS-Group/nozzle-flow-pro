@@ -17,7 +17,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
     public fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
-            CapacitorHttp.get({ url: `${ApiBaseUri}/data`, connectTimeout: 1000 }).then(async (response) => {
+            CapacitorHttp.get({ url: `${ApiBaseUri}/data`, connectTimeout: 5000 }).then(async (response) => {
                 const nozzles = await NozzlesService.getNozzles();
                 const flows = response.data.flows;
                 const active = response.data.active;
@@ -32,12 +32,8 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 this.dispatchEvent('onDataFetched', res);
 
                 resolve(res);
-            })
-                .catch((reason: any) => {
-                    reject(reason);
-                    alert(reason);
-                });
-        });
+            });
+        }); 
     }
 
     public calibrateAllNozzles = async (value: number): Promise<void> => {
