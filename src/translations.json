@@ -326,5 +326,9 @@
     {
         "en-us": "Flow above expected",
         "pt-br": "Fluxo acima do esperado"
+    },
+    {
+        "en-us": "Loading...",
+        "pt-br": "Carregando..."
     }
 ]

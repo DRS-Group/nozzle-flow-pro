@@ -25,7 +25,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const currentJob = useCurrentJob();
 
     const [chartData, setChartData] = useState<ChartData>({ datasets: [] });
-    const [nozzles, setNozzles] = useState<Nozzle[]>([]);
+    const [nozzles, setNozzles] = useState<Nozzle[] | undefined>(undefined);
     const [speed, setSpeed] = useState<number>(0);
     const [nozzleSpacing, setNozzleSpacing] = useState<number>(0.1);
 
@@ -71,6 +71,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     }, [setNozzles, setSpeed, setNozzleSpacing]);
 
     const onBarClick = async (nozzleIndex: number) => {
+        if (nozzles === undefined) return;
         const nozzle = nozzles[nozzleIndex];
 
         if (nozzle === null) return;
@@ -99,7 +100,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
 
     return (
         <>
-            {currentJob.job && (<>
+            {currentJob.job && nozzles !== undefined && (<>
                 <div className={styles.wrapper}>
                     {nozzles.length >= 1 &&
                         <BarChart
@@ -159,6 +160,11 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                     />
                 }
             </>)}
+            {currentJob.job && nozzles === undefined && (
+                <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <span>{translate('Loading...')}</span>
+                </div>
+            )}
         </>
     )
 });

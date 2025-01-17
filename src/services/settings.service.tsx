@@ -7,9 +7,12 @@ import { Capacitor } from "@capacitor/core";
 import sha256 from 'crypto-js/sha256';
 import { services } from "../dependency-injection";
 
+import { Network } from "@capacitor/network";
+import { CapacitorWifiConnect } from "@falconeta/capacitor-wifi-connect";
+
 export const defaultSettings: Settings = {
     language: 'en-us',
-    apiBaseUrl: 'http://localhost:3000',
+    apiBaseUrl: 'http://192.168.4.1',
     primaryColor: '#466905',
     secondaryColor: '#ffffff',
     primaryFontColor: '#000000',
@@ -374,3 +377,26 @@ export namespace SettingsService {
         });
     }
 }
+
+const connectToAPIWifi = async () => {
+    let { value } = await CapacitorWifiConnect.checkPermission();
+    if (value === 'prompt') {
+        const data = await CapacitorWifiConnect.requestPermission();
+        value = data.value;
+    }
+    if (value === 'granted') {
+        CapacitorWifiConnect.secureConnect({
+            ssid: 'tupido-EUA',
+            password: '123456789',
+        });
+    } else {
+        throw new Error('permission denied');
+    }
+}
+
+setInterval(async () => {
+    const status = await Network.getStatus();
+    if (!status.connected) {
+        connectToAPIWifi();
+    }
+}, 5000);

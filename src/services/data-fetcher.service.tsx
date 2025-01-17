@@ -32,8 +32,14 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 this.dispatchEvent('onDataFetched', res);
 
                 resolve(res);
-            });
-        }); 
+            })
+                .catch((reason: any) => {
+                    alert(reason);
+                    setTimeout(() => {
+                        reject(reason);
+                    }, 5000);
+                });
+        });
     }
 
     public calibrateAllNozzles = async (value: number): Promise<void> => {
