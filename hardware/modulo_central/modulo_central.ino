@@ -63,7 +63,7 @@ void setup() {
   server.on("/data", HTTP_GET, [](AsyncWebServerRequest *request) {
     String json = "{\"active\":" + String(bombaAtiva ? "true" : "false") + ",\"speed\":" + String(velocidadeMaquina) + ",\"flows\":[";
     for (int i = 0; i < 9; i++) {
-      json += String(fluxometroData[i]);
+      json += String(fluxometroData[i], 6);
       if (i < 8) json += ",";
     }
     json += "]}";
@@ -154,10 +154,7 @@ void loop() {
 
     // Verifica se a localização foi atualizada
     if (gps.location.isUpdated()) {
-      // Só atualiza a velocidade se for maior que 0,56 m/s
-      if (gps.speed.mps() > 0.56) {
         velocidadeMaquina = gps.speed.mps();
-      }
     }
   }
 
