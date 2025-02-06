@@ -3,16 +3,17 @@
 #include <ESPAsyncWebServer.h>
 #include <TinyGPS++.h>
 #include <HardwareSerial.h>
-#include <ArduinoJson.h>
+#include "../common/typesConversionHelper.cpp"
+#include "../common/CANCommunicationHelper.cpp"
 
 #define TX_GPIO_NUM 4
 #define RX_GPIO_NUM 5
 
-#define NETWORK_SSID "tupido-EUA"
+#define NETWORK_SSID "NOZZLE FLOW PRO"
 #define NETWORK_PASSWORD "123456789"
 
 TinyGPSPlus gps;
-HardwareSerial mySerial(1);
+HardwareSerial GPSSerial(1);
 
 #define FLOWMETERS_AMOUNT 9  // TODO: Alterar esse cara futuramente.
 
@@ -21,25 +22,7 @@ float speed = 0;
 
 AsyncWebServer server(80);
 
-uint8_t *floatToBytes(float value) {
-  size_t size = sizeof(value);
-  uint8_t *byte_array = (uint8_t *)malloc(size);
-  memcpy(byte_array, &value, size);
-  return byte_array;
-}
 
-void sendFloat(int id, float value) {
-  uint8_t *byte_array = floatToBytes(value);
-  sendBytes(id, byte_array, sizeof(float));
-}
-
-void sendBytes(unsigned short id, uint8_t *byte_array, size_t size) {
-  CAN.beginPacket(id);
-  CAN.write(byte_array, size);
-  if (CAN.endPacket() == 0) {
-    throw "Error while sending CAN message.";
-  }
-}
 
 void setupCAN() {
   CAN.setPins(RX_GPIO_NUM, TX_GPIO_NUM);
@@ -84,12 +67,14 @@ void setupEndpoints() {
   });
 
   server.on("/interval", HTTP_POST, [](AsyncWebServerRequest *request) {
+    Serial.println("Interval");
     // Verifica se o parâmetro 'interval' está presente
     if (request->hasParam("interval", false)) {
-      float intervalo = request->getParam("interval", false)->value().toFloat();
+      int intervalo = request->getParam("interval", false)->value().toInt();
+      Serial.println(intervalo);
 
       // Envia o valor do intervalo via CAN para o transmissor
-      sendFloat(0x0300, intervalo);
+      sendInteger(0x0300, intervalo);
       request->send(200, "text/plain", "Intervalo atualizado para " + String(intervalo) + " ms");
     } else {
       request->send(400, "text/plain", "Parâmetro de intervalo faltando");
@@ -111,8 +96,8 @@ void setup() {
 }
 
 void loop() {
-  while (mySerial.available() > 0) {
-    gps.encode(mySerial.read());
+  while (GPSSerial.available() > 0) {
+    gps.encode(GPSSerial.read());
 
     // Verifica se a localização foi atualizada
     if (gps.location.isUpdated()) {
@@ -126,14 +111,17 @@ void onReceive(int packetSize) {
   if ((id & 0xFF00) == 0x0100) {
     uint8_t *buf = (uint8_t *)malloc(packetSize);
     CAN.readBytes(buf, packetSize);
-    float value;
+    int value;
     memcpy(&value, buf, packetSize);  // Converte o buffer recebido para float
 
     int flowmeterIndex = id - 0x0100;
 
     flowmeterPulses[flowmeterIndex] = value;
 
-    Serial.println(value);
-    Serial.println(String(value, 10));
+    Serial.print("Fluxometro ");
+    Serial.print(flowmeterIndex + 1);
+    Serial.print(": ");
+    Serial.print(value);
+    Serial.println(" pulsos por minuto.");
   }
 }
