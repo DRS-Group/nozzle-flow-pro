@@ -142,6 +142,32 @@ void MainModule::onReceiveData(const uint8_t *mac_addr, const uint8_t *data, int
             }
         }
     }
+    else if (type == FLOWMETER_DATA_RESPONSE)
+    {
+        flowmeters_data flowmetersData;
+        flowmetersData.flowmeterCount = data[1];
+        flowmetersData.flowmetersPulsesPerMinute = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
+
+        memcpy(flowmetersData.flowmetersPulsesPerMinute, &data[2], sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
+
+        setLastFlowmeterDataResponseTimestamp(senderAddress, millis());
+        registerFlowmetersData(senderAddress, flowmetersData);
+
+        if (isAllFlowmetersDataReceived())
+        {
+            flowmeters_data allFlowmetersData;
+            this->getLastFlowmeterData(&allFlowmetersData);
+            callGetFlowmetersDataCallbacks(allFlowmetersData);
+            this->setLastFlowmetersDataRequestTimestamp(0);
+            this->flowmetersData.clear();
+        }
+
+        free(flowmetersData.flowmetersPulsesPerMinute);
+    }
+    else
+    {
+        Serial.println("Unknown message type");
+    }
 }
 
 void MainModule::onSendData(const uint8_t *mac_addr, esp_now_send_status_t status)
@@ -151,6 +177,18 @@ void MainModule::onSendData(const uint8_t *mac_addr, esp_now_send_status_t statu
 int MainModule::getSecondaryModuleCount()
 {
     return this->secondaryModuleCount;
+}
+
+int MainModule::getSecondaryModuleIndex(const macAddress_t mac_addr)
+{
+    for (int i = 0; i < getSecondaryModuleCount(); i++)
+    {
+        if (memcmp(&this->secondaryModules[i], mac_addr, sizeof(macAddress_t)) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 
 void MainModule::addSecondaryModule(const macAddress_t mac_addr)
@@ -259,6 +297,108 @@ void MainModule::setMode(ModuleMode mode)
     else if (mode == MODULE_MODE_RUNNING)
     {
         Serial.println("Running mode");
+    }
+}
+
+void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback)
+{
+    this->addGetFlowmetersDataCallback(callback);
+    this->setLastFlowmetersDataRequestTimestamp(millis());
+
+    if (getSecondaryModuleCount() == 0)
+    {
+        flowmeters_data data;
+        data.flowmeterCount = 0;
+        data.flowmetersPulsesPerMinute = nullptr;
+        callGetFlowmetersDataCallbacks(data);
+        return;
+    }
+
+    for (int i = 0; i < getSecondaryModuleCount(); i++)
+    {
+        secondary_module_data_request request;
+        request.msgType = FLOWMETER_DATA_REQUEST;
+        esp_now_send(this->secondaryModules[i], (uint8_t *)&request, sizeof(secondary_module_data_request));
+    }
+}
+
+void MainModule::addGetFlowmetersDataCallback(std::function<void(flowmeters_data)> callback)
+{
+    getFlowmetersDataCallbacks.push_back(callback);
+}
+
+void MainModule::callGetFlowmetersDataCallbacks(flowmeters_data data)
+{
+    for (auto &callback : getFlowmetersDataCallbacks)
+    {
+        callback(data);
+    }
+
+    getFlowmetersDataCallbacks.clear();
+}
+
+void MainModule::setLastFlowmetersDataRequestTimestamp(unsigned long timestamp)
+{
+    this->lastFlowmetersDataRequestTimestamp = timestamp;
+}
+
+void MainModule::setLastFlowmeterDataResponseTimestamp(const macAddress_t mac_addr, unsigned long timestamp)
+{
+    std::string mac_addr_str = this->macToString(mac_addr);
+    this->lastFlowmetersDataResponseTimestamps[mac_addr_str] = timestamp;
+}
+
+void MainModule::registerFlowmetersData(const macAddress_t mac_addr, flowmeters_data data)
+{
+    std::string mac_addr_str = this->macToString(mac_addr);
+
+    flowmeters_data flowmetersData;
+    flowmetersData.flowmeterCount = data.flowmeterCount;
+    flowmetersData.flowmetersPulsesPerMinute = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * data.flowmeterCount);
+    memcpy(flowmetersData.flowmetersPulsesPerMinute, data.flowmetersPulsesPerMinute, sizeof(flowmeter_data_t) * data.flowmeterCount);
+
+    this->flowmetersData[mac_addr_str] = flowmetersData;
+}
+
+bool MainModule::isAllFlowmetersDataReceived()
+{
+    if (getSecondaryModuleCount() == 0)
+    {
+        return true;
+    }
+
+    for (int i = 0; i < getSecondaryModuleCount(); i++)
+    {
+        std::string mac_addr_str = this->macToString(this->secondaryModules[i]);
+        unsigned long lastResponseTimestamp = this->lastFlowmetersDataResponseTimestamps[mac_addr_str];
+        if (lastResponseTimestamp < this->lastFlowmetersDataRequestTimestamp)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void MainModule::getLastFlowmeterData(flowmeters_data *result)
+{
+    result->flowmeterCount = 0;
+    for (int i = 0; i < getSecondaryModuleCount(); i++)
+    {
+        std::string mac_addr_str = this->macToString(this->secondaryModules[i]);
+        result->flowmeterCount += this->flowmetersData[mac_addr_str].flowmeterCount;
+    }
+    result->flowmetersPulsesPerMinute = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * result->flowmeterCount);
+
+    int index = 0;
+    for (int i = 0; i < getSecondaryModuleCount(); i++)
+    {
+        std::string mac_addr_str = this->macToString(this->secondaryModules[i]);
+        for (int j = 0; j < this->flowmetersData[mac_addr_str].flowmeterCount; j++)
+        {
+            result->flowmetersPulsesPerMinute[index] = this->flowmetersData[mac_addr_str].flowmetersPulsesPerMinute[j];
+            index++;
+        }
     }
 }
 

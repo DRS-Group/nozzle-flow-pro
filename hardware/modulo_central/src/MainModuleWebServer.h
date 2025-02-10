@@ -22,6 +22,8 @@ private:
     void setupEndpoints();
     void setupDefaultHeaders();
 
+    void onDataRequest(AsyncWebServerRequest *request);
+
 public:
     void setGetModuleMode(std::function<ModuleMode(void)> getModuleMode)
     {

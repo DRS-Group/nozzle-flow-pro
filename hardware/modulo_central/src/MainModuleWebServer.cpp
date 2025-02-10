@@ -1,5 +1,6 @@
 #include "MainModuleWebServer.h"
 #include "MainModule.h"
+#include <ArduinoJson.h>
 
 MainModuleWebServer::MainModuleWebServer(const char *ssid, const char *password)
 {
@@ -28,10 +29,7 @@ void MainModuleWebServer::setup()
 
 void MainModuleWebServer::setupEndpoints()
 {
-    // server->on("/module_mode", HTTP_GET, [](AsyncWebServerRequest *request)
-    //            {
-    //                 ModuleMode mode = MainModule::getInstance()->getModuleMode();
-    //                 request->send(200, "application/json", "{\"mode\": " + String(mode) + "}"); });
+    server->on("/data", HTTP_GET, std::bind(&MainModuleWebServer::onDataRequest, this, std::placeholders::_1));
 
     server->on("/set_module_mode", HTTP_POST, [](AsyncWebServerRequest *request)
                {
@@ -50,11 +48,6 @@ void MainModuleWebServer::setupEndpoints()
                {
         MainModule::getInstance()->removeAllSecondaryModules();
         request->send(200); });
-
-    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-               { 
-                Serial.println("GET /");
-                request->send(200, "text/plain", "Hello, world"); });
 }
 
 void MainModuleWebServer::setupDefaultHeaders()
@@ -62,4 +55,33 @@ void MainModuleWebServer::setupDefaultHeaders()
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
+}
+
+void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
+{
+    MainModule *mainModule = MainModule::getInstance();
+
+    bool canSendResponse = false;
+
+    mainModule->getFlowmetersData(
+        [request, &canSendResponse](flowmeters_data data)
+        {
+            JsonDocument doc;
+            JsonArray flowmeters = doc["flowmetersPulsesPerMinute"].to<JsonArray>();
+            for (int i = 0; i < data.flowmeterCount; i++)
+            {
+                flowmeters.add(data.flowmetersPulsesPerMinute[i]);
+            }
+
+            String response;
+            serializeJson(doc, response);
+
+            request->send(200, "application/json", response);
+            canSendResponse = true;
+        });
+
+    while (!canSendResponse)
+    {
+        delay(10);
+    }
 }

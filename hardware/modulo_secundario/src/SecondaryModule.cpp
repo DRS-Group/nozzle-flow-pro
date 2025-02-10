@@ -30,6 +30,9 @@ SecondaryModule::SecondaryModule()
     this->preferences->begin("my-app", false);
 
     this->printInitialMessage();
+
+    addFlowmeter(22, 5000);
+    addFlowmeter(23, 5000);
 }
 
 SecondaryModule::~SecondaryModule()
@@ -66,10 +69,6 @@ void SecondaryModule::setupESPNow()
 
     esp_now_register_recv_cb([](const uint8_t *mac_addr, const uint8_t *incomingData, int len)
                              { SecondaryModule::getInstance()->onReceiveData(mac_addr, incomingData, len); });
-    // esp_now_register_send_cb([](const uint8_t *mac_addr, esp_now_send_status_t status)
-    //                          {
-    //                              Serial.print("Send status: ");
-    //                              Serial.println(status == ESP_NOW_SEND_SUCCESS ? "success" : "fail"); });
 }
 
 void SecondaryModule::setServerAddress(const macAddress_t &address)
@@ -127,6 +126,45 @@ void SecondaryModule::onReceiveData(const uint8_t *mac_addr, const uint8_t *inco
             Serial.println("Pairing failed");
         }
     }
+    else if (type == FLOWMETER_DATA_REQUEST)
+    {
+        flowmeters_data flowmetersData = this->getFlowmeterData();
+
+        const size_t responseSize = flowmetersData.flowmeterCount * sizeof(flowmeter_data_t) + sizeof(uint8_t) * 2; // 1 byte for message type, 1 byte for flowmeter count and other bytes for flowmeter data.
+
+        uint8_t *responseBuffer = (uint8_t *)malloc(responseSize);
+        responseBuffer[0] = FLOWMETER_DATA_RESPONSE;
+        responseBuffer[1] = flowmetersData.flowmeterCount;
+
+        memcpy(responseBuffer + 2, flowmetersData.flowmetersPulsesPerMinute, flowmetersData.flowmeterCount * sizeof(flowmeter_data_t));
+
+        esp_now_send(senderAddress, responseBuffer, responseSize);
+        Serial.println();
+
+        free(responseBuffer);
+        free(flowmetersData.flowmetersPulsesPerMinute);
+    }
+}
+
+void SecondaryModule::addFlowmeter(uint8_t pin, unsigned short refreshRate)
+{
+    Flowmeter *newFlowmeter = new Flowmeter(pin, refreshRate);
+
+    const uint8_t flowmeterCount = this->getFlowmeterCount();
+
+    Flowmeter **newFlowmeters = (Flowmeter **)realloc(this->flowmeters, (flowmeterCount + 1) * sizeof(Flowmeter *));
+    this->flowmeters = newFlowmeters;
+    this->flowmeters[flowmeterCount] = newFlowmeter;
+    this->flowmeterCount++;
+}
+
+void SecondaryModule::removeFlowmeter(uint8_t pin)
+{
+}
+
+uint8_t SecondaryModule::getFlowmeterCount()
+{
+    return this->flowmeterCount;
 }
 
 void SecondaryModule::getServerAddress(macAddress_t &address)
@@ -144,28 +182,26 @@ bool SecondaryModule::isServerAddressSet()
     return memcmp(serverAddress, BROADCAST_MAC_ADDRESS, sizeof(macAddress_t)) != 0;
 }
 
+flowmeters_data SecondaryModule::getFlowmeterData()
+{
+    flowmeters_data data;
+    data.flowmeterCount = this->flowmeterCount;
+
+    data.flowmetersPulsesPerMinute = (flowmeter_data_t *)malloc(this->flowmeterCount * sizeof(flowmeter_data_t));
+    for (uint8_t i = 0; i < this->flowmeterCount; i++)
+    {
+        data.flowmetersPulsesPerMinute[i] = this->flowmeters[i]->getPulsesPerMinute();
+    }
+
+    return data;
+}
+
 void SecondaryModule::loop()
 {
     if (!this->isServerAddressSet())
     {
-        Serial.println("Server address not set");
-        Serial.println("Broadcasting pairing request");
+        Serial.println("\nBroadcasting pairing request");
         this->broadcastPairingRequest();
-    }
-    else
-    {
-        Serial.println("Sending data to server");
-
-        esp_err_t result = esp_now_send(serverAddress, (uint8_t *)"Hello", 5);
-        if (result == ESP_OK)
-        {
-            Serial.print("Data sent to server: ");
-            printMAC(serverAddress);
-        }
-        else
-        {
-            Serial.println("Failed to send data to server");
-        }
     }
     delay(1000);
 }
