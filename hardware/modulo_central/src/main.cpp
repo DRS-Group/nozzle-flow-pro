@@ -1,4 +1,5 @@
 #include "MainModule.h"
+#include "GPS.h"
 
 void setup()
 {
@@ -8,4 +9,5 @@ void setup()
 void loop()
 {
   MainModule::getInstance()->loop();
+  GPS::getInstance()->loop();
 }

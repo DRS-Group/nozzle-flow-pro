@@ -26,19 +26,24 @@ SecondaryModule *SecondaryModule::getInstance()
 
 SecondaryModule::SecondaryModule()
 {
+    Serial.println("Starting secondary module");
     this->setupESPNow();
-    this->preferences->begin("my-app", false);
 
     this->printInitialMessage();
 
     addFlowmeter(22, 5000);
-    addFlowmeter(23, 5000);
+    addFlowmeter(14, 5000);
+    addFlowmeter(27, 5000);
+    addFlowmeter(26, 5000);
+    addFlowmeter(25, 5000);
+    addFlowmeter(33, 5000);
+    addFlowmeter(32, 5000);
+    addFlowmeter(35, 5000);
+    addFlowmeter(34, 5000);
 }
 
 SecondaryModule::~SecondaryModule()
 {
-    this->preferences->end();
-
     esp_now_deinit();
     WiFi.mode(WIFI_OFF);
     Serial.println("Secondary module stopped");
@@ -75,9 +80,6 @@ void SecondaryModule::setServerAddress(const macAddress_t &address)
 {
     esp_now_del_peer(serverAddress);
     memcpy(serverAddress, address, sizeof(macAddress_t));
-    Serial.println("Server address set to:");
-    printMAC(serverAddress);
-    Serial.println();
     addPeer(serverAddress);
 }
 
@@ -113,21 +115,17 @@ void SecondaryModule::onReceiveData(const uint8_t *mac_addr, const uint8_t *inco
 
     if (type == PAIR_RESPONSE)
     {
+        Serial.println("PAIR RESPONSE");
+
         struct_pair_response pairResponse;
         memcpy(&pairResponse, incomingData, sizeof(struct_pair_response));
 
         if (pairResponse.success == 1)
-        {
-            Serial.println("Pairing successful");
             this->setServerAddress(senderAddress);
-        }
-        else
-        {
-            Serial.println("Pairing failed");
-        }
     }
     else if (type == FLOWMETER_DATA_REQUEST)
     {
+        Serial.println("FLOWMETER DATA REQUEST");
         flowmeters_data flowmetersData = this->getFlowmeterData();
 
         const size_t responseSize = flowmetersData.flowmeterCount * sizeof(flowmeter_data_t) + sizeof(uint8_t) * 2; // 1 byte for message type, 1 byte for flowmeter count and other bytes for flowmeter data.
@@ -200,7 +198,6 @@ void SecondaryModule::loop()
 {
     if (!this->isServerAddressSet())
     {
-        Serial.println("\nBroadcasting pairing request");
         this->broadcastPairingRequest();
     }
     delay(1000);

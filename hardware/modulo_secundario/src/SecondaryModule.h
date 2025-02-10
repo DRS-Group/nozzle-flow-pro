@@ -1,7 +1,6 @@
 #pragma once
 
 #include <esp_now_types.h>
-#include <Preferences.h>
 #include "Flowmeter.h"
 
 class SecondaryModule
@@ -21,8 +20,6 @@ private:
 private:
     macAddress_t macAddress = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     macAddress_t serverAddress = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
-    Preferences *preferences = new Preferences();
 
     Flowmeter **flowmeters = nullptr;
     uint8_t flowmeterCount = 0;

@@ -14,8 +14,6 @@ Flowmeter::Flowmeter(uint8_t pin, unsigned short refreshRate)
     this->pulseCount = 0;
 
     instances[this->pin] = this;
-
-    Serial.println("Flowmeter created");
 }
 
 Flowmeter::~Flowmeter()

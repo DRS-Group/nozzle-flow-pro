@@ -1,6 +1,7 @@
 #include "MainModuleWebServer.h"
 #include "MainModule.h"
 #include <ArduinoJson.h>
+#include <GPS.h>
 
 MainModuleWebServer::MainModuleWebServer(const char *ssid, const char *password)
 {
@@ -72,6 +73,12 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
             {
                 flowmeters.add(data.flowmetersPulsesPerMinute[i]);
             }
+
+            float speed = GPS::getInstance()->getSpeed();
+            doc["speed"] = speed;
+
+            uint32_t satelliteCount = GPS::getInstance()->getSatelliteCount();
+            doc["satelliteCount"] = satelliteCount;
 
             String response;
             serializeJson(doc, response);

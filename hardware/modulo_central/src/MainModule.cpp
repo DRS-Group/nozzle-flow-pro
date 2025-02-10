@@ -164,10 +164,6 @@ void MainModule::onReceiveData(const uint8_t *mac_addr, const uint8_t *data, int
 
         free(flowmetersData.flowmetersPulsesPerMinute);
     }
-    else
-    {
-        Serial.println("Unknown message type");
-    }
 }
 
 void MainModule::onSendData(const uint8_t *mac_addr, esp_now_send_status_t status)
