@@ -41,7 +41,7 @@ void Flowmeter::registerPulse()
 {
     this->removeOldPulses();
 
-    unsigned long *newPulsesTimestamps = (unsigned long *)realloc(this->pulsesTimestamps, (this->pulseCount + 1) * sizeof(unsigned long));
+    unsigned long *newPulsesTimestamps = static_cast<unsigned long *>(realloc(this->pulsesTimestamps, (this->pulseCount + 1) * sizeof(unsigned long)));
     if (newPulsesTimestamps != nullptr)
     {
         this->pulsesTimestamps = newPulsesTimestamps;
@@ -61,7 +61,7 @@ void Flowmeter::removeOldPulses()
         }
         this->pulseCount--;
 
-        unsigned long *newPulsesTimestamps = (unsigned long *)realloc(this->pulsesTimestamps, this->pulseCount * sizeof(unsigned long));
+        unsigned long *newPulsesTimestamps = static_cast<unsigned long *>(realloc(this->pulsesTimestamps, this->pulseCount * sizeof(unsigned long)));
 
         this->pulsesTimestamps = newPulsesTimestamps;
     }
@@ -72,17 +72,6 @@ unsigned short Flowmeter::getPulsesPerMinute()
     this->removeOldPulses();
 
     return this->pulseCount * 60000 / this->refreshRate;
-}
-
-void Flowmeter::printPulsesTimestamps()
-{
-    const unsigned long currentTime = millis();
-    for (unsigned short i = 0; i < this->pulseCount; i++)
-    {
-        Serial.print(currentTime - this->pulsesTimestamps[i]);
-        Serial.print(" ");
-    }
-    Serial.println();
 }
 
 uint8_t Flowmeter::getPin()

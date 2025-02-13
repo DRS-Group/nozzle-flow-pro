@@ -4,11 +4,6 @@
 
 typedef uint8_t macAddress_t[6];
 
-typedef struct struct_pair_request
-{
-    uint8_t msgType;
-} struct_pair_request;
-
 typedef struct struct_pair_response
 {
     uint8_t msgType;
@@ -18,9 +13,7 @@ typedef struct struct_pair_response
 enum MessageType
 {
     PAIR_REQUEST = 0X10,
-    PAIR_RESPONSE,
     FLOWMETER_DATA_REQUEST,
-    FLOWMETER_DATA_RESPONSE
 };
 
 enum moduleType

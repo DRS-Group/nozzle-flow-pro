@@ -34,6 +34,5 @@ public:
     void onPulse();
     static std::map<uint8_t, Flowmeter *> instances;
     unsigned short getPulsesPerMinute();
-    void printPulsesTimestamps();
     uint8_t getPin();
 };

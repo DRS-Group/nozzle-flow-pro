@@ -17,6 +17,17 @@ MainModuleWebServer::~MainModuleWebServer()
 
 void MainModuleWebServer::setup()
 {
+    // if (WiFi.getMode() == WIFI_STA)
+    // {
+    //     WiFi.mode(WIFI_AP_STA);
+    // }
+    // else
+    // {
+    //     WiFi.mode(WIFI_AP);
+    // }
+
+    WiFi.mode(WIFI_AP_STA);
+
     WiFi.softAP(this->ssid, this->password);
 
     IPAddress local_ip(192, 168, 0, 1);
@@ -41,13 +52,20 @@ void MainModuleWebServer::setupEndpoints()
         }
         ModuleMode newMode = (ModuleMode)request->getParam("mode", false)->value().toInt();
 
-        MainModule::getInstance()->setMode(newMode);
+        if(newMode == MODULE_MODE_PAIRING)
+        {
+            MainModule::getInstance()->getEspNowCentralManager()->enablePairing();
+        }
+        else
+        {
+            MainModule::getInstance()->getEspNowCentralManager()->disablePairing();
+        }
 
         request->send(200); });
 
     server->on("/remove_all_secondary_modules", HTTP_POST, [](AsyncWebServerRequest *request)
                {
-        MainModule::getInstance()->removeAllSecondaryModules();
+        MainModule::getInstance()->getEspNowCentralManager()->removeAllSlaves();
         request->send(200); });
 }
 
