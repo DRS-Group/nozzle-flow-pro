@@ -22,6 +22,10 @@ SecondaryModule::SecondaryModule()
     espNowManager->registerCallback(
         FLOWMETER_DATA_REQUEST,
         SecondaryModule::onDataRequest);
+
+    espNowManager->registerCallback(
+        SET_REFRESH_RATE,
+        SecondaryModule::onSetRefreshRate);
 }
 
 SecondaryModule::~SecondaryModule()
@@ -48,6 +52,15 @@ void SecondaryModule::onDataRequest(const uint8_t *mac_addr, const uint8_t *inco
 
     free(responseBuffer);
     free(flowmetersData.flowmetersPulsesPerMinute);
+}
+
+void SecondaryModule::onSetRefreshRate(const uint8_t *mac_addr, const uint8_t *incomingData, int len)
+{
+    SecondaryModule *instance = SecondaryModule::getInstance();
+
+    unsigned short refreshRate = *reinterpret_cast<const unsigned short *>(incomingData);
+
+    instance->setRefreshRate(refreshRate);
 }
 
 void SecondaryModule::addFlowmeter(uint8_t pin, unsigned short refreshRate)
@@ -79,6 +92,14 @@ flowmeters_data SecondaryModule::getFlowmeterData()
     }
 
     return data;
+}
+
+void SecondaryModule::setRefreshRate(unsigned short refreshRate)
+{
+    for (uint8_t i = 0; i < this->flowmeterCount; i++)
+    {
+        this->flowmeters[i]->setRefreshRate(refreshRate);
+    }
 }
 
 void SecondaryModule::loop()

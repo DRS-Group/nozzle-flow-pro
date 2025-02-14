@@ -78,3 +78,8 @@ uint8_t Flowmeter::getPin()
 {
     return this->pin;
 }
+
+void Flowmeter::setRefreshRate(unsigned short refreshRate)
+{
+    this->refreshRate = refreshRate;
+}

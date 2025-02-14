@@ -35,4 +35,5 @@ public:
     static std::map<uint8_t, Flowmeter *> instances;
     unsigned short getPulsesPerMinute();
     uint8_t getPin();
+    void setRefreshRate(unsigned short refreshRate);
 };

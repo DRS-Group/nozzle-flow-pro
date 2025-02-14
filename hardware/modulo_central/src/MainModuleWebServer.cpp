@@ -17,16 +17,14 @@ MainModuleWebServer::~MainModuleWebServer()
 
 void MainModuleWebServer::setup()
 {
-    // if (WiFi.getMode() == WIFI_STA)
-    // {
-    //     WiFi.mode(WIFI_AP_STA);
-    // }
-    // else
-    // {
-    //     WiFi.mode(WIFI_AP);
-    // }
-
-    WiFi.mode(WIFI_AP_STA);
+    if (WiFi.getMode() == WIFI_STA)
+    {
+        WiFi.mode(WIFI_AP_STA);
+    }
+    else
+    {
+        WiFi.mode(WIFI_AP);
+    }
 
     WiFi.softAP(this->ssid, this->password);
 
@@ -63,10 +61,27 @@ void MainModuleWebServer::setupEndpoints()
 
         request->send(200); });
 
-    server->on("/remove_all_secondary_modules", HTTP_POST, [](AsyncWebServerRequest *request)
-               {
-        MainModule::getInstance()->getEspNowCentralManager()->removeAllSlaves();
-        request->send(200); });
+    server->on(
+        "/remove_all_secondary_modules",
+        HTTP_POST, [](AsyncWebServerRequest *request)
+        {
+            MainModule::getInstance()->getEspNowCentralManager()->removeAllSlaves();
+            request->send(200); });
+
+    server->on(
+        "/set_refresh_rate",
+        HTTP_POST, [](AsyncWebServerRequest *request)
+        {
+            if (!request->hasParam("refresh_rate", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing rate parameter\"}");
+                return;
+            }
+            unsigned short newRate = request->getParam("refresh_rate", false)->value().toInt();
+
+            MainModule::getInstance()->setRefreshRate(newRate);
+
+            request->send(200); });
 }
 
 void MainModuleWebServer::setupDefaultHeaders()

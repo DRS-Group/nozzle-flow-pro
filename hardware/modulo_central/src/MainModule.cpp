@@ -85,6 +85,25 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
     }
 }
 
+void MainModule::setRefreshRate(unsigned short refreshRate)
+{
+    for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
+    {
+        uint8_t *mac_addr = (uint8_t *)malloc(6);
+        espNowCentralManager->getSlaveMacAddress(i, mac_addr);
+
+        uint8_t messageType = SET_REFRESH_RATE;
+        uint8_t *buffer = (uint8_t *)malloc(sizeof(unsigned short));
+
+        memcpy(buffer, &refreshRate, sizeof(unsigned short));
+
+        ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, sizeof(unsigned short));
+
+        free(buffer);
+        free(mac_addr);
+    }
+}
+
 void MainModule::addGetFlowmetersDataCallback(std::function<void(flowmeters_data)> callback)
 {
     getFlowmetersDataCallbacks.push_back(callback);

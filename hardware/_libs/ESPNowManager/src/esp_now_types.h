@@ -14,6 +14,7 @@ enum MessageType
 {
     PAIR_REQUEST = 0X10,
     FLOWMETER_DATA_REQUEST,
+    SET_REFRESH_RATE,
 };
 
 enum moduleType
