@@ -111,7 +111,7 @@ export namespace NozzlesService {
 
             for (let i = 0; i < count; i++) {
                 console.log(`${TranslationServices.translate('Nozzle', await TranslationServices.getCurrentLanguage())} ${i + 1}`);
-                nozzles.push({ name: `${TranslationServices.translate('Nozzle', await TranslationServices.getCurrentLanguage())} ${i + 1}`, flow: 0, pulsesPerLiter: 350 });
+                nozzles.push({ name: `${TranslationServices.translate('Nozzle', await TranslationServices.getCurrentLanguage())} ${i + 1}`, pulsesPerMinute: 0, pulsesPerLiter: 350 });
             }
 
             setNozzles(nozzles).then(() => {

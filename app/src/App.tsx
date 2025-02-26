@@ -47,11 +47,6 @@ function App() {
     navigation.navigate('menu');
 
     SettingsService.getSettings().then((settings: SettingsType) => {
-      NozzlesService.getNozzles().then((nozzles: Nozzle[]) => {
-        nozzles.map((nozzle: Nozzle, index) => {
-          services.dataFetcherService.calibrateNozzle(index, nozzle.pulsesPerLiter);
-        });
-      });
       const interval = settings.interval;
       services.dataFetcherService.setInterval(interval);
     });

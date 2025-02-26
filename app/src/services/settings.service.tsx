@@ -7,8 +7,8 @@ import { Capacitor } from "@capacitor/core";
 import sha256 from 'crypto-js/sha256';
 import { services } from "../dependency-injection";
 
-import { Network } from "@capacitor/network";
 import { CapacitorWifiConnect } from "@falconeta/capacitor-wifi-connect";
+import { Network } from "@capacitor/network";
 
 export const defaultSettings: Settings = {
     language: 'en-us',
@@ -386,7 +386,7 @@ const connectToAPIWifi = async () => {
     }
     if (value === 'granted') {
         CapacitorWifiConnect.secureConnect({
-            ssid: 'tupido-EUA',
+            ssid: 'NOZZLE FLOW PRO',
             password: '123456789',
         });
     } else {
@@ -399,4 +399,4 @@ setInterval(async () => {
     if (!status.connected) {
         connectToAPIWifi();
     }
-}, 5000);
+}, 1000);

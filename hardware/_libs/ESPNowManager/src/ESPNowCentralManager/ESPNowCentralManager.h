@@ -38,4 +38,5 @@ public:
     void getSlaveMacAddress(uint8_t index, uint8_t *mac_addr);
     std::string getSlaveMacAddress(uint8_t index);
     void removeAllSlaves();
+    bool isPairingEnabled();
 };

@@ -35,10 +35,6 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                         console.error(error);
                     })
                     .finally(() => {
-                        console.log('end');
-                        // setTimeout(() => {
-                        //     resolve()
-                        // }, 1000);
                         resolve();
                     });
             });
@@ -132,7 +128,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
 
         for (let nozzleIndex = 0; nozzleIndex < nozzles.length; nozzleIndex++) {
             const nozzle: Nozzle = nozzles[nozzleIndex];
-            const nozzleFlow = nozzle.flow;
+            const nozzleFlow = nozzle.pulsesPerMinute / nozzle.pulsesPerLiter;
 
             const isFlowAboveExpected = nozzleFlow > maxExpectedFlow;
             const isFlowBelowExpected = nozzleFlow < minExpectedFlow;

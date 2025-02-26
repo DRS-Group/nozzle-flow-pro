@@ -44,7 +44,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         const newChartData = nozzles.map((nozzle: Nozzle) => {
             return {
                 label: nozzle.name,
-                value: nozzle.flow,
+                value: nozzle.pulsesPerMinute / nozzle.pulsesPerLiter,
                 opacity: nozzle.ignored ? 0.5 : 1
             } as Dataset;
         });

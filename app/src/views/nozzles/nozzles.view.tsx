@@ -299,14 +299,12 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 <NumberInputDialog
                     label={translate('Pulses/Liter')}
                     title={translate('Calibrate nozzle')}
-                    onConfirmClick={(value) => {
-                        services.dataFetcherService.calibrateNozzle(calibrateDialogNozzleIndex, value).then(async () => {
-                            const nozzle = nozzles[calibrateDialogNozzleIndex];
-                            nozzle.pulsesPerLiter = value;
-                            await NozzlesService.updateNozzle(nozzle, calibrateDialogNozzleIndex);
-                            NozzlesService.getNozzles().then((nozzles) => {
-                                setNozzles(nozzles);
-                            });
+                    onConfirmClick={async (value) => {
+                        const nozzle = nozzles[calibrateDialogNozzleIndex];
+                        nozzle.pulsesPerLiter = value;
+                        await NozzlesService.updateNozzle(nozzle, calibrateDialogNozzleIndex);
+                        NozzlesService.getNozzles().then((nozzles) => {
+                            setNozzles(nozzles);
                         });
 
                         setCalibrateDialogOpen(false);
@@ -323,17 +321,15 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     label={translate('Pulses/Liter')}
                     title={translate('Calibrate nozzles')}
                     onConfirmClick={async (value) => {
-                        services.dataFetcherService.calibrateAllNozzles(value).then(async () => {
-                            const nozzles = await NozzlesService.getNozzles();
-                            for (let i = 0; i < nozzles.length; i++) {
-                                nozzles[i].pulsesPerLiter = value;
-                            }
+                        const nozzles = await NozzlesService.getNozzles();
+                        for (let i = 0; i < nozzles.length; i++) {
+                            nozzles[i].pulsesPerLiter = value;
+                        }
 
-                            await NozzlesService.setNozzles(nozzles);
+                        await NozzlesService.setNozzles(nozzles);
 
-                            NozzlesService.getNozzles().then((nozzles) => {
-                                setNozzles(nozzles);
-                            });
+                        NozzlesService.getNozzles().then((nozzles) => {
+                            setNozzles(nozzles);
                         });
 
                         setCalibrateDialogOpen(false);

@@ -10,6 +10,8 @@ import { NumberInputDialog } from '../../components/number-input-dialog/number-i
 import { useTranslate } from '../../hooks/useTranslate';
 import { useNavigation } from '../../hooks/useNavigation';
 import { useAdmin } from '../../hooks/useAdmin';
+import { services } from '../../dependency-injection';
+import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.component';
 
 export type SettingsElement = {
 
@@ -27,6 +29,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
     const [settings, setSettings] = useState<SettingsType | null>(null);
     const [logoUri, setLogoUri] = useState<string>('');
+    const [moduleMode, setModuleMode] = useState<number>(0);
+    const [secondaryModulesCount, setSecondaryModulesCount] = useState<number>(0);
 
     const [ApiBaseUriDialogOpen, setApiBaseUriDialogOpen] = useState<boolean>(false);
     const [refreshIntervalDialogOpen, setRefreshIntervalDialogOpen] = useState<boolean>(false);
@@ -36,11 +40,13 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [secondaryFontColorDialogOpen, setSecondaryFontColorDialogOpen] = useState<boolean>(false);
     const [adminPasswordDialogOpen, setAdminPasswordDialogOpen] = useState<boolean>(false);
     const [nozzleSpacingDialogOpen, setNozzleSpacingDialogOpen] = useState<boolean>(false);
+    const [removeAllSecondaryModulesDialogOpen, setRemoveAllSecondaryModulesDialogOpen] = useState<boolean>(false);
 
     const [languageContextMenuPosition, setLanguageContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [interfaceScaleContextMenuPosition, setInterfaceScaleContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [volumeUnitContextMenuPosition, setVolumeUnitContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [areaUnitContextMenuPosition, setAreaUnitContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
+    const [moduleModeContextMenuPosition, setModuleModeContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
 
     useImperativeHandle(ref, () => ({
 
@@ -52,6 +58,28 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
             setLogoUri(await SettingsService.getLogoUri());
         });
     }, []);
+
+    useEffect(() => {
+        services.dataFetcherService.getSecondaryModulesCount().then((count) => {
+            setSecondaryModulesCount(count);
+        });
+        services.dataFetcherService.getModuleMode().then((mode) => {
+            setModuleMode(mode);
+        });
+
+        const timer = setInterval(() => {
+            services.dataFetcherService.getModuleMode().then((mode) => {
+                setModuleMode(mode);
+            });
+            services.dataFetcherService.getSecondaryModulesCount().then((count) => {
+                setSecondaryModulesCount(count);
+            });
+        }, 1000);
+
+        return () => {
+            clearInterval(timer);
+        }
+    }, [setModuleMode, setSecondaryModulesCount]);
 
     useEffect(() => {
         const eventHandler = async (settings: SettingsType) => {
@@ -105,6 +133,19 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
         setAreaUnitContextMenuPosition({ x, y });
     }
 
+    const onModuleModeClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        const x = e.nativeEvent.clientX;
+        const y = e.nativeEvent.clientY;
+
+        setModuleModeContextMenuPosition({ x, y });
+    }
+
+    const onRemoveAllSecondaryModulesClick = () => {
+        setRemoveAllSecondaryModulesDialogOpen(true);
+    }
+
     const onContextMenuBackgroundClick = () => {
         setLanguageContextMenuPosition(null);
     }
@@ -147,6 +188,41 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 </div>
                                 <div className={styles.itemRight}>
                                     <i className="icon-thin-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                {isAdmin &&
+                    <div className={styles.section}>
+                        <div className={styles.sectionTitle}>
+                            {translate('Main module')}
+                        </div>
+                        <div className={styles.sectionContent}>
+                            <div className={styles.item}
+                                onClick={onModuleModeClick}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Module mode')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <span>{moduleMode === 0 ? 'Running' : 'Pairing'}</span>
+                                    </div>
+                                    <i className="icon-unfold-more-horizontal"></i>
+                                </div>
+                            </div>
+                            <div className={styles.item}
+                                onClick={onRemoveAllSecondaryModulesClick}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Secondary modules count')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <span>{secondaryModulesCount}</span>
+                                    </div>
+                                    <i className="icon-unfold-more-horizontal"></i>
                                 </div>
                             </div>
                         </div>
@@ -397,6 +473,23 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     </div>
                 </div>
             </div>
+            {removeAllSecondaryModulesDialogOpen &&
+                <YesNoDialog
+                    title={translate('Remove all secondary modules')}
+                    message={translate('Are you sure you want to remove all secondary modules') + '?'}
+                    onYesClick={() => {
+                        services.dataFetcherService.removeAllSecondaryModules().then(() => {
+                            services.dataFetcherService.getSecondaryModulesCount().then((count) => {
+                                setSecondaryModulesCount(count);
+                            });
+                        });
+                        setRemoveAllSecondaryModulesDialogOpen(false);
+                    }}
+                    onNoClick={() => {
+                        setRemoveAllSecondaryModulesDialogOpen(false);
+                    }}
+                />
+            }
             {ApiBaseUriDialogOpen &&
                 <TextInputDialog
                     title='Set API Base URI'
@@ -604,6 +697,37 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
                     onBackgroundClick={() => {
                         setAreaUnitContextMenuPosition(null);
+                    }}
+                />
+            }
+            {moduleModeContextMenuPosition &&
+                <ContextMenu
+                    items={[
+                        {
+                            label: translate('Running'),
+                            onClick: () => {
+                                services.dataFetcherService.setModuleMode(0).then(() => {
+                                    services.dataFetcherService.getModuleMode().then((mode) => {
+                                        setModuleMode(mode);
+                                    });
+                                });
+                            }
+                        },
+                        {
+                            label: translate('Pairing'),
+                            onClick: () => {
+                                services.dataFetcherService.setModuleMode(1).then(() => {
+                                    services.dataFetcherService.getModuleMode().then((mode) => {
+                                        setModuleMode(mode);
+                                    });
+                                });
+                            }
+                        }
+                    ]}
+                    position={moduleModeContextMenuPosition}
+
+                    onBackgroundClick={() => {
+                        setModuleModeContextMenuPosition(null);
                     }}
                 />
             }

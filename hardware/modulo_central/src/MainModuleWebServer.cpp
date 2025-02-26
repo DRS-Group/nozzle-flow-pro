@@ -41,6 +41,15 @@ void MainModuleWebServer::setupEndpoints()
 {
     server->on("/data", HTTP_GET, std::bind(&MainModuleWebServer::onDataRequest, this, std::placeholders::_1));
 
+    server->on(
+        "/get_module_mode",
+        HTTP_GET,
+        [](AsyncWebServerRequest *request)
+        {
+            ModuleMode mode = MainModule::getInstance()->getEspNowCentralManager()->isPairingEnabled() ? MODULE_MODE_PAIRING : MODULE_MODE_RUNNING;
+            request->send(200, "application/json", "{\"mode\": " + String(mode) + "}");
+        });
+
     server->on("/set_module_mode", HTTP_POST, [](AsyncWebServerRequest *request)
                {
         if (!request->hasParam("mode", false))
@@ -67,6 +76,13 @@ void MainModuleWebServer::setupEndpoints()
         {
             MainModule::getInstance()->getEspNowCentralManager()->removeAllSlaves();
             request->send(200); });
+
+    server->on(
+        "/get_secondary_modules_count",
+        HTTP_GET, [](AsyncWebServerRequest *request)
+        {
+            uint8_t count = MainModule::getInstance()->getEspNowCentralManager()->getSlavesCount();
+            request->send(200, "application/json", "{\"count\": " + String(count) + "}"); });
 
     server->on(
         "/set_refresh_rate",

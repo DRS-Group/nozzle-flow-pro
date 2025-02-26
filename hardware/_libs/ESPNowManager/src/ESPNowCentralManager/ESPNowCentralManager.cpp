@@ -189,9 +189,16 @@ void ESPNowCentralManager::removeAllSlaves()
         removePeer(this->slaves[i]);
     }
 
-    free(this->slaves);
-    this->slaves = nullptr;
-    this->slavesCount = 0;
+    if (this->slaves != nullptr)
+    {
+        free(this->slaves);
+        this->slaves = nullptr;
+        this->slavesCount = 0;
+        saveSlaves();
+    }
+}
 
-    saveSlaves();
+bool ESPNowCentralManager::isPairingEnabled()
+{
+    return isParingEnabled;
 }
