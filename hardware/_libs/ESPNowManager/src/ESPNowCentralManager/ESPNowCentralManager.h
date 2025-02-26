@@ -13,7 +13,7 @@ private:
 
     bool isParingEnabled = false;
 
-    macAddress_t *slaves;
+    macAddress_t *slaves = nullptr;
     uint8_t slavesCount = 0;
 
     static void onPairRequestReceived(const uint8_t *mac_addr, const uint8_t *data, int data_len);

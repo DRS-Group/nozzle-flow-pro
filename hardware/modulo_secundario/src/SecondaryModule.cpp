@@ -18,6 +18,13 @@ SecondaryModule::SecondaryModule()
 {
     addFlowmeter(22, 5000);
     addFlowmeter(14, 5000);
+    addFlowmeter(27, 5000);
+    addFlowmeter(26, 5000);
+    addFlowmeter(25, 5000);
+    addFlowmeter(33, 5000);
+    addFlowmeter(32, 5000);
+    addFlowmeter(35, 5000);
+    addFlowmeter(34, 5000);
 
     espNowManager->registerCallback(
         FLOWMETER_DATA_REQUEST,
