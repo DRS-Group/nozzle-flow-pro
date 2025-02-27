@@ -14,9 +14,23 @@ export interface IDataFecherService extends IBaseService<DataFecherServiceEvents
     setModuleMode: (value: number) => Promise<void>;
     getSecondaryModulesCount: () => Promise<number>;
     removeAllSecondaryModules: () => Promise<void>;
+
+    setSimulatedSpeed: (value: number) => Promise<void>;
+    setShouldSimulateSpeed: (value: boolean) => Promise<void>;
 }
 
 export class DataFecherService extends BaseService<DataFecherServiceEvents> implements IDataFecherService {
+    simulatedSpeed = 0;
+    shouldSimulateSpeed = false;
+
+    public setSimulatedSpeed = async (value: number): Promise<void> => {
+        this.simulatedSpeed = value;
+    }
+
+    public setShouldSimulateSpeed = async (value: boolean): Promise<void> => {
+        this.shouldSimulateSpeed = value;
+    }
+
     public fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
@@ -25,8 +39,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 .then(async (response) => {
                     const nozzles = await NozzlesService.getNozzles();
                     const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
-                    const active = response.data.active;
-                    const speed = response.data.speed;
+                    const speed = this.shouldSimulateSpeed ? this.simulatedSpeed : response.data.speed;
 
                     for (let i = 0; i < nozzles.length; i++) {
                         nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;

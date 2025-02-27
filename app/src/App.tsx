@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { BottomMenu } from './components/bottom-menu/bottom-menu.component';
 import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen';
 import { DataFecherService } from './services/data-fetcher.service';
@@ -25,6 +25,62 @@ import { CurrentJobService } from './services/current-job.service';
 import { PumpService } from './services/pump.service';
 import { usePump } from './hooks/usePump';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
+
+
+
+
+export type SpeedSimulatorElement = {
+}
+
+export type SpeedSimulatorProps = {
+}
+
+export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorProps>((props, ref) => {
+  const [speed, setSpeed] = useState<number>(3);
+  useImperativeHandle(ref, () => ({
+
+  }), []);
+
+  useEffect(() => {
+    services.dataFetcherService.setSimulatedSpeed(speed);
+  }, [speed]);
+
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'absolute',
+      top: 0,
+      right: '5rem',
+      left: '5rem',
+      height: '2rem',
+      zIndex: 100,
+      opacity: 0.5,
+    }}>
+      <input
+        type='checkbox' onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          services.dataFetcherService.setShouldSimulateSpeed(e.target.checked);
+        }}
+        style={{
+          marginRight: '0.5rem',
+          height: '1.25rem',
+          width: '1.25rem',
+        }}
+      />
+      <input type='range' min={0} max={5} defaultValue={speed} step={0.1} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        setSpeed(parseFloat(e.target.value));
+      }}
+        style={{
+          flexGrow: 1
+        }}
+      />
+      <span>{speed.toFixed(1)}m/s</span>
+    </div>
+  );
+});
+
+
 
 services.jobsService = new JobsService();
 services.currentJobService = new CurrentJobService();
@@ -146,65 +202,69 @@ function App() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      {
-        navigation.currentPage === 'menu' &&
-        <Menu />
-      }
-      {
-        navigation.currentPage === 'jobs' &&
-        <Jobs />
-      }
-      {
-        navigation.currentPage === 'createJob' &&
-        <CreateJob />
-      }
-      {
-        navigation.currentPage === 'dataView' &&
-        <DataView />
-      }
-      {
-        navigation.currentPage === 'nozzles' &&
-        <NozzlesView />
-      }
-      {
-        navigation.currentPage === 'settings' &&
-        <Settings />
-      }
-      {
-        navigation.currentPage === 'logs' &&
-        <Logs />
-      }
-      {
-        (
-          navigation.currentPage === 'dataView' ||
-          (navigation.currentPage === 'nozzles' && currentJob.job != null) ||
-          (navigation.currentPage === 'settings' && currentJob.job != null) ||
-          (navigation.currentPage === 'logs' && navigation.previousPage !== 'jobs')
-        ) &&
-        <BottomMenu />
-      }
-      {
-        admin.isPasswordSet === false &&
-        <TextInputDialog
-          title={translate("Set Admin Password")}
-          label={translate("Admin password")}
-          type="password"
-          onConfirmClick={(password) => {
-            admin.setPassword(password);
-          }}
-        />
-      }
-      {
-        currentJob.unviwedTriggeredEvents.length > 0 && pump.pumpState === 'on' &&
-        <AlertModal
-          event={currentJob.unviwedTriggeredEvents[0]}
-          onOkClick={() => { currentJob.markEventAsViewed(currentJob.unviwedTriggeredEvents[0].id) }}
-          onOkForAllClick={currentJob.markAllEventsAsViewed}
-          totalEvents={currentJob.unviwedTriggeredEvents.length}
-        />
-      }
-    </div>
+    <>
+      <SpeedSimulator />
+
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        {
+          navigation.currentPage === 'menu' &&
+          <Menu />
+        }
+        {
+          navigation.currentPage === 'jobs' &&
+          <Jobs />
+        }
+        {
+          navigation.currentPage === 'createJob' &&
+          <CreateJob />
+        }
+        {
+          navigation.currentPage === 'dataView' &&
+          <DataView />
+        }
+        {
+          navigation.currentPage === 'nozzles' &&
+          <NozzlesView />
+        }
+        {
+          navigation.currentPage === 'settings' &&
+          <Settings />
+        }
+        {
+          navigation.currentPage === 'logs' &&
+          <Logs />
+        }
+        {
+          (
+            navigation.currentPage === 'dataView' ||
+            (navigation.currentPage === 'nozzles' && currentJob.job != null) ||
+            (navigation.currentPage === 'settings' && currentJob.job != null) ||
+            (navigation.currentPage === 'logs' && navigation.previousPage !== 'jobs')
+          ) &&
+          <BottomMenu />
+        }
+        {
+          admin.isPasswordSet === false &&
+          <TextInputDialog
+            title={translate("Set Admin Password")}
+            label={translate("Admin password")}
+            type="password"
+            onConfirmClick={(password) => {
+              admin.setPassword(password);
+            }}
+          />
+        }
+        {
+          currentJob.unviwedTriggeredEvents.length > 0 && pump.pumpState === 'on' &&
+          <AlertModal
+            event={currentJob.unviwedTriggeredEvents[0]}
+            onOkClick={() => { currentJob.markEventAsViewed(currentJob.unviwedTriggeredEvents[0].id) }}
+            onOkForAllClick={currentJob.markAllEventsAsViewed}
+            totalEvents={currentJob.unviwedTriggeredEvents.length}
+          />
+        }
+      </div>
+    </>
   );
 }
 
