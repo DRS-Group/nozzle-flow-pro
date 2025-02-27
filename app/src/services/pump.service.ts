@@ -1,5 +1,6 @@
 import { services } from "../dependency-injection";
 import { BaseService, IBaseService } from "../types/base-service.type";
+import { Nozzle } from "../types/nozzle.type";
 import { IDataFecherService } from "./data-fetcher.service";
 
 export type PumpServiceEvents = 'onStateChanged' | 'onOverriddenStateChanged';
@@ -17,7 +18,8 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
     constructor() {
         super();
         this.dataFetcherService.addEventListener('onDataFetched', (data) => {
-            const state = data.active ? 'on' : 'off';
+            const isPumpActive = data.nozzles.find((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10);
+            const state = isPumpActive ? 'on' : 'off';
             if (state !== this.getState()) {
                 this.setState(state);
             }

@@ -1,7 +1,7 @@
 import { Nozzle } from "./nozzle.type";
 
 export type ESPData = {
-    active: boolean;
+    // active: boolean;
     speed: number;
     nozzles: Nozzle[];
 }

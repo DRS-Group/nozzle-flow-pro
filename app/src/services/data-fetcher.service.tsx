@@ -32,7 +32,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                         nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;
                     }
 
-                    const res: ESPData = { active: active, nozzles: nozzles, speed: speed };
+                    const res: ESPData = { nozzles: nozzles, speed: speed };
 
                     this.dispatchEvent('onDataFetched', res);
 
