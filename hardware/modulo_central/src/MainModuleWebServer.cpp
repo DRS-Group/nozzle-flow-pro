@@ -35,6 +35,7 @@ void MainModuleWebServer::setup()
     WiFi.softAPConfig(local_ip, gateway, subnet);
 
     this->setupEndpoints();
+    this->setupDefaultHeaders();
 }
 
 void MainModuleWebServer::setupEndpoints()
