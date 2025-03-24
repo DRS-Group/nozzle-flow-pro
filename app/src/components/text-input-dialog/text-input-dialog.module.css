@@ -14,7 +14,7 @@
 .wrapper {
     position: absolute;
     height: fit-content;
-    width: fit-content;
+    width: min(95vw, 50rem);
 
     background-color: var(--secondary-color);
 
@@ -24,9 +24,6 @@
 
     border-radius: 1rem;
     overflow: hidden;
-
-    max-width: 75vw;
-    width: 50vw;
 
     box-shadow: 0rem 0.1rem 0.25rem 0.25rem rgba(0, 0, 0, 0.15);
 }

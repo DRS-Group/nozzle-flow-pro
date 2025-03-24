@@ -227,6 +227,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {syncNozzlesDialogOpen &&
                 <NumberInputDialog
+                    unit='nozzles'
                     label={translate('Nozzle count')}
                     title={translate('Reset nozzles')}
                     onConfirmClick={(value) => {
@@ -297,6 +298,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {calibrateDialogOpen && calibrateDialogNozzleIndex !== null &&
                 <NumberInputDialog
+                    unit='pulses/L'
                     label={translate('Pulses/Liter')}
                     title={translate('Calibrate nozzle')}
                     onConfirmClick={async (value) => {
@@ -318,6 +320,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {calibrateDialogOpen && calibrateDialogNozzleIndex === null &&
                 <NumberInputDialog
+                    unit='pulses/L'
                     label={translate('Pulses/Liter')}
                     title={translate('Calibrate nozzles')}
                     onConfirmClick={async (value) => {

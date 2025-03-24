@@ -1,7 +1,8 @@
 import { useTranslate } from '../../hooks/useTranslate';
+import { KeyboardTextInput } from '../keyboard-text-input/keyboard-text-input.component';
 import { TextInput, TextInputElement } from '../text-input/text-input.component';
 import styles from './text-input-dialog.module.css';
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 export type TextInputDialogElement = {
 
@@ -17,25 +18,25 @@ export type TextInputDialogProps = {
 }
 
 export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialogProps>((props, ref) => {
-    const inputRef = useRef<TextInputElement>(null);
     const translate = useTranslate();
+
+    const [inputValue, setInputValue] = useState(props.defaultValue || '');
 
     useImperativeHandle(ref, () => ({
 
     }), []);
 
     const onConfirmClick = () => {
-        const name = inputRef.current!.getValue();
-        props.onConfirmClick(name);
+        props.onConfirmClick(inputValue);
     };
 
     const onCancelClick = () => {
         props.onCancelClick!();
     };
 
-    useEffect(() => {
-        inputRef?.current?.focus();
-    })
+    const onValueChange = (value: string) => {
+        setInputValue(value);
+    }
 
     return (
         <div className={styles.background}>
@@ -44,12 +45,17 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
                     <span>{props.title}</span>
                 </div>
                 <div className={styles.content}>
-                    <TextInput
+                    {/* <TextInput
                         label={props.label}
                         className={styles.input}
                         ref={inputRef}
                         value={props.defaultValue}
                         type={props.type}
+                    /> */}
+                    <KeyboardTextInput
+                        disabledKeys={['enter', 'numbers']}
+                        onValueChange={onValueChange}
+                        value={props.defaultValue}
                     />
                 </div>
                 <div className={styles.footer}>

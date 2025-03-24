@@ -1,7 +1,7 @@
 import styles from './number-input-dialog.module.css';
-import { NumberInput, NumberInputElement } from '../number-input/number-input.component';
-import { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
 import { useTranslate } from '../../hooks/useTranslate';
+import { KeyboardNumberInput } from '../keyboard-number-input/keyboard-number-input.component';
 
 export type NumberInputDialogElement = {
 
@@ -12,25 +12,31 @@ export type NumberInputDialogProps = {
     title: string,
     onConfirmClick: (value: number) => void,
     onCancelClick: () => void,
-    defaultValue?: number
+    defaultValue?: number,
+    unit?: string
+    decimals?: number
 }
 
 export const NumberInputDialog = forwardRef<NumberInputDialogElement, NumberInputDialogProps>((props, ref) => {
     const translate = useTranslate();
-    const inputRef = useRef<NumberInputElement>(null);
+
+    const [inputValue, setInputValue] = useState(props.defaultValue || 0);
 
     useImperativeHandle(ref, () => ({
 
     }), []);
 
     const onConfirmClick = () => {
-        const value = parseFloat(inputRef.current!.getValue());
-        props.onConfirmClick(value);
+        props.onConfirmClick(inputValue);
     };
 
     const onCancelClick = () => {
         props.onCancelClick();
     };
+
+    const onValueChange = (value: number) => {
+        setInputValue(value);
+    }
 
     return (
         <div className={styles.background}>
@@ -39,11 +45,18 @@ export const NumberInputDialog = forwardRef<NumberInputDialogElement, NumberInpu
                     <span>{props.title}</span>
                 </div>
                 <div className={styles.content}>
-                    <NumberInput
+                    {/* <NumberInput
                         label={props.label}
                         className={styles.input}
                         ref={inputRef}
                         value={props.defaultValue}
+                    /> */}
+                    <KeyboardNumberInput
+                        decimals={props.decimals}
+                        disabledKeys={['+', '-', '*', '/', '(', ')', '=', '.']}
+                        onValueChange={onValueChange}
+                        value={props.defaultValue}
+                        unit={props.unit}
                     />
                 </div>
                 <div className={styles.footer}>

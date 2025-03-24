@@ -510,8 +510,9 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
             }
             {refreshIntervalDialogOpen &&
                 <NumberInputDialog
+                    unit='ms'
                     title={translate('Set refresh interval')}
-                    label={translate('Refresh interval (ms)')}
+                    label={translate('Refresh interval')}
                     defaultValue={settings?.interval}
                     onConfirmClick={(value: number) => {
                         SettingsService.setInterval(value).then(() => {
@@ -528,6 +529,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
             }
             {nozzleSpacingDialogOpen &&
                 <NumberInputDialog
+                    unit='cm'
                     title={translate('Set nozzle spacing')}
                     label={translate('Nozzle spacing (cm)')}
                     defaultValue={(settings?.nozzleSpacing || 0.6) * 100}

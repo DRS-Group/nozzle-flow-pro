@@ -118,6 +118,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                         </div>
                     }
                     <span className={styles.jobTitle}>{currentJob.job?.title}</span>
+                    <span className={styles.jobExpectedFlow}>{currentJob.job?.expectedFlow * 10000} L/ha</span>
                 </div >
                 {ignoreNozzleDialogOpen &&
                     <YesNoDialog

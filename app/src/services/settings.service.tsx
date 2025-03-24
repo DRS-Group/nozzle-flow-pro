@@ -12,7 +12,7 @@ import { Network } from "@capacitor/network";
 
 export const defaultSettings: Settings = {
     language: 'en-us',
-    apiBaseUrl: 'http://192.168.4.1',
+    apiBaseUrl: 'http://192.168.0.1',
     primaryColor: '#466905',
     secondaryColor: '#ffffff',
     primaryFontColor: '#000000',

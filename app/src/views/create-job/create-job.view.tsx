@@ -78,6 +78,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         value={7000}
                         decimals={0}
                         ref={durationToleranceInputRef}
+                        unit='ms'
                     />
                     <NumberInput
                         label={translate('Expected flow (L/ha)')}
@@ -85,6 +86,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         value={2.5}
                         decimals={2}
                         ref={expectedFlowInputRef}
+                        unit='L/ha'
                     />
                     <NumberInput
                         label={translate('Variation margin (%)')}
@@ -92,6 +94,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         value={5}
                         decimals={2}
                         ref={flowToleranceInputRef}
+                        unit='%'
                     />
                 </div>
             </div>
