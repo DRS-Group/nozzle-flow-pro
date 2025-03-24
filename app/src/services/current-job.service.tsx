@@ -25,47 +25,46 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         super();
         this.jobsService = services.jobsService;
 
-        const refreshData = async (): Promise<void> => {
-            return new Promise(async (resolve, reject) => {
-                services.dataFetcherService.fetchData()
-                    .then(async (espData) => {
-                        await this.processNewData(espData);
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                    })
-                    .finally(() => {
-                        resolve();
-                    });
-            });
-        };
-
-        const loop = async () => {
-            if (this.currentJobId === null) {
-                setTimeout(() => {
-                    loop();
-                }, 100);
-                return;
-            };
-
-            const previousPage = services.navigationService.getPreviousPage();
-            const currentPage = services.navigationService.getCurrentPage();
-            if (previousPage === 'jobs' && currentPage !== 'createJob') return;
-
-            const refreshBegin = new Date();
-            await refreshData();
-            const refreshEnd = new Date();
-            const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
-            // const nextTimeout = 100 - refreshDuration;
-            const nextTimeout = 1000;
-
-            setTimeout(() => {
-                loop();
-            }, nextTimeout);
-        };
-
-        loop();
+        this.loop();
     }
+
+    refreshData = async (): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            services.dataFetcherService.fetchData()
+                .then(async (espData) => {
+                    await this.processNewData(espData);
+                })
+                .catch((error) => {
+                    console.error(error);
+                })
+                .finally(() => {
+                    resolve();
+                });
+        });
+    };
+
+    loop = async () => {
+        if (this.currentJobId === null) {
+            setTimeout(() => {
+                this.loop();
+            }, 100);
+            return;
+        };
+
+        const previousPage = services.navigationService.getPreviousPage();
+        const currentPage = services.navigationService.getCurrentPage();
+        if (previousPage === 'jobs' && currentPage !== 'createJob') return;
+
+        const refreshBegin = new Date();
+        await this.refreshData();
+        const refreshEnd = new Date();
+        const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
+        const nextTimeout = 100 - refreshDuration;
+
+        setTimeout(() => {
+            this.loop();
+        }, nextTimeout);
+    };
 
     setCurrentJob = (jobId: string | null) => {
         this.currentJobId = jobId;
@@ -105,11 +104,30 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
     }
 
     private processNewData = async (espData: ESPData) => {
+        const isPumpActive = services.pumpService.getState() === 'on';
+
+        if (!isPumpActive) {
+            const currentJob = await this.getCurrentJob();
+            if (!currentJob) return;
+
+            const ongoingEvents = currentJob.nozzleEvents.filter((event: NozzleEvent) => {
+                return event.endTime === undefined;
+            });
+
+            ongoingEvents.forEach((event: NozzleEvent) => {
+                event.endTime = new Date();
+            });
+
+            await this.jobsService.saveJob(currentJob);
+            this.dispatchEvent('onCurrentJobChanged', currentJob.id);
+            return;
+        }
+
         const calculateTargetValue = (job: Job, speed: number, nozzleSpacing: number) => {
             // Nozzle expected flow in liters per second;
             const expectedFlow = job.expectedFlow;
 
-            return (speed * nozzleSpacing * expectedFlow) / 1;
+            return (speed * nozzleSpacing * expectedFlow);
         };
 
         const currentLanguage: 'pt-br' | 'en-us' = await SettingsService.getSettingOrDefault('language', 'en-us');
@@ -187,8 +205,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
 
                     this.dispatchEvent('onNozzleEventTriggered', nozzleOngoingEvent);
                 }
-
-                if (isFlowWithinExpected) {
+                else if (isFlowWithinExpected) {
                     nozzleOngoingEvent.endTime = new Date();
                     shouldSaveJob = true;
                 }

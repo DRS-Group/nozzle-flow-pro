@@ -1,3 +1,4 @@
+import { usePump } from '../../hooks/usePump';
 import { SoundsService } from '../../services/sounds.service';
 import styles from './toggle-button.module.css';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
@@ -22,6 +23,8 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
     useEffect(() => {
         setButtonState(props.state || "auto");
     }, [props.state]);
+
+    const { pumpState } = usePump();
 
     const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         SoundsService.playClickSound();
@@ -75,7 +78,7 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
             onTouchEnd={onTouchEnd}
             onClick={onClick}
         >
-            <div className={styles.light}></div>
+            <div className={styles.light} data-pumpState={pumpState}></div>
             <span className={styles.label}>{getLabel()}</span>
         </div>
     )

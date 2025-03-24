@@ -1,13 +1,6 @@
-import { Preferences } from "@capacitor/preferences";
 import { Job } from "../types/job.type";
 import { BaseService, IBaseService } from "../types/base-service.type";
-import { NozzleEvent } from "../types/nozzle-event.type";
-import { ESPData } from "../types/ESP-data.type";
-import { SettingsService } from "./settings.service";
-import { DataFecherService } from "./data-fetcher.service";
-import { NavigationService } from "./navigation.service";
 import { JobRepository } from "../repositories/job.repository";
-import { services } from "../dependency-injection";
 
 export type JobsServiceEvents = 'onCurrentJobChanged' | 'onJobsChanged' | 'onCurrentJobNozzleEventsUpdated' | 'onNozzleEventTriggered';
 

@@ -255,7 +255,7 @@ function App() {
           />
         }
         {
-          currentJob.unviwedTriggeredEvents.length > 0 && pump.pumpState === 'on' &&
+          currentJob.unviwedTriggeredEvents.length > 0 &&
           <AlertModal
             event={currentJob.unviwedTriggeredEvents[0]}
             onOkClick={() => { currentJob.markEventAsViewed(currentJob.unviwedTriggeredEvents[0].id) }}
