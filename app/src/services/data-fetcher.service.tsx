@@ -3,7 +3,6 @@ import { NozzlesService } from './nozzles.service';
 import { SettingsService } from './settings.service';
 import { ESPData } from '../types/ESP-data.type';
 import { BaseService, IBaseService } from '../types/base-service.type';
-import { Preferences } from '@capacitor/preferences';
 
 export type DataFecherServiceEvents = 'onDataFetched';
 
@@ -52,7 +51,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                     resolve(res);
                 })
                 .catch((reason: any) => {
-                    alert(reason);
+                    alert('Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
                     setTimeout(() => {
                         reject(reason);
                     }, 5000);

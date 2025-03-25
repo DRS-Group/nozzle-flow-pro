@@ -395,8 +395,10 @@ const connectToAPIWifi = async () => {
 }
 
 setInterval(async () => {
-    const status = await Network.getStatus();
-    if (!status.connected) {
-        connectToAPIWifi();
-    }
+    if (Capacitor.getPlatform() === 'web') return;
+    CapacitorWifiConnect.getDeviceSSID().then((ssid) => {
+        if (ssid.value !== 'NOZZLE FLOW PRO') {
+            connectToAPIWifi();
+        }
+    });
 }, 1000);
