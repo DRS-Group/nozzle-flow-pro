@@ -47,6 +47,8 @@ public:
 
     void getLastFlowmeterData(flowmeters_data *result);
 
+    int getPendingFlowmetersDataCount();
+
     std::string macAddressToString(const macAddress_t mac_addr);
 
     void loop();

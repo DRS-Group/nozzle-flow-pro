@@ -1,4 +1,5 @@
 #include "MainModule.h"
+#include <esp_task_wdt.h>
 
 MainModule *MainModule::instance = nullptr;
 
@@ -73,15 +74,27 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
         return;
     }
 
-    for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
+    while (getPendingFlowmetersDataCount() > 0)
     {
-        uint8_t *mac_addr = (uint8_t *)malloc(6);
-        espNowCentralManager->getSlaveMacAddress(i, mac_addr);
+        for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
+        {
+            uint8_t *mac_addr = (uint8_t *)malloc(6);
+            espNowCentralManager->getSlaveMacAddress(i, mac_addr);
 
-        uint8_t messageType = FLOWMETER_DATA_REQUEST;
-        uint8_t *buffer = (uint8_t *)malloc(0);
+            if (this->lastFlowmetersDataRequestTimestamp < this->lastFlowmetersDataResponseTimestamps[macAddressToString(mac_addr)])
+            {
+                continue;
+            }
 
-        ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, 0);
+            uint8_t messageType = FLOWMETER_DATA_REQUEST;
+            uint8_t *buffer = (uint8_t *)malloc(0);
+
+            Serial.printf("Requesting data from %02X:%02X:%02X:%02X:%02X:%02X\n", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+            ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, 0);
+        }
+
+        esp_task_wdt_reset();
+        delay(250);
     }
 }
 
@@ -182,6 +195,21 @@ void MainModule::getLastFlowmeterData(flowmeters_data *result)
             index++;
         }
     }
+}
+
+int MainModule::getPendingFlowmetersDataCount()
+{
+    int count = 0;
+    for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
+    {
+        std::string mac_addr_str = espNowCentralManager->getSlaveMacAddress(i);
+        unsigned long lastResponseTimestamp = this->lastFlowmetersDataResponseTimestamps[mac_addr_str];
+        if (lastResponseTimestamp < this->lastFlowmetersDataRequestTimestamp)
+        {
+            count++;
+        }
+    }
+    return count;
 }
 
 std::string MainModule::macAddressToString(const macAddress_t mac_addr)
