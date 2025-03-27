@@ -124,10 +124,9 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         }
 
         const calculateTargetValue = (job: Job, speed: number, nozzleSpacing: number) => {
-            // Nozzle expected flow in liters per second;
             const expectedFlow = job.expectedFlow;
 
-            return (speed * nozzleSpacing * expectedFlow);
+            return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow);
         };
 
         const currentLanguage: 'pt-br' | 'en-us' = await SettingsService.getSettingOrDefault('language', 'en-us');
@@ -146,6 +145,9 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
 
         for (let nozzleIndex = 0; nozzleIndex < nozzles.length; nozzleIndex++) {
             const nozzle: Nozzle = nozzles[nozzleIndex];
+
+            if (nozzle.ignored) continue;
+
             const nozzleFlow = nozzle.pulsesPerMinute / nozzle.pulsesPerLiter;
 
             const isFlowAboveExpected = nozzleFlow > maxExpectedFlow;

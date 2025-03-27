@@ -92,10 +92,11 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
 
     const calculateTargetValue = () => {
         if (currentJob.job === null) return 0;
-        // Nozzle expected flow in liters per second;
-        const expectedFlow = currentJob.job.expectedFlow;
 
-        return (speed * nozzleSpacing * expectedFlow) / 1;
+        const expectedFlow = currentJob.job.expectedFlow;
+        debugger
+
+        return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow) / 60000;
     }
 
     return (
@@ -118,7 +119,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                         </div>
                     }
                     <span className={styles.jobTitle}>{currentJob.job?.title}</span>
-                    <span className={styles.jobExpectedFlow}>{currentJob.job?.expectedFlow * 10000} L/ha</span>
+                    <span className={styles.jobExpectedFlow}>{currentJob.job?.expectedFlow} L/ha</span>
                 </div >
                 {ignoreNozzleDialogOpen &&
                     <YesNoDialog
