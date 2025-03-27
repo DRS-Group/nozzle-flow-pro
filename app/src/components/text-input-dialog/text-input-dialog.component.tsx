@@ -53,7 +53,7 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
                         type={props.type}
                     /> */}
                     <KeyboardTextInput
-                        disabledKeys={['enter', 'numbers']}
+                        disabledKeys={['enter']}
                         onValueChange={onValueChange}
                         value={props.defaultValue}
                     />

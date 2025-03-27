@@ -34,7 +34,35 @@ enum KeyboardKey {
     Enter = 'enter',
     Numbers = 'numbers',
     Comma = ',',
-    Period = '.'
+    Period = '.',
+    One = '1',
+    Two = '2',
+    Three = '3',
+    Four = '4',
+    Five = '5',
+    Six = '6',
+    Seven = '7',
+    Eight = '8',
+    Nine = '9',
+    Zero = '0',
+    At = '@',
+    Hash = '#',
+    Dollar = '$',
+    Underscore = '_',
+    Ampersand = '&',
+    Minus = '-',
+    Plus = '+',
+    OpenParenthesis = '(',
+    CloseParenthesis = ')',
+    ForwardSlash = '/',
+    Asterisk = '*',
+    DoubleQuote = '"',
+    SingleQuote = "'",
+    Colon = ':',
+    Semicolon = ';',
+    Exclamation = '!',
+    Question = '?',
+    NormalKeyboard = 'normal',
 }
 
 export type KeyboardTextInputElement = {
@@ -48,7 +76,11 @@ export type KeyboardTextInputProps = {
 }
 
 export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTextInputProps>((props, ref) => {
-    const [isShift, setIsShift] = useState(false);
+    const [currentKeyboard, setCurrentKeyboard] = useState<'normal' | 'symbols'>('normal');
+
+    const [shiftState, setShiftState] = useState<'normal' | 'shift' | 'caps'>('normal');
+    const [shiftTimeout, setShiftTimeout] = useState<NodeJS.Timeout | null>(null);
+
     const [inputValue, setInputValue] = useState(props.value || '');
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -58,11 +90,25 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
     }), []);
 
     const onKeyClick = (key: string) => {
-        const nonCharacters = ['shift', 'backspace', 'space', 'enter', 'numbers'];
+        const nonCharacters = ['shift', 'backspace', 'space', 'enter', 'numbers', 'normal'];
         if (nonCharacters.includes(key)) {
             switch (key) {
                 case 'shift':
-                    setIsShift(!isShift);
+                    if (shiftState === 'normal') {
+                        setShiftState('shift');
+                        setShiftTimeout(setTimeout(() => {
+                            clearTimeout(shiftTimeout!);
+                            setShiftTimeout(null);
+                        }, 250));
+                    }
+                    else if (shiftState === 'shift' && shiftTimeout) {
+                        clearTimeout(shiftTimeout);
+                        setShiftTimeout(null);
+                        setShiftState('caps');
+                    }
+                    else if (shiftState === 'caps' || shiftState === 'shift') {
+                        setShiftState('normal');
+                    }
                     break;
                 case 'backspace':
                     setInputValue(inputValue.slice(0, -1));
@@ -73,13 +119,18 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
                 case 'enter':
                     break;
                 case 'numbers':
+                    setCurrentKeyboard(currentKeyboard === 'normal' ? 'symbols' : 'normal');
+                    break;
+                case 'normal':
+                    setCurrentKeyboard('normal');
                     break;
             }
             return;
         }
         else {
-            setInputValue(inputValue + (isShift ? key.toUpperCase() : key.toLowerCase()));
-            setIsShift(false);
+            setInputValue(inputValue + (['shift', 'caps'].includes(shiftState) ? key.toUpperCase() : key.toLowerCase()));
+            if (shiftState === 'shift')
+                setShiftState('normal');
         }
     }
 
@@ -103,14 +154,17 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
         return () => clearInterval(interval);
     }, []);
 
-    const getKeyboardRow = (keys: KeyboardKey[]) => {
+    const getKeyboardRow = (keys: KeyboardKey[] | KeyboardKey[]) => {
         return (
             <div className={styles.row}>
                 {keys.map(key => {
-                    let displayKey: string | JSX.Element = isShift && key.length === 1 ? key.toUpperCase() : key.toLowerCase();
+                    let displayKey: string | JSX.Element = ['shift', 'caps'].includes(shiftState) && key.length === 1 ? key.toUpperCase() : key.toLowerCase();
 
                     if (key === KeyboardKey.Numbers)
                         displayKey = '123';
+
+                    if (key === KeyboardKey.NormalKeyboard)
+                        displayKey = 'ABC';
 
                     if (key === KeyboardKey.Backspace)
                         displayKey = <i className='icon-backspace' />;
@@ -118,10 +172,13 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
                     if (key === KeyboardKey.Enter)
                         displayKey = <i className='icon-keyboard-return' />;
 
-                    if (key === KeyboardKey.Shift && !isShift)
-                        displayKey = <i className='icon-shift' />;
+                    if (key === KeyboardKey.Shift && shiftState === 'normal')
+                        displayKey = <i className='icon-shift-normal' />;
 
-                    if (key === KeyboardKey.Shift && isShift)
+                    if (key === KeyboardKey.Shift && shiftState === 'shift')
+                        displayKey = <i className='icon-shift-shifted' />;
+
+                    if (key === KeyboardKey.Shift && shiftState === 'caps')
                         displayKey = <i className='icon-caps' />;
 
                     return (
@@ -140,10 +197,22 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
                 defaultValue={props.value}
             />
             <div className={styles.keyboard}>
-                {getKeyboardRow([KeyboardKey.Q, KeyboardKey.W, KeyboardKey.E, KeyboardKey.R, KeyboardKey.T, KeyboardKey.Y, KeyboardKey.U, KeyboardKey.I, KeyboardKey.O, KeyboardKey.P])}
-                {getKeyboardRow([KeyboardKey.A, KeyboardKey.S, KeyboardKey.D, KeyboardKey.F, KeyboardKey.G, KeyboardKey.H, KeyboardKey.J, KeyboardKey.K, KeyboardKey.L])}
-                {getKeyboardRow([KeyboardKey.Shift, KeyboardKey.Z, KeyboardKey.X, KeyboardKey.C, KeyboardKey.V, KeyboardKey.B, KeyboardKey.N, KeyboardKey.M, KeyboardKey.Backspace])}
-                {getKeyboardRow([KeyboardKey.Numbers, KeyboardKey.Comma, KeyboardKey.Space, KeyboardKey.Period, KeyboardKey.Enter])}
+                {currentKeyboard === 'normal' &&
+                    <>
+                        {getKeyboardRow([KeyboardKey.Q, KeyboardKey.W, KeyboardKey.E, KeyboardKey.R, KeyboardKey.T, KeyboardKey.Y, KeyboardKey.U, KeyboardKey.I, KeyboardKey.O, KeyboardKey.P])}
+                        {getKeyboardRow([KeyboardKey.A, KeyboardKey.S, KeyboardKey.D, KeyboardKey.F, KeyboardKey.G, KeyboardKey.H, KeyboardKey.J, KeyboardKey.K, KeyboardKey.L])}
+                        {getKeyboardRow([KeyboardKey.Shift, KeyboardKey.Z, KeyboardKey.X, KeyboardKey.C, KeyboardKey.V, KeyboardKey.B, KeyboardKey.N, KeyboardKey.M, KeyboardKey.Backspace])}
+                        {getKeyboardRow([KeyboardKey.Numbers, KeyboardKey.Comma, KeyboardKey.Space, KeyboardKey.Period, KeyboardKey.Enter])}
+                    </>
+                }
+                {currentKeyboard === 'symbols' &&
+                    <>
+                        {getKeyboardRow([KeyboardKey.One, KeyboardKey.Two, KeyboardKey.Three, KeyboardKey.Four, KeyboardKey.Five, KeyboardKey.Six, KeyboardKey.Seven, KeyboardKey.Eight, KeyboardKey.Nine, KeyboardKey.Zero])}
+                        {getKeyboardRow([KeyboardKey.At, KeyboardKey.Hash, KeyboardKey.Dollar, KeyboardKey.Underscore, KeyboardKey.Ampersand, KeyboardKey.Minus, KeyboardKey.Plus, KeyboardKey.OpenParenthesis, KeyboardKey.CloseParenthesis, KeyboardKey.ForwardSlash])}
+                        {getKeyboardRow([KeyboardKey.Asterisk, KeyboardKey.DoubleQuote, KeyboardKey.SingleQuote, KeyboardKey.Colon, KeyboardKey.Semicolon, KeyboardKey.Exclamation, KeyboardKey.Question, KeyboardKey.Backspace])}
+                        {getKeyboardRow([KeyboardKey.NormalKeyboard, KeyboardKey.Comma, KeyboardKey.Space, KeyboardKey.Period, KeyboardKey.Enter])}
+                    </>
+                }
             </div>
         </div>
     )
