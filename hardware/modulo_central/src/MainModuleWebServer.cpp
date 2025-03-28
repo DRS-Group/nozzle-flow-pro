@@ -2,6 +2,7 @@
 #include "MainModule.h"
 #include <ArduinoJson.h>
 #include <GPS.h>
+#include <esp_task_wdt.h>
 
 MainModuleWebServer::MainModuleWebServer(const char *ssid, const char *password)
 {
@@ -106,10 +107,23 @@ void MainModuleWebServer::setupDefaultHeaders()
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
+    DefaultHeaders::Instance().addHeader("Connection", "keep-alive");
 }
 
 void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
 {
+
+    request->client()->onDisconnect(
+        [](void *arg, AsyncClient *client)
+        {
+            client->close(true);
+        });
+    request->client()->onError(
+        [](void *arg, AsyncClient *client, int8_t error)
+        {
+            client->close(true);
+        });
+
     MainModule *mainModule = MainModule::getInstance();
 
     bool canSendResponse = false;
@@ -133,12 +147,23 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
             String response;
             serializeJson(doc, response);
 
-            request->send(200, "application/json", response);
+            if (request->client()->connected())
+            {
+                request->send(200, "application/json", response);
+            }
+
             canSendResponse = true;
         });
 
     while (!canSendResponse)
     {
         delay(10);
+        esp_task_wdt_reset();
+    }
+
+    if (!request->client()->connected())
+    {
+        request->client()->close(true);
+        request->abort();
     }
 }
