@@ -59,7 +59,8 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         await this.refreshData();
         const refreshEnd = new Date();
         const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
-        const nextTimeout = 100 - refreshDuration;
+        const nextTimeout = 250 - refreshDuration;
+        // const nextTimeout = 250;
 
         setTimeout(() => {
             this.loop();
@@ -126,7 +127,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         const calculateTargetValue = (job: Job, speed: number, nozzleSpacing: number) => {
             const expectedFlow = job.expectedFlow;
 
-            return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow);
+            return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow) / 60000;
         };
 
         const currentLanguage: 'pt-br' | 'en-us' = await SettingsService.getSettingOrDefault('language', 'en-us');

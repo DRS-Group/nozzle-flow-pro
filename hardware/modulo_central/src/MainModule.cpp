@@ -51,10 +51,14 @@ void MainModule::onDataResponseReceived(const uint8_t *mac_addr, const uint8_t *
     {
         flowmeters_data allFlowmetersData;
         instance->getLastFlowmeterData(&allFlowmetersData);
-
         instance->callGetFlowmetersDataCallbacks(allFlowmetersData);
         instance->setLastFlowmetersDataRequestTimestamp(0);
+        for (auto &pair : instance->flowmetersData)
+        {
+            free(pair.second.flowmetersPulsesPerMinute);
+        }
         instance->flowmetersData.clear();
+        free(allFlowmetersData.flowmetersPulsesPerMinute);
     }
 
     free(flowmetersData.flowmetersPulsesPerMinute);
@@ -87,10 +91,11 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
             }
 
             uint8_t messageType = FLOWMETER_DATA_REQUEST;
-            uint8_t *buffer = (uint8_t *)malloc(0);
+            uint8_t *buffer = nullptr;
 
-            Serial.printf("Requesting data from %02X:%02X:%02X:%02X:%02X:%02X\n", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+            // Serial.printf("Requesting data from %02X:%02X:%02X:%02X:%02X:%02X\n", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
             ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, 0);
+            free(mac_addr);
         }
 
         esp_task_wdt_reset();

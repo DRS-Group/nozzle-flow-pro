@@ -18,7 +18,7 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
     constructor() {
         super();
         this.dataFetcherService.addEventListener('onDataFetched', (data) => {
-            const isPumpActive = data.nozzles.find((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10);
+            const isPumpActive = data.nozzles.find((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10 && !nozzle.ignored);
             const state = isPumpActive ? 'on' : 'off';
             if (state !== this.getState()) {
                 this.setState(state);

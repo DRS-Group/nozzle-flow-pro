@@ -11,7 +11,7 @@ const macAddress_t BROADCAST_MAC_ADDRESS = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 class ESPNowManager
 {
 public:
-    ESPNowManager();
+    ESPNowManager(bool debug = false);
     ~ESPNowManager();
 
     static ESPNowManager *getInstance();
@@ -24,6 +24,8 @@ private:
 
     void onReceiveData(const uint8_t *mac_addr, const uint8_t *dataBuffer, int len);
     void callOnReceiveCallbacks(uint8_t messageType, const uint8_t *mac_addr, const uint8_t *dataBuffer, int len);
+
+    bool debugMode = false;
 
 protected:
     void addPeer(const uint8_t *mac_addr);

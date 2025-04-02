@@ -107,22 +107,12 @@ void MainModuleWebServer::setupDefaultHeaders()
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
-    DefaultHeaders::Instance().addHeader("Connection", "keep-alive");
 }
 
+int count = 0;
 void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
 {
-
-    request->client()->onDisconnect(
-        [](void *arg, AsyncClient *client)
-        {
-            client->close(true);
-        });
-    request->client()->onError(
-        [](void *arg, AsyncClient *client, int8_t error)
-        {
-            client->close(true);
-        });
+    Serial.printf("Data request received: %d\n", count++);
 
     MainModule *mainModule = MainModule::getInstance();
 
@@ -147,9 +137,17 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
             String response;
             serializeJson(doc, response);
 
-            if (request->client()->connected())
+            try
             {
-                request->send(200, "application/json", response);
+
+                if (request->client()->connected())
+                {
+                    request->send(200, "application/json", response);
+                }
+            }
+            catch (const std::exception &e)
+            {
+                Serial.printf("Error sending response: %s\n", e.what());
             }
 
             canSendResponse = true;
@@ -159,11 +157,5 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
     {
         delay(10);
         esp_task_wdt_reset();
-    }
-
-    if (!request->client()->connected())
-    {
-        request->client()->close(true);
-        request->abort();
     }
 }

@@ -5,7 +5,7 @@
 class ESPNowCentralManager : ESPNowManager
 {
 public:
-    ESPNowCentralManager();
+    ESPNowCentralManager(bool debug = false);
     ~ESPNowCentralManager();
 
 private:

@@ -378,25 +378,31 @@ export namespace SettingsService {
     }
 }
 
+let isConnecting = false;
+
 const connectToAPIWifi = async () => {
+    if (isConnecting) return;
+    isConnecting = true;
+
     let { value } = await CapacitorWifiConnect.checkPermission();
     if (value === 'prompt') {
         const data = await CapacitorWifiConnect.requestPermission();
         value = data.value;
     }
     if (value === 'granted') {
-        CapacitorWifiConnect.secureConnect({
+        await CapacitorWifiConnect.secureConnect({
             ssid: 'NOZZLE FLOW PRO',
             password: '123456789',
         });
     } else {
         throw new Error('permission denied');
     }
+    isConnecting = false;
 }
 
 setInterval(async () => {
     if (Capacitor.getPlatform() === 'web') return;
-    CapacitorWifiConnect.getDeviceSSID().then((ssid) => {
+    CapacitorWifiConnect.getAppSSID().then((ssid) => {
         if (ssid.value !== 'NOZZLE FLOW PRO') {
             connectToAPIWifi();
         }

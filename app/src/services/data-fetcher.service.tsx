@@ -3,6 +3,7 @@ import { NozzlesService } from './nozzles.service';
 import { SettingsService } from './settings.service';
 import { ESPData } from '../types/ESP-data.type';
 import { BaseService, IBaseService } from '../types/base-service.type';
+import { CapacitorHttpPluginWeb, HttpResponse } from '@capacitor/core/types/core-plugins';
 
 export type DataFecherServiceEvents = 'onDataFetched';
 
@@ -33,28 +34,45 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
     public fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+
             CapacitorHttp
-                .get({ url: `${ApiBaseUri}/data`, connectTimeout: 5000 })
-                .then(async (response) => {
-                    const nozzles = await NozzlesService.getNozzles();
-                    const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
-                    const speed = this.shouldSimulateSpeed ? this.simulatedSpeed : response.data.speed;
+                .get({ url: `${ApiBaseUri}/data`, connectTimeout: 60000 })
+                .then(
+                    async (response: HttpResponse) => {
+                        const nozzles = await NozzlesService.getNozzles();
+                        const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
+                        const speed = this.shouldSimulateSpeed ? this.simulatedSpeed : response.data.speed;
 
-                    for (let i = 0; i < nozzles.length; i++) {
-                        nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;
+                        for (let i = 0; i < nozzles.length; i++) {
+                            nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;
+                        }
+
+                        const res: ESPData = { nozzles: nozzles, speed: speed };
+
+                        this.dispatchEvent('onDataFetched', res);
+
+                        resolve(res);
+                    },
+                    (reason: any) => {
+                        if (reason && reason.code === 'SocketTimeoutException') {
+                            alert('Timout');
+                            reject(reason);
+                        }
+
+                        console.error(reason);
+                        // alert('||| Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
+                        alert('Ocorreu um erro de comunicação: ' + JSON.stringify(reason));
+                        setTimeout(() => {
+                            reject(reason);
+                        }, 1000);
                     }
-
-                    const res: ESPData = { nozzles: nozzles, speed: speed };
-
-                    this.dispatchEvent('onDataFetched', res);
-
-                    resolve(res);
-                })
+                )
                 .catch((reason: any) => {
-                    alert('Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
+                    // alert('Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
+                    alert(JSON.stringify(reason));
                     setTimeout(() => {
                         reject(reason);
-                    }, 5000);
+                    }, 1000);
                 });
         });
     }

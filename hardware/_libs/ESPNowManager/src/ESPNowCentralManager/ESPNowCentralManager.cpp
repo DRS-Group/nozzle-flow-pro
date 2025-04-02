@@ -1,6 +1,6 @@
 #include "ESPNowCentralManager.h"
 
-ESPNowCentralManager::ESPNowCentralManager() : ESPNowManager()
+ESPNowCentralManager::ESPNowCentralManager(bool debug) : ESPNowManager(debug)
 {
     preferences = new Preferences();
     preferences->begin("espnow", false);
@@ -144,7 +144,7 @@ ESPNowCentralManager *ESPNowCentralManager::getInstance()
 {
     if (instance == nullptr)
     {
-        instance = new ESPNowCentralManager();
+        instance = new ESPNowCentralManager(true);
     }
     return static_cast<ESPNowCentralManager *>(instance);
 }

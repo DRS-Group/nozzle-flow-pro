@@ -3,7 +3,7 @@
 
 ESPNowManager *ESPNowManager::instance = nullptr;
 
-ESPNowManager::ESPNowManager()
+ESPNowManager::ESPNowManager(bool debug)
 {
     // if (WiFi.getMode() == WIFI_AP)
     // {
@@ -38,7 +38,8 @@ ESPNowManager *ESPNowManager::getInstance()
 
 void ESPNowManager::onReceiveData(const uint8_t *mac_addr, const uint8_t *dataBuffer, int len)
 {
-    Serial.printf("Received message of type %d from %02X:%02X:%02X:%02X:%02X:%02X\n", dataBuffer[0], mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+    if (debugMode)
+        Serial.printf("Received message of type %d from %02X:%02X:%02X:%02X:%02X:%02X\n", dataBuffer[0], mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
 
     const uint8_t messageType = dataBuffer[0];
 
@@ -77,7 +78,8 @@ void ESPNowManager::sendBuffer(const uint8_t *address, uint8_t messageType, cons
     esp_now_send(reinterpret_cast<const uint8_t *>(address), newBuffer, size + 1);
     delete[] newBuffer;
 
-    Serial.printf("Sent message of type %d to %02X:%02X:%02X:%02X:%02X:%02X\n", messageType, address[0], address[1], address[2], address[3], address[4], address[5]);
+    if (debugMode)
+        Serial.printf("Sent message of type %d to %02X:%02X:%02X:%02X:%02X:%02X\n", messageType, address[0], address[1], address[2], address[3], address[4], address[5]);
 }
 
 void ESPNowManager::registerCallback(uint8_t messageType, esp_now_recv_cb_t callback)
