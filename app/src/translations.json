@@ -330,5 +330,9 @@
     {
         "en-us": "Loading...",
         "pt-br": "Carregando..."
+    },
+    {
+        "en-us": "Not connected to Central Module",
+        "pt-br": "Não conectado ao Módulo Central"
     }
 ]

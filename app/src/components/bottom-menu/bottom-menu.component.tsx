@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useImperativeHandle, useState } from "react"
+import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from "react"
 import styles from './bottom-menu.module.css';
 import { ToggleButton } from "../toggle-button/toggle-button.component";
 import { useTranslate } from "../../hooks/useTranslate";
@@ -6,6 +6,7 @@ import { NavigationService } from "../../services/navigation.service";
 import { useCurrentJob } from "../../hooks/useCurrentJob";
 import { useNavigation } from "../../hooks/useNavigation";
 import { usePump } from "../../hooks/usePump";
+import { SettingsService } from "../../services/settings.service";
 
 export type BottomMenuElement = {
 

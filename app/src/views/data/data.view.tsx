@@ -34,6 +34,19 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const [ignoreNozzleDialogNozlleIndex, setIgnoreNozzleDialogNozzleIndex] = useState<number | null>(null);
     const [unignoreNozzleDialogNozlleIndex, setUnignoreNozzleDialogNozzleIndex] = useState<number | null>(null);
 
+    const [isConnectedToWifi, setIsConnectedToWifi] = useState<boolean>(SettingsService.isConnectedToWifi());
+
+    useEffect(() => {
+        const onConnectionStateChanged = (state: boolean) => {
+            setIsConnectedToWifi(state);
+        }
+
+        SettingsService.addEventListener('onConnectionStateChanged', onConnectionStateChanged);
+        return () => {
+            SettingsService.removeEventListener('onConnectionStateChanged', onConnectionStateChanged);
+        }
+    }, []);
+
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -162,11 +175,16 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                     />
                 }
             </>)}
-            {currentJob.job && nozzles === undefined && (
+            {isConnectedToWifi && currentJob.job && nozzles === undefined && (
                 <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <span>{translate('Loading...')}</span>
                 </div>
             )}
+            {!isConnectedToWifi &&
+                <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <span>{translate('Not connected to Central Module')}</span>
+                </div>
+            }
         </>
     )
 });

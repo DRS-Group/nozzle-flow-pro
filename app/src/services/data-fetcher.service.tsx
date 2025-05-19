@@ -33,6 +33,11 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
 
     public fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
+            if (!SettingsService.isConnectedToWifi()) {
+                resolve({nozzles: [], speed: 0} as ESPData)
+                return;
+            }
+
             const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
 
             CapacitorHttp

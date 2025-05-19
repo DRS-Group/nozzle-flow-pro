@@ -28,6 +28,9 @@ export const defaultSettings: Settings = {
 export namespace SettingsService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
     let isAdmin: boolean = false;
+    let _isConnectedToWifi = false;
+    export const isConnectedToWifi = () => _isConnectedToWifi;
+    export const setIsConnectedToWifi = (value: boolean) => _isConnectedToWifi = value;
 
     export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
         const listeners = eventListeners.get(eventName) || [];
@@ -399,6 +402,36 @@ const connectToAPIWifi = async () => {
     }
     isConnecting = false;
 }
+
+Network.addListener('networkStatusChange', async (status) => {
+    if (status.connected) {
+        const ssid = await CapacitorWifiConnect.getAppSSID();
+        if (ssid.value !== 'NOZZLE FLOW PRO') {
+            SettingsService.setIsConnectedToWifi(false);
+            SettingsService.dispatchEvent('onNetworkStatusChange', false);
+            connectToAPIWifi();
+        }
+        else {
+            SettingsService.setIsConnectedToWifi(true);
+            SettingsService.dispatchEvent('onNetworkStatusChange', true);
+        }
+    }
+    else {
+        SettingsService.setIsConnectedToWifi(false);
+        SettingsService.dispatchEvent('onNetworkStatusChange', false);
+    }
+});
+
+CapacitorWifiConnect.getAppSSID().then((ssid) => {
+    if (ssid.value === 'NOZZLE FLOW PRO') {
+        SettingsService.setIsConnectedToWifi(true);
+        SettingsService.dispatchEvent('onNetworkStatusChange', true);
+    } else {
+        SettingsService.setIsConnectedToWifi(false);
+        SettingsService.dispatchEvent('onNetworkStatusChange', false);
+        connectToAPIWifi();
+    }
+});
 
 setInterval(async () => {
     if (Capacitor.getPlatform() === 'web') return;
