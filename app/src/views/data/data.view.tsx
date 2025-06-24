@@ -107,8 +107,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         if (currentJob.job === null) return 0;
 
         const expectedFlow = currentJob.job.expectedFlow;
-        debugger
-
+        
         return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow) / 60000;
     }
 

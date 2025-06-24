@@ -440,4 +440,4 @@ setInterval(async () => {
             connectToAPIWifi();
         }
     });
-}, 1000);
+}, 100);

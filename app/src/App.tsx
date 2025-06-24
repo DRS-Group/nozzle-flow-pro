@@ -1,9 +1,7 @@
-import { createContext, forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { BottomMenu } from './components/bottom-menu/bottom-menu.component';
-import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen';
 import { DataFecherService } from './services/data-fetcher.service';
 import { DataView } from './views/data/data.view';
-import { Nozzle } from './types/nozzle.type';
 import { Menu } from './views/menu/menu.view';
 import { Jobs } from './views/jobs/jobs.view';
 import { CreateJob } from './views/create-job/create-job.view';
@@ -18,15 +16,18 @@ import { useAdmin } from './hooks/useAdmin';
 import { TextInputDialog } from './components/text-input-dialog/text-input-dialog.component';
 import { useTranslate } from './hooks/useTranslate';
 import { services } from './dependency-injection';
-import { NozzlesService } from './services/nozzles.service';
 import { JobsService } from './services/jobs.service';
 import { NavigationService } from './services/navigation.service';
 import { CurrentJobService } from './services/current-job.service';
 import { PumpService } from './services/pump.service';
 import { usePump } from './hooks/usePump';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
+import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen';
 
 
+AndroidFullScreen.isImmersiveModeSupported()
+  .then(() => AndroidFullScreen.immersiveMode())
+  .catch(() => { });
 
 
 export type SpeedSimulatorElement = {
@@ -80,17 +81,11 @@ export const SpeedSimulator = forwardRef<SpeedSimulatorElement, SpeedSimulatorPr
   );
 });
 
-
-
 services.jobsService = new JobsService();
 services.currentJobService = new CurrentJobService();
 services.navigationService = new NavigationService();
 services.dataFetcherService = new DataFecherService();
 services.pumpService = new PumpService();
-
-AndroidFullScreen.isImmersiveModeSupported()
-  .then(() => AndroidFullScreen.immersiveMode())
-  .catch(() => { });
 
 function App() {
   const navigation = useNavigation();

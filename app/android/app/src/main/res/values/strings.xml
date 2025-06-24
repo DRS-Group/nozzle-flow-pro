@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">nozzleflow-pro</string>
-    <string name="title_activity_main">nozzleflow-pro</string>
-    <string name="package_name">com.drsgroup.nozzleflowpro</string>
-    <string name="custom_url_scheme">com.drsgroup.nozzleflowpro</string>
+    <string name="app_name">D-Flow</string>
+    <string name="title_activity_main">D-Flow</string>
+    <string name="package_name">com.drsgroup.dflow</string>
+    <string name="custom_url_scheme">com.drsgroup.dflow</string>
 </resources>

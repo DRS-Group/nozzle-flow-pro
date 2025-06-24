@@ -65,7 +65,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                         // }
 
                         // alert('||| Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
-                        alert('Ocorreu um erro de comunicação: ' + JSON.stringify(reason) + '\n\nCaso o erro persista, entre em contato com o número: (61) 92000-0471 (Gustavo Peres da DRS).');
+                        alert('Ocorreu um erro de comunicação: ' + JSON.stringify(reason) + '\n\nCaso o erro persista, entre em contato com o suporte.');
                         setTimeout(() => {
                             reject(reason);
                         }, 1000);
@@ -73,7 +73,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 )
                 .catch((reason: any) => {
                     // alert('Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
-                    alert(JSON.stringify(reason) + '\n\nCaso o erro persista, entre em contato com o número: (61) 92000-0471 (Gustavo Peres da DRS).');
+                    alert(JSON.stringify(reason) + '\n\nCaso o erro persista, entre em contato com suporte.');
                     setTimeout(() => {
                         reject(reason);
                     }, 1000);

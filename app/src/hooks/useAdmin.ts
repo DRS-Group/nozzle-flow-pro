@@ -4,7 +4,7 @@ import { SettingsService } from "../services/settings.service";
 
 export function useAdmin() {
     const [isAdmin, setIsAdmin] = useState<boolean>(true);
-    const [isPasswordSet, setIsPasswordSet] = useState<boolean>(false);
+    const [isPasswordSet, setIsPasswordSet] = useState<boolean>(true);
 
     useEffect(() => {
         setIsAdmin(SettingsService.getIsAdmin());

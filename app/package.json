@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@awesome-cordova-plugins/android-full-screen": "^6.8.0",
+    "@awesome-cordova-plugins/android-full-screen": "^8.0.2",
     "@capacitor/android": "^6.1.2",
     "@capacitor/core": "^6.1.2",
     "@capacitor/filesystem": "^6.0.1",

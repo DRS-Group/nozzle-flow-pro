@@ -44,7 +44,7 @@
 }
 
 .table td {
-    background-color: var(--secondary-color);
+    /* background-color: var(--secondary-color); */
     padding: 10px;
     text-align: center;
 }
@@ -55,6 +55,14 @@
 
 .table tr {
     border-bottom: 0.1rem solid rgb(194, 194, 194);
+}
+
+.table tr:nth-child(odd) {
+    background-color: var(--secondary-color);
+}
+
+.table tr:nth-child(even) {
+    background-color: #d0d0d0;
 }
 
 .confirmButton {

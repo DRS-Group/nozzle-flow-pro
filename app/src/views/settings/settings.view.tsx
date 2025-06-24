@@ -278,7 +278,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 </div>
                                 <div className={styles.itemRight}>
                                     <div className={styles.itemValue}>
-                                        <span>{(settings?.nozzleSpacing || 0.6) * 100}cm</span>
+                                        <span>{parseFloat(((settings?.nozzleSpacing || 0.6) * 100).toFixed(2))}cm</span>
                                     </div>
                                     <i className="icon-thin-chevron-right"></i>
                                 </div>

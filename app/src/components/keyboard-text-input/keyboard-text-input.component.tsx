@@ -182,7 +182,7 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
                         displayKey = <i className='icon-caps' />;
 
                     return (
-                        <button key={key} data-key={key} onClick={() => onKeyClick(key)} disabled={props.disabledKeys?.includes(key)}>{displayKey}</button>
+                        <button key={key} data-key={key} onPointerDown={() => onKeyClick(key)} disabled={props.disabledKeys?.includes(key)}>{displayKey}</button>
                     )
                 })}
             </div>
