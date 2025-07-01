@@ -37,13 +37,13 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const [isConnectedToWifi, setIsConnectedToWifi] = useState<boolean>(SettingsService.isConnectedToWifi());
 
     useEffect(() => {
-        const onConnectionStateChanged = (state: boolean) => {
+        const onNetworkStatusChange = (state: boolean) => {
             setIsConnectedToWifi(state);
         }
 
-        SettingsService.addEventListener('onConnectionStateChanged', onConnectionStateChanged);
+        SettingsService.addEventListener('onNetworkStatusChange', onNetworkStatusChange);
         return () => {
-            SettingsService.removeEventListener('onConnectionStateChanged', onConnectionStateChanged);
+            SettingsService.removeEventListener('onNetworkStatusChange', onNetworkStatusChange);
         }
     }, []);
 
@@ -107,13 +107,13 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         if (currentJob.job === null) return 0;
 
         const expectedFlow = currentJob.job.expectedFlow;
-        
+
         return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow) / 60000;
     }
 
     return (
         <>
-            {currentJob.job && nozzles !== undefined && (<>
+            {currentJob.job && nozzles !== undefined && isConnectedToWifi && (<>
                 <div className={styles.wrapper}>
                     {nozzles.length >= 1 &&
                         <BarChart
