@@ -11,4 +11,6 @@ export type Settings = {
     areaUnit: string;
     interval: number;
     useDefaultLogo: boolean;
+    shouldSimulateSpeed: boolean;
+    simulatedSpeed: number;
 }

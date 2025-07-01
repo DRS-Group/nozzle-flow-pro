@@ -14,27 +14,13 @@ export interface IDataFecherService extends IBaseService<DataFecherServiceEvents
     setModuleMode: (value: number) => Promise<void>;
     getSecondaryModulesCount: () => Promise<number>;
     removeAllSecondaryModules: () => Promise<void>;
-
-    setSimulatedSpeed: (value: number) => Promise<void>;
-    setShouldSimulateSpeed: (value: boolean) => Promise<void>;
 }
 
 export class DataFecherService extends BaseService<DataFecherServiceEvents> implements IDataFecherService {
-    simulatedSpeed = 0;
-    shouldSimulateSpeed = false;
-
-    public setSimulatedSpeed = async (value: number): Promise<void> => {
-        this.simulatedSpeed = value;
-    }
-
-    public setShouldSimulateSpeed = async (value: boolean): Promise<void> => {
-        this.shouldSimulateSpeed = value;
-    }
-
     public fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
             if (!SettingsService.isConnectedToWifi()) {
-                resolve({nozzles: [], speed: 0} as ESPData)
+                resolve({ nozzles: [], speed: 0 } as ESPData)
                 return;
             }
 
@@ -44,9 +30,13 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 .get({ url: `${ApiBaseUri}/data`, connectTimeout: 60000 })
                 .then(
                     async (response: HttpResponse) => {
+
+                        const shouldSimulateSpeed = await SettingsService.getShouldSimulateSpeed();
+                        const simulatedSpeed = (await SettingsService.getSimulatedSpeed()) / 3.6; // Convert from m/s to km/h
+
                         const nozzles = await NozzlesService.getNozzles();
                         const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
-                        const speed = this.shouldSimulateSpeed ? this.simulatedSpeed : response.data.speed;
+                        const speed = shouldSimulateSpeed ? simulatedSpeed : response.data.speed;
 
                         for (let i = 0; i < nozzles.length; i++) {
                             nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;

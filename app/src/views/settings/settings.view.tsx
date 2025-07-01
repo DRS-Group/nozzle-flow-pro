@@ -47,6 +47,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [volumeUnitContextMenuPosition, setVolumeUnitContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [areaUnitContextMenuPosition, setAreaUnitContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [moduleModeContextMenuPosition, setModuleModeContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
+    const [simulatedSpeedContextMenuPosition, setSimulatedSpeedContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
 
     useImperativeHandle(ref, () => ({
 
@@ -104,6 +105,15 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
         const y = e.nativeEvent.clientY;
 
         setLanguageContextMenuPosition({ x, y });
+    }
+
+    const onSimulatedSpeedClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        const x = e.nativeEvent.clientX;
+        const y = e.nativeEvent.clientY;
+
+        setSimulatedSpeedContextMenuPosition({ x, y });
     }
 
     const onInterfaceScaleClick = (e: React.MouseEvent) => {
@@ -293,6 +303,19 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             <div className={styles.itemRight}>
                                 <div className={styles.itemValue}>
                                     <span>{settings?.language}</span>
+                                </div>
+                                <i className="icon-unfold-more-horizontal"></i>
+                            </div>
+                        </div>
+                        <div className={styles.item}
+                            onClick={onSimulatedSpeedClick}
+                        >
+                            <div className={styles.itemLeft}>
+                                <span className={styles.itemName}>{translate('Simulated speed')}</span>
+                            </div>
+                            <div className={styles.itemRight}>
+                                <div className={styles.itemValue}>
+                                    <span>{settings?.shouldSimulateSpeed ? translate('Yes') : translate('No')}</span>
                                 </div>
                                 <i className="icon-unfold-more-horizontal"></i>
                             </div>
@@ -640,6 +663,40 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     onBackgroundClick={onContextMenuBackgroundClick}
                 />
             }
+
+            {simulatedSpeedContextMenuPosition &&
+                <ContextMenu
+                    items={[
+                        {
+                            label: translate('Yes'),
+                            onClick: () => {
+                                SettingsService.setShouldSimulateSpeed(true).then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        },
+                        {
+                            label: translate('No'),
+                            onClick: () => {
+                                SettingsService.setShouldSimulateSpeed(false).then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        }
+                    ]}
+                    position={simulatedSpeedContextMenuPosition}
+
+                    onBackgroundClick={() => {
+                        setSimulatedSpeedContextMenuPosition(null);
+                    }}
+                />
+            }
+
+
             {volumeUnitContextMenuPosition &&
                 <ContextMenu
                     items={[

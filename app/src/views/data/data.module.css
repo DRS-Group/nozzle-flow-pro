@@ -4,6 +4,9 @@
     display: flex;
     overflow: hidden;
     background-color: var(--secondary-color);
+    flex-grow: 1;
+    flex-direction: column;
+    position: relative;
 }
 
 .syncWrapper {

@@ -10,6 +10,7 @@ import { useTranslate } from "../../hooks/useTranslate";
 import { useNavigation } from "../../hooks/useNavigation";
 import { useCurrentJob } from "../../hooks/useCurrentJob";
 import { services } from "../../dependency-injection";
+import { SimulatedSpeed } from "../../components/simulated-speed/simulated-speen.component";
 
 export type DataViewElement = {
 
@@ -35,6 +36,23 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const [unignoreNozzleDialogNozlleIndex, setUnignoreNozzleDialogNozzleIndex] = useState<number | null>(null);
 
     const [isConnectedToWifi, setIsConnectedToWifi] = useState<boolean>(SettingsService.isConnectedToWifi());
+
+    const [shouldSimulateSpeed, setShouldSimulateSpeed] = useState<boolean>(false);
+
+    useEffect(() => {
+        SettingsService.getShouldSimulateSpeed().then((value) => {
+            setShouldSimulateSpeed(value);
+        });
+
+        const onShouldSimulateSpeedChange = (state: boolean) => {
+            setShouldSimulateSpeed(state);
+        }
+
+        SettingsService.addEventListener('onShouldSimulateSpeedChange', onShouldSimulateSpeedChange);
+        return () => {
+            SettingsService.removeEventListener('onShouldSimulateSpeedChange', onShouldSimulateSpeedChange);
+        }
+    }, []);
 
     useEffect(() => {
         const onNetworkStatusChange = (state: boolean) => {
@@ -104,6 +122,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     }
 
     const calculateTargetValue = () => {
+        debugger;
         if (currentJob.job === null) return 0;
 
         const expectedFlow = currentJob.job.expectedFlow;
@@ -113,76 +132,87 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
 
     return (
         <>
-            {currentJob.job && nozzles !== undefined && isConnectedToWifi && (<>
+            {currentJob.job && (<>
+                {shouldSimulateSpeed && <SimulatedSpeed />}
                 <div className={styles.wrapper}>
-                    {nozzles.length >= 1 &&
-                        <BarChart
-                            chartData={chartData}
-                            targetValue={calculateTargetValue()}
-                            tolerance={currentJob.job!.tolerance}
-                            onClick={onBarClick}
-                        ></BarChart>
+                    {nozzles !== undefined && isConnectedToWifi && (<>
+                        {
+                            nozzles.length >= 1 &&
+                            <BarChart
+                                chartData={chartData}
+                                targetValue={calculateTargetValue()}
+                                tolerance={currentJob.job!.tolerance}
+                                onClick={onBarClick}
+                            ></BarChart>
+                        }
+                        {nozzles.length === 0 &&
+                            <div className={styles.syncWrapper}>
+                                <span>{translate('There is no registered nozzle.')}</span>
+                                <span>{translate('Click the button bellow to go to nozzles page.')}</span>
+                                <button className={styles.syncButton} onClick={onSyncClick}>{translate('Nozzles')}</button>
+                            </div>
+                        }
+                    </>)
                     }
-                    {nozzles.length === 0 &&
-                        <div className={styles.syncWrapper}>
-                            <span>{translate('There is no registered nozzle.')}</span>
-                            <span>{translate('Click the button bellow to go to nozzles page.')}</span>
-                            <button className={styles.syncButton} onClick={onSyncClick}>{translate('Nozzles')}</button>
+                    {
+                        isConnectedToWifi && currentJob.job && nozzles === undefined && (
+                            <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <span>{translate('Loading...')}</span>
+                            </div>
+                        )
+                    }
+                    {
+                        !isConnectedToWifi &&
+                        <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <span>{translate('Not connected to Central Module')}</span>
                         </div>
                     }
                     <span className={styles.jobTitle}>{currentJob.job?.title}</span>
                     <span className={styles.jobExpectedFlow}>{currentJob.job?.expectedFlow} L/ha</span>
-                </div >
-                {ignoreNozzleDialogOpen &&
-                    <YesNoDialog
-                        title={translate('Ignore nozzle')}
-                        message={translate('Are you sure you want to ignore this nozzle?')}
-                        onYesClick={() => {
-                            if (ignoreNozzleDialogNozlleIndex === null) return;
-                            const nozzle = nozzles[ignoreNozzleDialogNozlleIndex];
-                            nozzle.ignored = true;
-                            NozzlesService.updateNozzle(nozzle, ignoreNozzleDialogNozlleIndex);
-
-                            setIgnoreNozzleDialogOpen(false);
-                            setIgnoreNozzleDialogNozzleIndex(null);
-                        }}
-
-                        onNoClick={() => {
-                            setIgnoreNozzleDialogOpen(false);
-                            setIgnoreNozzleDialogNozzleIndex(null);
-                        }}
-                    />
-                }
-                {unignoreNozzleDialogOpen &&
-                    <YesNoDialog
-                        title={translate('Unignore nozzle')}
-                        message={translate('Are you sure you want to unignore this nozzle?')}
-                        onYesClick={() => {
-                            if (unignoreNozzleDialogNozlleIndex === null) return;
-                            const nozzle = nozzles[unignoreNozzleDialogNozlleIndex];
-                            nozzle.ignored = false;
-                            NozzlesService.updateNozzle(nozzle, unignoreNozzleDialogNozlleIndex);
-
-                            setUnignoreNozzleDialogOpen(false);
-                            setUnignoreNozzleDialogNozzleIndex(null);
-                        }}
-
-                        onNoClick={() => {
-                            setUnignoreNozzleDialogOpen(false);
-                            setUnignoreNozzleDialogNozzleIndex(null);
-                        }}
-                    />
-                }
-            </>)}
-            {isConnectedToWifi && currentJob.job && nozzles === undefined && (
-                <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <span>{translate('Loading...')}</span>
                 </div>
-            )}
-            {!isConnectedToWifi &&
-                <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <span>{translate('Not connected to Central Module')}</span>
-                </div>
+                {nozzles !== undefined && isConnectedToWifi && (<>
+                    {ignoreNozzleDialogOpen &&
+                        <YesNoDialog
+                            title={translate('Ignore nozzle')}
+                            message={translate('Are you sure you want to ignore this nozzle?')}
+                            onYesClick={() => {
+                                if (ignoreNozzleDialogNozlleIndex === null) return;
+                                const nozzle = nozzles[ignoreNozzleDialogNozlleIndex];
+                                nozzle.ignored = true;
+                                NozzlesService.updateNozzle(nozzle, ignoreNozzleDialogNozlleIndex);
+
+                                setIgnoreNozzleDialogOpen(false);
+                                setIgnoreNozzleDialogNozzleIndex(null);
+                            }}
+
+                            onNoClick={() => {
+                                setIgnoreNozzleDialogOpen(false);
+                                setIgnoreNozzleDialogNozzleIndex(null);
+                            }}
+                        />
+                    }
+                    {unignoreNozzleDialogOpen &&
+                        <YesNoDialog
+                            title={translate('Unignore nozzle')}
+                            message={translate('Are you sure you want to unignore this nozzle?')}
+                            onYesClick={() => {
+                                if (unignoreNozzleDialogNozlleIndex === null) return;
+                                const nozzle = nozzles[unignoreNozzleDialogNozlleIndex];
+                                nozzle.ignored = false;
+                                NozzlesService.updateNozzle(nozzle, unignoreNozzleDialogNozlleIndex);
+
+                                setUnignoreNozzleDialogOpen(false);
+                                setUnignoreNozzleDialogNozzleIndex(null);
+                            }}
+
+                            onNoClick={() => {
+                                setUnignoreNozzleDialogOpen(false);
+                                setUnignoreNozzleDialogNozzleIndex(null);
+                            }}
+                        />
+                    }
+                </>)}
+            </>)
             }
         </>
     )

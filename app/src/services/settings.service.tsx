@@ -23,6 +23,8 @@ export const defaultSettings: Settings = {
     areaUnit: 'ha',
     interval: 1000,
     useDefaultLogo: true,
+    shouldSimulateSpeed: false,
+    simulatedSpeed: 0
 }
 
 export namespace SettingsService {
@@ -377,6 +379,50 @@ export namespace SettingsService {
         return new Promise(async (resolve, reject) => {
             const adminPassword = await Preferences.get({ key: 'adminPassword' });
             resolve(adminPassword.value !== null);
+        });
+    }
+
+    export const setShouldSimulateSpeed = async (value: boolean): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.shouldSimulateSpeed = value;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onShouldSimulateSpeedChanged', value);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setSimulatedSpeed = async (value: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.simulatedSpeed = value / 3.6; // Convert from km/h to m/s
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onSimulatedSpeedChanged', value / 3.6);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const getSimulatedSpeed = async (): Promise<number> => {
+        return new Promise(async (resolve, reject) => {
+            const settings = await getSettings();
+            resolve(settings.simulatedSpeed * 3.6); // Convert from m/s to km/h
+        });
+    }
+
+    export const getShouldSimulateSpeed = async (): Promise<boolean> => {
+        return new Promise(async (resolve, reject) => {
+            const settings = await getSettings();
+            resolve(settings.shouldSimulateSpeed);
         });
     }
 }

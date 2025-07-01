@@ -338,5 +338,9 @@
     {
         "en-us": "Not connected to Central Module",
         "pt-br": "Não conectado ao Módulo Central"
+    },
+    {
+        "en-us": "Simulated Speed",
+        "pt-br": "Velocidade Simulada"
     }
 ]
