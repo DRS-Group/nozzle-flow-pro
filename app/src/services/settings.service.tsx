@@ -440,7 +440,7 @@ const connectToAPIWifi = async () => {
     }
     if (value === 'granted') {
         await CapacitorWifiConnect.secureConnect({
-            ssid: 'NOZZLE FLOW PRO',
+            ssid: 'DRS D-Flow',
             password: '123456789',
         });
     } else {
@@ -452,7 +452,7 @@ const connectToAPIWifi = async () => {
 Network.addListener('networkStatusChange', async (status) => {
     if (status.connected) {
         const ssid = await CapacitorWifiConnect.getAppSSID();
-        if (ssid.value !== 'NOZZLE FLOW PRO') {
+        if (ssid.value !== 'DRS D-Flow') {
             SettingsService.setIsConnectedToWifi(false);
             SettingsService.dispatchEvent('onNetworkStatusChange', false);
             connectToAPIWifi();
@@ -469,7 +469,7 @@ Network.addListener('networkStatusChange', async (status) => {
 });
 
 CapacitorWifiConnect.getAppSSID().then((ssid) => {
-    if (ssid.value === 'NOZZLE FLOW PRO') {
+    if (ssid.value === 'DRS D-Flow') {
         SettingsService.setIsConnectedToWifi(true);
         SettingsService.dispatchEvent('onNetworkStatusChange', true);
     } else {
@@ -482,7 +482,7 @@ CapacitorWifiConnect.getAppSSID().then((ssid) => {
 setInterval(async () => {
     if (Capacitor.getPlatform() === 'web') return;
     CapacitorWifiConnect.getAppSSID().then((ssid) => {
-        if (ssid.value !== 'NOZZLE FLOW PRO') {
+        if (ssid.value !== 'DRS D-Flow') {
             connectToAPIWifi();
         }
     });
