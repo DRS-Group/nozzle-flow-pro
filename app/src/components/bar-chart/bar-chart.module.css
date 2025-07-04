@@ -4,7 +4,7 @@
     --arrow-length: 0.5rem;
     --left-distance: 3rem;
     --grid-color: rgb(200, 200, 200);
-    --target-color: rgb(52, 52, 255);
+    --target-color: rgb(50, 200, 100);
     --max-target-color: rgb(255, 0, 0);
     --min-target-color: rgb(255, 0, 0);
 
@@ -149,14 +149,17 @@
 
 .targetLine {
     border-bottom: 2px solid var(--target-color);
+    box-shadow: 0rem 0.1rem 0.1rem 0rem rgba(0, 0, 0, 0.1);
 }
 
 .maxTargetLine {
     border-bottom: 2px dashed var(--max-target-color);
+    box-shadow: 0rem 0.1rem 0.1rem 0rem rgba(0, 0, 0, 0.1);
 }
 
 .minTargetLine {
     border-bottom: 2px dashed var(--min-target-color);
+    box-shadow: 0rem 0.1rem 0.1rem 0rem rgba(0, 0, 0, 0.1);
 }
 
 .targetLine span {
@@ -204,12 +207,13 @@
     height: 100%;
     display: flex;
     align-items: flex-end;
+    border-radius: 1rem 1rem 0 0;
 }
 
 .bar {
     position: relative;
     flex-grow: 1;
-    border-radius: 0;
+    border-radius: 1rem 1rem 0 0;
     transition: height 250ms, background-color 250ms;
 }
 
@@ -223,6 +227,51 @@
     text-align: left;
     text-wrap: nowrap;
     white-space: nowrap;
-    text-shadow: 0rem 0rem 0.25rem rgba(0, 0, 0, 0.25);
     z-index: 1;
+    color: white;
+    text-shadow:
+        -0.0625rem -0.0625rem 0 #000,
+        0.0625rem -0.0625rem 0 #000,
+        -0.0625rem 0.0625rem 0 #000,
+        0.0625rem 0.0625rem 0 #000,
+        0 0 0.25rem #000,
+        0 0 0.5rem #000;
+
+    letter-spacing: 0.2em;
+}
+
+.pulse {
+    animation: pulse 1s infinite;
+}
+
+.pulse .bar {
+    animation: pulseBar 1s infinite;    
+}
+
+@keyframes pulse {
+    0% {
+        background-color: transparent;
+    }
+
+    50% {
+        background-color: rgba(255, 100, 100, 0.5);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes pulseBar {
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(0.9);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
 }

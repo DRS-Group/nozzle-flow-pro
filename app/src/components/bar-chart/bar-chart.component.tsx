@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import styles from './bar-chart.module.css';
 
-const TARGET_COLOR = 'rgb(255, 220, 255)';
+const TARGET_COLOR = 'rgb(50, 200, 100)';
 const MAX_TARGET_COLOR = 'rgb(255, 0, 0)';
 const MIN_TARGET_COLOR = 'rgb(255, 0, 0)';
 
@@ -60,7 +60,7 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
         }
 
         let alpha = (percentage - minFlowPercentage) / (maxFlowPercentage - minFlowPercentage);
-        
+
         let newPercentage = lerp(25, 75, alpha);
 
         if (newPercentage < minFlowPercentage) {
@@ -110,6 +110,8 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
                     const height = valueToChartPercentage(value) / 100;
                     const color = (value > props.targetValue * (1 + props.tolerance)) ? MAX_TARGET_COLOR : (value < props.targetValue * (1 - props.tolerance)) ? MIN_TARGET_COLOR : TARGET_COLOR;
 
+                    const pulse = dataset.value > props.targetValue * (1 + props.tolerance) || dataset.value < props.targetValue * (1 - props.tolerance);
+
                     function randomNumber(min: number, max: number) { // min and max included 
                         return (Math.random() * (max - min) + min);
                     }
@@ -121,6 +123,7 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
                             color={color}
                             opacity={dataset.opacity}
                             label={dataset.label}
+                            pulse={pulse}
                             onClick={props.onClick}
                             nozzleIndex={index}
                         ></Bar>
@@ -148,6 +151,7 @@ type BarProps = {
     label: string;
     onClick?: (nozzleIndex: number) => void;
     nozzleIndex: number;
+    pulse?: boolean;
 }
 
 export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
@@ -179,12 +183,12 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
 
     return (
         <div
-            className={styles.barWrapper}
+            className={` ${styles.barWrapper} ${props.pulse ? styles.pulse : ''}`}
             onClick={() => {
                 if (props.onClick) props.onClick(props.nozzleIndex);
             }}
         >
-            <div className={styles.bar} style={style}>
+            <div className={`${styles.bar}`} style={style}>
                 <span>{props.label}</span>
             </div>
         </div>
