@@ -89,7 +89,10 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
 
     }), []);
 
-    const onKeyClick = (key: string) => {
+    const onKeyClick = (e: React.PointerEvent<HTMLButtonElement>, key: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         const nonCharacters = ['shift', 'backspace', 'space', 'enter', 'numbers', 'normal'];
         if (nonCharacters.includes(key)) {
             switch (key) {
@@ -182,7 +185,7 @@ export const KeyboardTextInput = forwardRef<KeyboardTextInputElement, KeyboardTe
                         displayKey = <i className='icon-caps' />;
 
                     return (
-                        <button key={key} data-key={key} onPointerDown={() => onKeyClick(key)} disabled={props.disabledKeys?.includes(key)}>{displayKey}</button>
+                        <button key={key} data-key={key} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, key)} disabled={props.disabledKeys?.includes(key)}>{displayKey}</button>
                     )
                 })}
             </div>

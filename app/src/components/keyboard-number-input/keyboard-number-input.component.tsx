@@ -52,7 +52,10 @@ export const KeyboardNumberInput = forwardRef<KeyboardNumberInputElement, Keyboa
         return numberValue.toFixed(props.decimals || 0)
     }
 
-    const onKeyClick = (key: string) => {
+    const onKeyClick = (e: React.PointerEvent<HTMLButtonElement>, key: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         let oldValue = inputValue;
         oldValue = oldValue.replace(/[^0-9]/g, '');
 
@@ -99,31 +102,31 @@ export const KeyboardNumberInput = forwardRef<KeyboardNumberInputElement, Keyboa
             </div>
             <div className={styles.keyboard}>
                 <div className={styles.row}>
-                    <button data-key={KeyboardKey.Plus} onPointerDown={() => onKeyClick(KeyboardKey.Plus)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Plus)}>+</button>
-                    <button data-key={KeyboardKey.One} onPointerDown={() => onKeyClick(KeyboardKey.One)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.One)}>1</button>
-                    <button data-key={KeyboardKey.Two} onPointerDown={() => onKeyClick(KeyboardKey.Two)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Two)}>2</button>
-                    <button data-key={KeyboardKey.Three} onPointerDown={() => onKeyClick(KeyboardKey.Three)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Three)}>3</button>
-                    <button data-key={KeyboardKey.OpenParenthesis} onPointerDown={() => onKeyClick(KeyboardKey.OpenParenthesis)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.OpenParenthesis)}>(</button>
+                    <button data-key={KeyboardKey.Plus} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Plus)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Plus)}>+</button>
+                    <button data-key={KeyboardKey.One} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.One)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.One)}>1</button>
+                    <button data-key={KeyboardKey.Two} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Two)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Two)}>2</button>
+                    <button data-key={KeyboardKey.Three} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Three)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Three)}>3</button>
+                    <button data-key={KeyboardKey.OpenParenthesis} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.OpenParenthesis)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.OpenParenthesis)}>(</button>
                 </div>
                 <div className={styles.row}>
-                    <button data-key={KeyboardKey.Minus} onPointerDown={() => onKeyClick(KeyboardKey.Minus)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Minus)}>-</button>
-                    <button data-key={KeyboardKey.Four} onPointerDown={() => onKeyClick(KeyboardKey.Four)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Four)}>4</button>
-                    <button data-key={KeyboardKey.Five} onPointerDown={() => onKeyClick(KeyboardKey.Five)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Five)}>5</button>
-                    <button data-key={KeyboardKey.Six} onPointerDown={() => onKeyClick(KeyboardKey.Six)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Six)}>6</button>
-                    <button data-key={KeyboardKey.CloseParenthesis} onPointerDown={() => onKeyClick(KeyboardKey.CloseParenthesis)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.CloseParenthesis)}>)</button>
+                    <button data-key={KeyboardKey.Minus} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Minus)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Minus)}>-</button>
+                    <button data-key={KeyboardKey.Four} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Four)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Four)}>4</button>
+                    <button data-key={KeyboardKey.Five} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Five)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Five)}>5</button>
+                    <button data-key={KeyboardKey.Six} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Six)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Six)}>6</button>
+                    <button data-key={KeyboardKey.CloseParenthesis} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.CloseParenthesis)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.CloseParenthesis)}>)</button>
                 </div>
                 <div className={styles.row}>
-                    <button data-key={KeyboardKey.Asterisk} onPointerDown={() => onKeyClick(KeyboardKey.Asterisk)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Asterisk)}>*</button>
-                    <button data-key={KeyboardKey.Seven} onPointerDown={() => onKeyClick(KeyboardKey.Seven)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Seven)}>7</button>
-                    <button data-key={KeyboardKey.Eight} onPointerDown={() => onKeyClick(KeyboardKey.Eight)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Eight)}>8</button>
-                    <button data-key={KeyboardKey.Nine} onPointerDown={() => onKeyClick(KeyboardKey.Nine)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Nine)}>9</button>
-                    <button data-key={KeyboardKey.Backspace} onPointerDown={() => onKeyClick(KeyboardKey.Backspace)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Backspace)}><i className='icon-backspace' /></button>
+                    <button data-key={KeyboardKey.Asterisk} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Asterisk)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Asterisk)}>*</button>
+                    <button data-key={KeyboardKey.Seven} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Seven)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Seven)}>7</button>
+                    <button data-key={KeyboardKey.Eight} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Eight)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Eight)}>8</button>
+                    <button data-key={KeyboardKey.Nine} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Nine)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Nine)}>9</button>
+                    <button data-key={KeyboardKey.Backspace} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Backspace)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Backspace)}><i className='icon-backspace' /></button>
                 </div>
                 <div className={styles.row}>
-                    <button data-key={KeyboardKey.Slash} onPointerDown={() => onKeyClick(KeyboardKey.Slash)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Slash)}>/</button>
-                    <button data-key={KeyboardKey.Period} onPointerDown={() => onKeyClick(KeyboardKey.Period)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Period)}>.</button>
-                    <button data-key={KeyboardKey.Zero} onPointerDown={() => onKeyClick(KeyboardKey.Zero)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Zero)}>0</button>
-                    <button data-key={KeyboardKey.Equals} onPointerDown={() => onKeyClick(KeyboardKey.Equals)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Equals)}>=</button>
+                    <button data-key={KeyboardKey.Slash} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Slash)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Slash)}>/</button>
+                    <button data-key={KeyboardKey.Period} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Period)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Period)}>.</button>
+                    <button data-key={KeyboardKey.Zero} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Zero)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Zero)}>0</button>
+                    <button data-key={KeyboardKey.Equals} onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => onKeyClick(e, KeyboardKey.Equals)} disabled={props.disabled || props.disabledKeys?.includes(KeyboardKey.Equals)}>=</button>
                 </div>
             </div>
         </div>

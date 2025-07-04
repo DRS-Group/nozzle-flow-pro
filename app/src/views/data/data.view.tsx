@@ -117,7 +117,9 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         }
     }
 
-    const onSyncClick = () => {
+    const onSyncClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         navigation.navigate('nozzles');
     }
 

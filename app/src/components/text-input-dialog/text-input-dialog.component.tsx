@@ -26,11 +26,15 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
 
     }), []);
 
-    const onConfirmClick = () => {
+    const onConfirmClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onConfirmClick(inputValue);
     };
 
-    const onCancelClick = () => {
+    const onCancelClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onCancelClick!();
     };
 

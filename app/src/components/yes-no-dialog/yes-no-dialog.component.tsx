@@ -20,11 +20,15 @@ export const YesNoDialog = forwardRef<DialogElement, DialogProps>((props, ref) =
 
     }), []);
 
-    const onYesClick = () => {
+    const onYesClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onYesClick();
     };
 
-    const onNoClick = () => {
+    const onNoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onNoClick();
     };
 

@@ -28,11 +28,15 @@ export const ColorInputDialog = forwardRef<ColorInputDialogElement, ColorInputDi
         hexInputRef.current?.setValue(color);
     }, [color]);
 
-    const onConfirmClick = () => {
+    const onConfirmClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onConfirmClick(color);
     };
 
-    const onCancelClick = () => {
+    const onCancelClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.onCancelClick();
     };
 

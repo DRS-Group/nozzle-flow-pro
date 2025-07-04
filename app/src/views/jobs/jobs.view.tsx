@@ -44,7 +44,9 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
         setContextMenuPosition(null);
     }
 
-    const onAddButtonClick = () => {
+    const onAddButtonClick = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
         navigation.navigate('createJob');
     }
 

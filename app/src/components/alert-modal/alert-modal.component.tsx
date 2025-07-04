@@ -32,6 +32,20 @@ export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props,
 
     }, [props.event]);
 
+    const onOkClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        props.onOkClick?.();
+    };
+
+    const onOkForAllClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        props.onOkForAllClick?.();
+    };
+
     return (
         <div className={styles.alertModalBackground}>
             <div className={styles.wrapper}>
@@ -42,9 +56,9 @@ export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props,
                     <span dangerouslySetInnerHTML={{ __html: props.event.description }}></span>
                 </div>
                 <div className={styles.footer}>
-                    <button onClick={props.onOkClick}>Ok</button>
+                    <button onClick={onOkClick}>Ok</button>
                     {props.totalEvents! > 1 &&
-                        <button onClick={props.onOkForAllClick}>Ok for all ({props.totalEvents})</button>
+                        <button onClick={onOkForAllClick}>Ok for all ({props.totalEvents})</button>
                     }
                 </div>
             </div>
