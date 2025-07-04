@@ -13,4 +13,5 @@ export type Settings = {
     useDefaultLogo: boolean;
     shouldSimulateSpeed: boolean;
     simulatedSpeed: number;
+    demoMode: boolean;
 }

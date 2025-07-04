@@ -89,9 +89,9 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             const speed: number = data.speed;
             if (!nozzles) return;
 
-            setNozzles(nozzles);
+            setNozzles([...nozzles]);
             setSpeed(speed);
-            setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.1));
+            setNozzleSpacing(await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6));
         }
 
         services.dataFetcherService.addEventListener('onDataFetched', eventHandler);
@@ -124,7 +124,6 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     }
 
     const calculateTargetValue = () => {
-        debugger;
         if (currentJob.job === null) return 0;
 
         const expectedFlow = currentJob.job.expectedFlow;

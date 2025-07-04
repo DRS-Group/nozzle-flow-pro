@@ -24,7 +24,8 @@ export const defaultSettings: Settings = {
     interval: 1000,
     useDefaultLogo: true,
     shouldSimulateSpeed: false,
-    simulatedSpeed: 0
+    simulatedSpeed: 0,
+    demoMode: false
 }
 
 export namespace SettingsService {
@@ -423,6 +424,28 @@ export namespace SettingsService {
         return new Promise(async (resolve, reject) => {
             const settings = await getSettings();
             resolve(settings.shouldSimulateSpeed);
+        });
+    }
+
+    export const getDemoMode = async (): Promise<boolean> => {
+        return new Promise(async (resolve, reject) => {
+            const settings = await getSettings();
+            resolve(settings.demoMode);
+        });
+    }
+
+    export const setDemoMode = async (value: boolean): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.demoMode = value;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onDemoModeChanged', value);
+            dispatchEvent('onSettingsChanged', settings);
         });
     }
 }

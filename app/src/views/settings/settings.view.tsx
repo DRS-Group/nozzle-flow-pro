@@ -48,6 +48,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [areaUnitContextMenuPosition, setAreaUnitContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [moduleModeContextMenuPosition, setModuleModeContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [simulatedSpeedContextMenuPosition, setSimulatedSpeedContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
+    const [demoModeContextMenuPosition, setDemoModeContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
 
     useImperativeHandle(ref, () => ({
 
@@ -114,6 +115,15 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
         const y = e.nativeEvent.clientY;
 
         setSimulatedSpeedContextMenuPosition({ x, y });
+    }
+
+    const onDemoModeClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        const x = e.nativeEvent.clientX;
+        const y = e.nativeEvent.clientY;
+
+        setDemoModeContextMenuPosition({ x, y });
     }
 
     const onInterfaceScaleClick = (e: React.MouseEvent) => {
@@ -320,6 +330,21 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 <i className="icon-unfold-more-horizontal"></i>
                             </div>
                         </div>
+                        {isAdmin &&
+                            <div className={styles.item}
+                                onClick={onDemoModeClick}
+                            >
+                                <div className={styles.itemLeft}>
+                                    <span className={styles.itemName}>{translate('Demo mode')}</span>
+                                </div>
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemValue}>
+                                        <span>{settings?.demoMode ? translate('Yes') : translate('No')}</span>
+                                    </div>
+                                    <i className="icon-unfold-more-horizontal"></i>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
                 <div className={styles.section}>
@@ -692,6 +717,38 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
                     onBackgroundClick={() => {
                         setSimulatedSpeedContextMenuPosition(null);
+                    }}
+                />
+            }
+
+            {demoModeContextMenuPosition &&
+                <ContextMenu
+                    items={[
+                        {
+                            label: translate('Yes'),
+                            onClick: () => {
+                                SettingsService.setDemoMode(true).then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        },
+                        {
+                            label: translate('No'),
+                            onClick: () => {
+                                SettingsService.setDemoMode(false).then(() => {
+                                    SettingsService.getSettings().then((settings) => {
+                                        setSettings(settings);
+                                    });
+                                });
+                            }
+                        }
+                    ]}
+                    position={demoModeContextMenuPosition}
+
+                    onBackgroundClick={() => {
+                        setDemoModeContextMenuPosition(null);
                     }}
                 />
             }
