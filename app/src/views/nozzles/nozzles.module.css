@@ -143,8 +143,13 @@
     transition: 200ms;
 }
 
-.menuButton[data-state="open"] .clearButton {
+.menuButton[data-state="open"] .autoCalibrateButton {
     transform: translate(0rem, -12.25rem);
+    transition: 200ms;
+}
+
+.menuButton[data-state="open"] .clearButton {
+    transform: translate(0rem, -16.25rem);
     transition: 200ms;
 }
 

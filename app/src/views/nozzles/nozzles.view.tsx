@@ -9,6 +9,8 @@ import { useNavigation } from '../../hooks/useNavigation';
 import { useTranslate } from '../../hooks/useTranslate';
 import { DataFecherService } from '../../services/data-fetcher.service';
 import { NozzlesService } from '../../services/nozzles.service';
+import { SettingsService } from '../../services/settings.service';
+import { ESPData } from '../../types/ESP-data.type';
 import { Nozzle } from '../../types/nozzle.type';
 import styles from './nozzles.module.css';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
@@ -32,6 +34,10 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
     const [changeNameDialogOpen, setChangeNameDialogOpen] = useState<boolean>(false);
     const [calibrateDialogOpen, setCalibrateDialogOpen] = useState<boolean>(false);
+    const [speedDialogOpen, setSpeedDialogOpen] = useState<boolean>(false);
+    const [speed, setSpeed] = useState<number>(0);
+    const [flowRateDialogOpen, setFlowRateDialogOpen] = useState<boolean>(false);
+    const [flowRate, setFlowRate] = useState<number>(0);
 
     const [ignoreNozzleDialogNozzleIndex, setIgnoreNozzleDialogNozzleIndex] = useState<number | null>(null);
     const [unignoreNozzleDialogNozzleIndex, setUnignoreNozzleDialogNozzleIndex] = useState<number | null>(null);
@@ -177,6 +183,13 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     >
                         <i className="icon-speedometer-black"></i>
                     </div>
+                    <div className={`${styles.menuItem} ${styles.autoCalibrateButton}`}
+                        onClick={() => {
+                            setFlowRateDialogOpen(true);
+                        }}
+                    >
+                        <i className="icon-refresh-auto"></i>
+                    </div>
                     <div className={`${styles.menuItem} ${styles.clearButton}`}
                         onClick={onClearNozzlesClick}
                     >
@@ -275,6 +288,58 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
 
                     onNoClick={() => {
                         setUnignoreNozzleDialogOpen(false);
+                    }}
+                />
+            }
+            {flowRateDialogOpen &&
+                <NumberInputDialog
+                    unit='L/ha'
+                    label={translate('Expected flow')}
+                    title={translate('Set expected flow')}
+                    defaultValue={0}
+                    onConfirmClick={(value) => {
+                        setFlowRate(value);
+
+                        setFlowRateDialogOpen(false);
+                        setSpeedDialogOpen(true);
+                    }}
+                    onCancelClick={() => {
+                        setFlowRateDialogOpen(false);
+                    }}
+                />
+            }
+            {speedDialogOpen &&
+                <NumberInputDialog
+                    unit='km/h'
+                    label={translate('Speed')}
+                    title={translate('Set speed')}
+                    defaultValue={10}
+                    onConfirmClick={async (value) => {
+                        setSpeed(value);
+
+                        setSpeedDialogOpen(false);
+
+                        const espData: ESPData = await services.dataFetcherService.fetchData();
+                        const nozzleSpacing = await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
+                        const expectedFlow = (value * 3.6 * nozzleSpacing * 100 * flowRate) / 60000;
+
+
+                        let newNozzles = espData.nozzles.map((nozzle) => {
+                            const pulsesPerMinute = nozzle.pulsesPerMinute;
+                            return {
+                                ...nozzle,
+                                pulsesPerLiter: Math.round(pulsesPerMinute / expectedFlow)
+                            };
+                        });
+
+                        await NozzlesService.setNozzles(newNozzles);
+
+                        NozzlesService.getNozzles().then((nozzles) => {
+                            setNozzles(nozzles);
+                        });
+                    }}
+                    onCancelClick={() => {
+                        setSpeedDialogOpen(false);
                     }}
                 />
             }
