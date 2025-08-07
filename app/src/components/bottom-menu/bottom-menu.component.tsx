@@ -7,6 +7,7 @@ import { useCurrentJob } from "../../hooks/useCurrentJob";
 import { useNavigation } from "../../hooks/useNavigation";
 import { usePump } from "../../hooks/usePump";
 import { SettingsService } from "../../services/settings.service";
+import { SoundsService } from "../../services/sounds.service";
 
 export type BottomMenuElement = {
 
@@ -20,6 +21,8 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
     const currentJob = useCurrentJob();
     const navigation = useNavigation();
     const pump = usePump();
+
+    const [timeoutHandle, setTimeoutHandle] = useState<NodeJS.Timeout | null>(null);
 
     const onDataClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -47,15 +50,23 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
 
     }
 
-    const onStopClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigation.navigate('menu');
-        currentJob.set(null);
-    }
-
     const onPumpActiveButtonChange = (active: 'on' | 'off' | 'auto') => {
         pump.setOverridden(active);
+    }
+
+    const stopButton_onPointerDown = () => {
+        SoundsService.playClickSound();
+        const timer = setTimeout(() => {
+            SoundsService.playClickSound();
+            navigation.navigate('menu');
+            currentJob.set(null);
+        }, 1000);
+
+        setTimeoutHandle(timer);
+    }
+
+    const stopButton_onPointerLeave = () => {
+        clearTimeout(timeoutHandle!);
     }
 
     useImperativeHandle(ref, () => ({
@@ -74,7 +85,7 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
                 <button className={styles.menuItem} data-current={navigation.currentPage === 'logs'} onPointerDown={onLogsClick}><i className="icon-file-clock-outline"></i><span>{translate('Logs')}</span></button>
                 <button className={styles.menuItem} data-current={navigation.currentPage === 'settings'} onPointerDown={onSettingsClick}><i className="icon-cog"></i><span>{translate('Settings')}</span></button>
             </div>
-            <button className={styles.stopButton} onPointerDown={onStopClick}><i className="icon-stop"></i><span>{translate('Stop')}</span></button>
+            <button className={styles.stopButton} onPointerDown={stopButton_onPointerDown} onPointerLeave={stopButton_onPointerLeave}><i className="icon-stop"></i><span>{translate('Stop')}</span></button>
         </div>
     )
 });

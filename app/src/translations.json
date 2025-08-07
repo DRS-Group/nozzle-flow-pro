@@ -108,8 +108,8 @@
         "pt-br": "Título"
     },
     {
-        "en-us": "Time before alert (milliseconds)",
-        "pt-br": "Tempo antes do alerta (milissegundos)"
+        "en-us": "Time before alert (seconds)",
+        "pt-br": "Tempo antes do alerta (segundos)"
     },
     {
         "en-us": "New Job",

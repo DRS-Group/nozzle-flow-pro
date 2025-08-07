@@ -39,7 +39,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
 
     const onConfirmButtonClick = () => {
         const title = titleInputRef.current!.getValue();
-        const durationTolerance = parseFloat(durationToleranceInputRef.current!.getValue());
+        const durationTolerance = parseFloat(durationToleranceInputRef.current!.getValue()) * 1000;
         // Divide-se por 10.000 para obter o valor em L/m². Se não dividir por 10.000, fica em L/ha.
         const expectedFlow = parseFloat(expectedFlowInputRef.current!.getValue()) / 1;
         const flowTolerance = parseFloat(flowToleranceInputRef.current!.getValue()) / 100;
@@ -73,17 +73,17 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         value={translate('New Job')}
                     />
                     <NumberInput
-                        label={translate('Time before alert (milliseconds)')}
+                        label={translate('Time before alert (seconds)')}
                         className={styles.durationToleranceInput}
-                        value={7000}
+                        value={7}
                         decimals={0}
                         ref={durationToleranceInputRef}
-                        unit='ms'
+                        unit='s'
                     />
                     <NumberInput
                         label={translate('Expected flow (L/ha)')}
                         className={styles.expectedFlow}
-                        value={2.5}
+                        value={240}
                         decimals={2}
                         ref={expectedFlowInputRef}
                         unit='L/ha'
@@ -91,7 +91,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                     <NumberInput
                         label={translate('Variation margin (%)')}
                         className={styles.flowToleranceInput}
-                        value={5}
+                        value={10}
                         decimals={2}
                         ref={flowToleranceInputRef}
                         unit='%'

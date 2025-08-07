@@ -11,7 +11,7 @@ import { CapacitorWifiConnect } from "@falconeta/capacitor-wifi-connect";
 import { Network } from "@capacitor/network";
 
 export const defaultSettings: Settings = {
-    language: 'en-us',
+    language: 'pt-br',
     apiBaseUrl: 'http://192.168.0.1',
     primaryColor: '#466905',
     secondaryColor: '#ffffff',
@@ -25,7 +25,8 @@ export const defaultSettings: Settings = {
     useDefaultLogo: true,
     shouldSimulateSpeed: false,
     simulatedSpeed: 0,
-    demoMode: false
+    demoMode: false,
+    logo: ''
 }
 
 export namespace SettingsService {
@@ -145,22 +146,15 @@ export namespace SettingsService {
                 return;
             }
 
-            const logoImageName: string | undefined = (await Filesystem.readdir({
-                path: 'NozzleFlowPro',
-                directory: Directory.Documents
-            })).files.find((file: FileInfo) => file.name.split('.')[0] === 'logo')?.name;
-
-            if (!logoImageName) {
+            const settings = await getSettings();
+            const logoFilePath = settings.logo;
+            if (!logoFilePath) {
                 resolve(DEFAULT_LOGO_URI);
                 return;
             }
 
-            const logoFilePath: string = (await Filesystem.getUri({
-                directory: Directory.Documents,
-                path: `NozzleFlowPro/${logoImageName}`
-            })).uri;
-
-            resolve(Capacitor.convertFileSrc(logoFilePath));
+            resolve(logoFilePath);
+            return;
         });
     }
 
@@ -175,17 +169,7 @@ export namespace SettingsService {
         }
 
         return new Promise(async (resolve, reject) => {
-            const logos: string[] = (await Filesystem.readdir({
-                path: 'NozzleFlowPro',
-                directory: Directory.Documents
-            })).files.filter((file: FileInfo) => file.name.split('.')[0] === 'logo').map((file: FileInfo) => file.name);
-
-            for (const logo of logos) {
-                await Filesystem.deleteFile({
-                    path: `NozzleFlowPro/${logo}`,
-                    directory: Directory.Documents
-                });
-            }
+            debugger
 
             if (!image) {
                 const settings = await getSettings();
@@ -197,15 +181,9 @@ export namespace SettingsService {
             else {
                 const base64 = await getBase64(image);
 
-                await Filesystem.writeFile({
-                    data: base64,
-                    directory: Directory.Documents,
-                    path: `NozzleFlowPro/logo.${image.type.split('/')[1]}`,
-                    recursive: true
-                });
-
                 const settings = await getSettings();
                 settings.useDefaultLogo = false;
+                settings.logo = base64;
                 await setSettings(settings);
                 resolve();
                 dispatchEvent('onSettingsChanged', settings);
@@ -463,7 +441,7 @@ const connectToAPIWifi = async () => {
     }
     if (value === 'granted') {
         await CapacitorWifiConnect.secureConnect({
-            ssid: 'DRS D-Flow',
+            ssid: 'D-Flow DEMO',
             password: '123456789',
         });
     } else {
@@ -475,7 +453,7 @@ const connectToAPIWifi = async () => {
 Network.addListener('networkStatusChange', async (status) => {
     if (status.connected) {
         const ssid = await CapacitorWifiConnect.getAppSSID();
-        if (ssid.value !== 'DRS D-Flow') {
+        if (ssid.value !== 'D-Flow DEMO') {
             SettingsService.setIsConnectedToWifi(false);
             SettingsService.dispatchEvent('onNetworkStatusChange', false);
             connectToAPIWifi();
@@ -492,7 +470,7 @@ Network.addListener('networkStatusChange', async (status) => {
 });
 
 CapacitorWifiConnect.getAppSSID().then((ssid) => {
-    if (ssid.value === 'DRS D-Flow') {
+    if (ssid.value === 'D-Flow DEMO') {
         SettingsService.setIsConnectedToWifi(true);
         SettingsService.dispatchEvent('onNetworkStatusChange', true);
     } else {
@@ -505,7 +483,7 @@ CapacitorWifiConnect.getAppSSID().then((ssid) => {
 setInterval(async () => {
     if (Capacitor.getPlatform() === 'web') return;
     CapacitorWifiConnect.getAppSSID().then((ssid) => {
-        if (ssid.value !== 'DRS D-Flow') {
+        if (ssid.value !== 'D-Flow DEMO') {
             connectToAPIWifi();
         }
     });

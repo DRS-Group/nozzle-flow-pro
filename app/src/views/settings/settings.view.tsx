@@ -172,6 +172,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
     const onLogoClick = async () => {
         try {
+            debugger
             const image = await SettingsService.selectImage();
             SettingsService.setLogo(image);
         } catch (error) {

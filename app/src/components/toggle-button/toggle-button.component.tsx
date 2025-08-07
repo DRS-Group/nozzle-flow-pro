@@ -26,7 +26,7 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
 
     const { pumpState } = usePump();
 
-    const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const onTouchStart = () => {
         SoundsService.playClickSound();
         const timer = setTimeout(() => {
             SoundsService.playClickSound();
@@ -44,7 +44,7 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
         setTimeoutHandle(timer);
     }
 
-    const onTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const onTouchEnd = () => {
         clearTimeout(timeoutHandle!);
     }
 
@@ -74,8 +74,8 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
         <div
             className={styles.toggleButton}
             data-state={buttonState}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
+            onPointerDown={onTouchStart}
+            onPointerLeave={onTouchEnd}
             onClick={onClick}
         >
             <div className={styles.light} data-pumpState={pumpState}></div>
