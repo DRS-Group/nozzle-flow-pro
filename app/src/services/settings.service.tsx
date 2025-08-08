@@ -10,6 +10,13 @@ import { services } from "../dependency-injection";
 import { CapacitorWifiConnect } from "@falconeta/capacitor-wifi-connect";
 import { Network } from "@capacitor/network";
 
+const checkIfIsConnected = async () => {
+    const appSSID = await CapacitorWifiConnect.getAppSSID()
+    const androidSSID = await CapacitorWifiConnect.getDeviceSSID()
+
+    return appSSID.value === 'D-Flow DEMO' || androidSSID.value === 'D-Flow DEMO';
+}
+
 export const defaultSettings: Settings = {
     language: 'pt-br',
     apiBaseUrl: 'http://192.168.0.1',
@@ -443,7 +450,12 @@ const connectToAPIWifi = async () => {
         await CapacitorWifiConnect.secureConnect({
             ssid: 'D-Flow DEMO',
             password: '123456789',
-        });
+        }).then(async (data) => {
+            if (data.value === 0) {
+                SettingsService.setIsConnectedToWifi(true);
+                SettingsService.dispatchEvent('onNetworkStatusChange', true);
+            }
+        });;
     } else {
         throw new Error('permission denied');
     }
@@ -451,26 +463,20 @@ const connectToAPIWifi = async () => {
 }
 
 Network.addListener('networkStatusChange', async (status) => {
-    if (status.connected) {
-        const ssid = await CapacitorWifiConnect.getAppSSID();
-        if (ssid.value !== 'D-Flow DEMO') {
-            SettingsService.setIsConnectedToWifi(false);
-            SettingsService.dispatchEvent('onNetworkStatusChange', false);
-            connectToAPIWifi();
-        }
-        else {
-            SettingsService.setIsConnectedToWifi(true);
-            SettingsService.dispatchEvent('onNetworkStatusChange', true);
-        }
-    }
-    else {
+    const isConnected = await checkIfIsConnected();
+    if (isConnected) {
         SettingsService.setIsConnectedToWifi(false);
         SettingsService.dispatchEvent('onNetworkStatusChange', false);
+        connectToAPIWifi();
+    }
+    else {
+        SettingsService.setIsConnectedToWifi(true);
+        SettingsService.dispatchEvent('onNetworkStatusChange', true);
     }
 });
 
-CapacitorWifiConnect.getAppSSID().then((ssid) => {
-    if (ssid.value === 'D-Flow DEMO') {
+checkIfIsConnected().then((isConnected) => {
+    if (isConnected) {
         SettingsService.setIsConnectedToWifi(true);
         SettingsService.dispatchEvent('onNetworkStatusChange', true);
     } else {
@@ -480,11 +486,11 @@ CapacitorWifiConnect.getAppSSID().then((ssid) => {
     }
 });
 
+
 setInterval(async () => {
     if (Capacitor.getPlatform() === 'web') return;
-    CapacitorWifiConnect.getAppSSID().then((ssid) => {
-        if (ssid.value !== 'D-Flow DEMO') {
-            connectToAPIWifi();
-        }
+
+    checkIfIsConnected().then((isConnected) => {
+        if (!isConnected) connectToAPIWifi();
     });
 }, 100);
