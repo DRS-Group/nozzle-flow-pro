@@ -187,8 +187,9 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
             onClick={() => {
                 if (props.onClick) props.onClick(props.nozzleIndex);
             }}
+            style={{opacity: style.opacity}}
         >
-            <div className={`${styles.bar}`} style={style}>
+            <div className={`${styles.bar}`} style={{...style, opacity: 1}}>
                 <span>{props.label}</span>
             </div>
         </div>

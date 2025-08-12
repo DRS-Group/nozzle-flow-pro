@@ -76,7 +76,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             return {
                 label: nozzle.name,
                 value: nozzle.pulsesPerMinute / nozzle.pulsesPerLiter,
-                opacity: nozzle.ignored ? 0.5 : 1
+                opacity: nozzle.ignored ? 0.15 : 1
             } as Dataset;
         });
 
