@@ -139,6 +139,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
 
         const nozzles = espData.nozzles;
         const speed = espData.speed;
+        const timeBeforeAlert = await SettingsService.getTimeBeforeAlert();
         const nozzleSpacing = await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
         const expectedFlow = calculateTargetValue(currentJob, speed, nozzleSpacing);
         const maxExpectedFlow = expectedFlow * (1 + currentJob.tolerance);
@@ -162,8 +163,10 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
             const nozzleOngoingEvent: NozzleEvent | undefined = nozzleEvents.find((event: NozzleEvent) => {
                 return event.endTime === undefined;
             });
+            
 
             if (nozzleOngoingEvent === undefined) {
+                debugger
                 if (isFlowAboveExpected) {
                     const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is above the expected value', currentLanguage)}`;
 
@@ -175,7 +178,11 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                         endTime: undefined,
                         nozzleIndex: nozzleIndex,
                         triggered: false,
-                        viewed: false
+                        viewed: false,
+                        coordinates: {
+                            latitude: espData.coordinates.latitude,
+                            longitude: espData.coordinates.longitude
+                        }
                     }
                     currentJob.nozzleEvents.push(newEvent);
                     shouldSaveJob = true;
@@ -191,7 +198,11 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                         endTime: undefined,
                         nozzleIndex: nozzleIndex,
                         triggered: false,
-                        viewed: false
+                        viewed: false,
+                        coordinates: {
+                            latitude: espData.coordinates.latitude,
+                            longitude: espData.coordinates.longitude
+                        }
                     }
                     currentJob.nozzleEvents.push(newEvent);
                     shouldSaveJob = true
@@ -202,7 +213,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                 const eventDuration = new Date().getTime() - nozzleOngoingEvent.startTime.getTime();
                 const eventTitle = nozzleOngoingEvent.title;
 
-                if (!wasEventTriggered && eventDuration > currentJob!.durationTolerance) {
+                if (!wasEventTriggered && eventDuration > timeBeforeAlert) {
                     nozzleOngoingEvent.triggered = true;
                     shouldSaveJob = true;
 
@@ -226,7 +237,11 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                         nozzleIndex: nozzleIndex,
                         nozzle: nozzle,
                         triggered: false,
-                        viewed: false
+                        viewed: false,
+                        coordinates: {
+                            latitude: espData.coordinates.latitude,
+                            longitude: espData.coordinates.longitude
+                        }
                     }
                     currentJob.nozzleEvents.push(newEvent);
                     shouldSaveJob = true;
@@ -245,7 +260,11 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                         nozzleIndex: nozzleIndex,
                         nozzle: nozzle,
                         triggered: false,
-                        viewed: false
+                        viewed: false,
+                        coordinates: {
+                            latitude: espData.coordinates.latitude,
+                            longitude: espData.coordinates.longitude
+                        }
                     }
                     currentJob.nozzleEvents.push(newEvent);
                     shouldSaveJob = true;

@@ -66,6 +66,7 @@ return (
                         <tr>
                             <th>{translate('Date')}</th>
                             <th>{translate('Title')}</th>
+                            <th>{translate('Coordenadas')}</th>
                             <th>{translate('Description')}</th>
                         </tr>
                     </thead>
@@ -74,6 +75,7 @@ return (
                             <tr key={index}>
                                 <td>{event.startTime.toLocaleDateString()} {event.startTime.toLocaleTimeString()}</td>
                                 <td>{event.title}</td>
+                                <td>{event.coordinates.latitude}, {event.coordinates.longitude}</td>
                                 <td dangerouslySetInnerHTML={{ __html: event.description }}></td>
                             </tr>
                         ))}

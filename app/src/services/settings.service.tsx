@@ -33,14 +33,15 @@ export const defaultSettings: Settings = {
     shouldSimulateSpeed: false,
     simulatedSpeed: 0,
     demoMode: false,
-    logo: ''
+    logo: '',
+    timeBeforeAlert: 2 * 1000
 }
 
 export namespace SettingsService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
     let isAdmin: boolean = false;
     let _isConnectedToWifi = false;
-    export const isConnectedToWifi = () => _isConnectedToWifi;
+    export const isConnectedToWifi = () => true //_isConnectedToWifi;
     export const setIsConnectedToWifi = (value: boolean) => _isConnectedToWifi = value;
 
     export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
@@ -331,6 +332,28 @@ export namespace SettingsService {
 
             dispatchEvent('onNozzleSpacingChanged', nozzleSpacing);
             dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setTimeBeforeAlert = async (timeBeforeAlert: number): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+
+            settings.timeBeforeAlert = timeBeforeAlert;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+
+            dispatchEvent('onTimeBeforeAlertChanged', timeBeforeAlert);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const getTimeBeforeAlert = async (): Promise<number> => {
+        return new Promise(async (resolve, reject) => {
+            const settings = await getSettings();
+            resolve(settings.timeBeforeAlert);
         });
     }
 

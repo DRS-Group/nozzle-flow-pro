@@ -9,7 +9,6 @@ export abstract class JobRepository {
                 title: job.title,
                 expectedFlow: job.expectedFlow,
                 tolerance: job.tolerance,
-                durationTolerance: job.durationTolerance,
                 creationDate: new Date(job.creationDate),
                 id: job.id,
                 nozzleEvents: job.nozzleEvents.map((event: any) => {
@@ -21,7 +20,11 @@ export abstract class JobRepository {
                         nozzleIndex: event.nozzleIndex,
                         triggered: event.triggered,
                         id: event.id,
-                        viewed: event.viewed
+                        viewed: event.viewed,
+                        coordinates: {
+                            latitude: event.coordinates.latitude,
+                            longitude: event.coordinates.longitude
+                        }
                     };
                 })
             }

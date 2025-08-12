@@ -38,6 +38,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const [isConnectedToWifi, setIsConnectedToWifi] = useState<boolean>(SettingsService.isConnectedToWifi());
 
     const [shouldSimulateSpeed, setShouldSimulateSpeed] = useState<boolean>(false);
+    const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
     useEffect(() => {
         SettingsService.getShouldSimulateSpeed().then((value) => {
@@ -63,6 +64,17 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
         return () => {
             SettingsService.removeEventListener('onNetworkStatusChange', onNetworkStatusChange);
         }
+    }, []);
+    
+    useEffect(() => {
+      const onDemoModeChanged = (state: boolean) => {
+          setIsDemoMode(state);
+      }
+
+        SettingsService.addEventListener('onDemoModeChanged', onDemoModeChanged);
+        SettingsService.getSettingOrDefault('demoMode', false).then((value) => {
+            setIsDemoMode(value);
+        });
     }, []);
 
     useImperativeHandle(ref, () => ({
@@ -136,7 +148,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             {currentJob.job && (<>
                 {shouldSimulateSpeed && <SimulatedSpeed />}
                 <div className={styles.wrapper}>
-                    {nozzles !== undefined && isConnectedToWifi && (<>
+                    {nozzles !== undefined && (isConnectedToWifi || isDemoMode) && (<>
                         {
                             nozzles.length >= 1 &&
                             <BarChart
@@ -163,7 +175,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                         )
                     }
                     {
-                        !isConnectedToWifi &&
+                        !isConnectedToWifi && !isDemoMode &&
                         <div className={styles.wrapper} style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <span>{translate('Not connected to Central Module')}</span>
                         </div>

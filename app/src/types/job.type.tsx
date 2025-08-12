@@ -5,7 +5,6 @@ export type Job = {
     title: string;
     expectedFlow: number;
     tolerance: number;
-    durationTolerance: number;
     creationDate: Date;
     nozzleEvents: NozzleEvent[];
 };

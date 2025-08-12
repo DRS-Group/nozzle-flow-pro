@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import styles from './bar-chart.module.css';
+import { usePump } from '../../hooks/usePump';
 
 const TARGET_COLOR = 'rgb(50, 200, 100)';
 const MAX_TARGET_COLOR = 'rgb(255, 0, 0)';
@@ -155,6 +156,8 @@ type BarProps = {
 }
 
 export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
+    const pump = usePump();
+
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -183,7 +186,7 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
 
     return (
         <div
-            className={` ${styles.barWrapper} ${props.pulse ? styles.pulse : ''}`}
+            className={` ${styles.barWrapper} ${(props.pulse && pump.rawState !== "off") ? styles.pulse : ''}`}
             onClick={() => {
                 if (props.onClick) props.onClick(props.nozzleIndex);
             }}

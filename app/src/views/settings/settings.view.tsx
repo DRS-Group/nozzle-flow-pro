@@ -41,6 +41,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [adminPasswordDialogOpen, setAdminPasswordDialogOpen] = useState<boolean>(false);
     const [nozzleSpacingDialogOpen, setNozzleSpacingDialogOpen] = useState<boolean>(false);
     const [removeAllSecondaryModulesDialogOpen, setRemoveAllSecondaryModulesDialogOpen] = useState<boolean>(false);
+    const [timeBeforeAlertDialogOpen, setTimeBeforeAlertDialogOpen] = useState<boolean>(false);
 
     const [languageContextMenuPosition, setLanguageContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [interfaceScaleContextMenuPosition, setInterfaceScaleContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
@@ -214,41 +215,6 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         </div>
                     </div>
                 }
-                {isAdmin &&
-                    <div className={styles.section}>
-                        <div className={styles.sectionTitle}>
-                            {translate('Main module')}
-                        </div>
-                        <div className={styles.sectionContent}>
-                            <div className={styles.item}
-                                onClick={onModuleModeClick}
-                            >
-                                <div className={styles.itemLeft}>
-                                    <span className={styles.itemName}>{translate('Module mode')}</span>
-                                </div>
-                                <div className={styles.itemRight}>
-                                    <div className={styles.itemValue}>
-                                        <span>{moduleMode === 0 ? 'Running' : 'Pairing'}</span>
-                                    </div>
-                                    <i className="icon-unfold-more-horizontal"></i>
-                                </div>
-                            </div>
-                            <div className={styles.item}
-                                onClick={onRemoveAllSecondaryModulesClick}
-                            >
-                                <div className={styles.itemLeft}>
-                                    <span className={styles.itemName}>{translate('Secondary modules count')}</span>
-                                </div>
-                                <div className={styles.itemRight}>
-                                    <div className={styles.itemValue}>
-                                        <span>{secondaryModulesCount}</span>
-                                    </div>
-                                    <i className="icon-unfold-more-horizontal"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
                 <div className={styles.section}>
                     <div className={styles.sectionTitle}>
                         {translate('General')}
@@ -257,32 +223,15 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         {isAdmin &&
                             <div className={styles.item}
                                 onClick={() => {
-                                    setApiBaseUriDialogOpen(true);
+                                    setTimeBeforeAlertDialogOpen(true);
                                 }}
                             >
                                 <div className={styles.itemLeft}>
-                                    <span className={styles.itemName}>{translate('API Base URL')}</span>
+                                    <span className={styles.itemName}>{translate('Time before alert')}</span>
                                 </div>
                                 <div className={styles.itemRight}>
                                     <div className={styles.itemValue}>
-                                        <span>{settings?.apiBaseUrl}</span>
-                                    </div>
-                                    <i className="icon-thin-chevron-right"></i>
-                                </div>
-                            </div>
-                        }
-                        {isAdmin &&
-                            <div className={styles.item}
-                                onClick={() => {
-                                    setRefreshIntervalDialogOpen(true);
-                                }}
-                            >
-                                <div className={styles.itemLeft}>
-                                    <span className={styles.itemName}>{translate('Refresh interval')}</span>
-                                </div>
-                                <div className={styles.itemRight}>
-                                    <div className={styles.itemValue}>
-                                        <span>{settings?.interval}ms</span>
+                                        <span>{parseFloat(((settings?.timeBeforeAlert || 2000) / 1000).toFixed(0))}s</span>
                                     </div>
                                     <i className="icon-thin-chevron-right"></i>
                                 </div>
@@ -348,6 +297,79 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         }
                     </div>
                 </div>
+                {isAdmin &&
+                    <div className={styles.section}>
+                        <div className={styles.sectionTitle}>
+                            {translate('Connection')}
+                        </div>
+                        <div className={styles.sectionContent}>
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
+                                        setApiBaseUriDialogOpen(true);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('API Base URL')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{settings?.apiBaseUrl}</span>
+                                        </div>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={onModuleModeClick}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Module mode')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{moduleMode === 0 ? 'Running' : 'Pairing'}</span>
+                                        </div>
+                                        <i className="icon-unfold-more-horizontal"></i>
+                                    </div>
+                                </div>
+                            }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={onRemoveAllSecondaryModulesClick}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Secondary modules count')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{secondaryModulesCount}</span>
+                                        </div>
+                                        <i className="icon-unfold-more-horizontal"></i>
+                                    </div>
+                                </div>
+                            }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
+                                        setRefreshIntervalDialogOpen(true);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Refresh interval')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{settings?.interval}ms</span>
+                                        </div>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
                 <div className={styles.section}>
                     <div className={styles.sectionTitle}>
                         {translate('Units of measurement')}
@@ -592,6 +614,26 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     }}
                     onCancelClick={() => {
                         setNozzleSpacingDialogOpen(false);
+                    }}
+                />
+            }
+            {timeBeforeAlertDialogOpen &&
+                <NumberInputDialog
+                    unit='s'
+                    title={translate('Set time before alert')}
+                    label={translate('Time before alert')}
+                    decimals={0}
+                    defaultValue={(settings?.timeBeforeAlert || 2000) / 1000}
+                    onConfirmClick={(value: number) => {
+                        SettingsService.setTimeBeforeAlert(value * 1000).then(() => {
+                            SettingsService.getSettings().then((settings) => {
+                                setSettings(settings);
+                            });
+                        });
+                        setTimeBeforeAlertDialogOpen(false);
+                    }}
+                    onCancelClick={() => {
+                        setTimeBeforeAlertDialogOpen(false);
                     }}
                 />
             }

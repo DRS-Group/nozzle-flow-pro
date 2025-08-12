@@ -4,15 +4,18 @@ import { services } from "../dependency-injection";
 export function usePump() {
     const pumpService = services.pumpService;
 
+    const [rawState, setRawState] = useState<'on' | 'off'>('off');
     const [pumpState, setPumpState] = useState<'on' | 'off'>('off');
     const [overriddenState, setOverriddenState] = useState<'on' | 'off' | 'auto'>('auto');
 
     useEffect(() => {
         setPumpState(pumpService.getState());
         setOverriddenState(pumpService.getOverriddenState());
+        setRawState(pumpService.getRawState());
 
         const eventHandler = (state: 'on' | 'off') => {
             setPumpState(state);
+            setRawState(pumpService.getRawState());
         }
 
         pumpService.addEventListener('onStateChanged', eventHandler);
@@ -46,6 +49,7 @@ export function usePump() {
         pumpState,
         overriddenState,
         setState,
-        setOverridden
+        setOverridden,
+        rawState
     }
 }

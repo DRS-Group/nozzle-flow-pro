@@ -30,7 +30,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 const currentJob = await services.currentJobService.getCurrentJob();
 
                 if (!currentJob) {
-                    resolve({ nozzles: [], speed: 0 } as ESPData);
+                    resolve({ nozzles: [], speed: 0, coordinates: { latitude: 0, longitude: 0 } } as ESPData);
                     return;
                 }
 
@@ -75,19 +75,27 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
 
                 resolve({
                     nozzles: demoModeData.nozzles,
-                    speed: demoModeData.speed
+                    speed: demoModeData.speed,
+                    coordinates: {
+                        latitude: -21.122778,
+                        longitude: -48.993056
+                    }
                 });
 
                 const res: ESPData = {
                     nozzles: demoModeData.nozzles,
-                    speed: demoModeData.speed
+                    speed: demoModeData.speed,
+                    coordinates: {
+                        latitude: -21.122778,
+                        longitude: -48.993056
+                    }
                 };
                 this.dispatchEvent('onDataFetched', res);
                 return;
             }
 
             if (!SettingsService.isConnectedToWifi()) {
-                resolve({ nozzles: [], speed: 0 } as ESPData)
+                resolve({ nozzles: [], speed: 0, coordinates: { latitude: 0, longitude: 0 } } as ESPData)
                 return;
             }
 
@@ -104,12 +112,16 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                         const nozzles = await NozzlesService.getNozzles();
                         const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
                         const speed = shouldSimulateSpeed ? simulatedSpeed : response.data.speed;
+                        const coordinates = response.data.coordinates || {
+                            latitude: -21.122778,
+                            longitude: -48.993056
+                        };
 
                         for (let i = 0; i < nozzles.length; i++) {
                             nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;
                         }
 
-                        const res: ESPData = { nozzles: nozzles, speed: speed };
+                        const res: ESPData = { nozzles: nozzles, speed: speed, coordinates: coordinates };
 
                         this.dispatchEvent('onDataFetched', res);
 

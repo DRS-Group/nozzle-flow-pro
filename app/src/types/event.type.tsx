@@ -6,4 +6,8 @@ export type Event = {
     endTime: Date | undefined;
     viewed: boolean;
     triggered: boolean;
+    coordinates: {
+        latitude: number;
+        longitude: number;
+    };
 };

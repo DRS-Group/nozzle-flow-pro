@@ -15,4 +15,5 @@ export type Settings = {
     simulatedSpeed: number;
     demoMode: boolean;
     logo: string;
+    timeBeforeAlert: number;
 }

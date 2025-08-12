@@ -44,6 +44,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     const [changeNameDialogNozzleIndex, setChangeNameDialogNozzleIndex] = useState<number | null>(null);
     const [calibrateDialogNozzleIndex, setCalibrateDialogNozzleIndex] = useState<number | null>(null);
 
+    const currentJob = useCurrentJob();
+
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -296,7 +298,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     unit='L/ha'
                     label={translate('Expected flow')}
                     title={translate('Set expected flow')}
-                    defaultValue={0}
+                    defaultValue={currentJob.job != undefined ? (currentJob.job.expectedFlow) : 0}
                     onConfirmClick={(value) => {
                         setFlowRate(value);
 

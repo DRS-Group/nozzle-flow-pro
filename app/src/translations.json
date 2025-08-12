@@ -112,6 +112,10 @@
         "pt-br": "Tempo antes do alerta (segundos)"
     },
     {
+        "en-us": "Time before alert",
+        "pt-br": "Tempo antes do alerta"
+    },
+    {
         "en-us": "New Job",
         "pt-br": "Novo Trabalho"
     },
@@ -350,5 +354,17 @@
     {
         "en-us": "Set speed",
         "pt-br": "Definir velocidade"
+    },
+    {
+        "en-us": "Demo mode",
+        "pt-br": "Modo demonstração"
+    },
+    {
+        "en-us": "Module mode",
+        "pt-br": "Modo do módulo"
+    },
+    {
+        "en-us": "Secondary modules count",
+        "pt-br": "Quantidade de módulos secundários"
     }
 ]

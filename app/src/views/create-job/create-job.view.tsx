@@ -25,7 +25,6 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
     const currentJob = useCurrentJob();
 
     const titleInputRef = useRef<TextInputElement>(null);
-    const durationToleranceInputRef = useRef<TextInputElement>(null);
     const expectedFlowInputRef = useRef<TextInputElement>(null);
     const flowToleranceInputRef = useRef<TextInputElement>(null);
 
@@ -39,14 +38,12 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
 
     const onConfirmButtonClick = () => {
         const title = titleInputRef.current!.getValue();
-        const durationTolerance = parseFloat(durationToleranceInputRef.current!.getValue()) * 1000;
         // Divide-se por 10.000 para obter o valor em L/m². Se não dividir por 10.000, fica em L/ha.
         const expectedFlow = parseFloat(expectedFlowInputRef.current!.getValue()) / 1;
         const flowTolerance = parseFloat(flowToleranceInputRef.current!.getValue()) / 100;
 
         services.jobsService.saveJob({
             title: title,
-            durationTolerance: durationTolerance,
             expectedFlow: expectedFlow,
             creationDate: new Date(),
             tolerance: flowTolerance,
@@ -71,14 +68,6 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
                         className={styles.titleInput}
                         ref={titleInputRef}
                         value={translate('New Job')}
-                    />
-                    <NumberInput
-                        label={translate('Time before alert (seconds)')}
-                        className={styles.durationToleranceInput}
-                        value={7}
-                        decimals={0}
-                        ref={durationToleranceInputRef}
-                        unit='s'
                     />
                     <NumberInput
                         label={translate('Expected flow (L/ha)')}

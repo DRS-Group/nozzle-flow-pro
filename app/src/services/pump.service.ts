@@ -10,6 +10,7 @@ export interface IPumpService extends IBaseService<PumpServiceEvents> {
     getState: () => 'on' | 'off';
     setOverriddenState: (state: 'on' | 'off' | 'auto') => void;
     getOverriddenState: () => 'on' | 'off' | 'auto';
+    getRawState: () => 'on' | 'off';
 }
 
 export class PumpService extends BaseService<PumpServiceEvents> implements IPumpService {
@@ -39,6 +40,10 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
             return this.state;
         }
         return this.overriddenState;
+    }
+
+    public getRawState = () => {
+        return this.state;
     }
 
     public setOverriddenState = (state: 'on' | 'off' | 'auto') => {
