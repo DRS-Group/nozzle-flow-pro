@@ -320,6 +320,13 @@ export namespace SettingsService {
         });
     }
 
+    export const getInterval = async (): Promise<number> => {
+        return new Promise(async (resolve, reject) => {
+            const settings = await getSettings();
+            resolve(settings.interval);
+        });
+    }
+
     export const setNozzleSpacing = async (nozzleSpacing: number): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             let settings = await getSettings();

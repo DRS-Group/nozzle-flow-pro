@@ -13,7 +13,7 @@ import { SettingsService } from '../../services/settings.service';
 import { ESPData } from '../../types/ESP-data.type';
 import { Nozzle } from '../../types/nozzle.type';
 import styles from './nozzles.module.css';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useContext, useEffect, useImperativeHandle, useLayoutEffect, useState } from 'react';
 
 export type NozzlesViewElement = {}
 
@@ -35,6 +35,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     const [changeNameDialogOpen, setChangeNameDialogOpen] = useState<boolean>(false);
     const [calibrateDialogOpen, setCalibrateDialogOpen] = useState<boolean>(false);
     const [speedDialogOpen, setSpeedDialogOpen] = useState<boolean>(false);
+    const [autoCalibratingDialogOpen, setAutoCalibratingDialogOpen] = useState<boolean>(false);
     const [speed, setSpeed] = useState<number>(0);
     const [flowRateDialogOpen, setFlowRateDialogOpen] = useState<boolean>(false);
     const [flowRate, setFlowRate] = useState<number>(0);
@@ -320,30 +321,41 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         setSpeed(value);
 
                         setSpeedDialogOpen(false);
+                        setAutoCalibratingDialogOpen(true);
 
-                        const espData: ESPData = await services.dataFetcherService.fetchData();
-                        const nozzleSpacing = await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
-                        const expectedFlow = (value * nozzleSpacing * 100 * flowRate) / 60000;
+                        await services.dataFetcherService.setInterval(10000);
+                        setInterval(async () => {
+                            const espData: ESPData = await services.dataFetcherService.fetchData();
 
+                            await services.dataFetcherService.setInterval(await SettingsService.getInterval());
 
-                        let newNozzles = espData.nozzles.map((nozzle) => {
-                            const pulsesPerMinute = nozzle.pulsesPerMinute;
-                            return {
-                                ...nozzle,
-                                pulsesPerLiter: Math.round(pulsesPerMinute / expectedFlow)
-                            };
-                        });
+                            const nozzleSpacing = await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
+                            const expectedFlow = (value * nozzleSpacing * 100 * flowRate) / 60000;
 
-                        await NozzlesService.setNozzles(newNozzles);
+                            let newNozzles = espData.nozzles.map((nozzle) => {
+                                const pulsesPerMinute = nozzle.pulsesPerMinute;
+                                return {
+                                    ...nozzle,
+                                    pulsesPerLiter: Math.round(pulsesPerMinute / expectedFlow)
+                                };
+                            });
 
-                        NozzlesService.getNozzles().then((nozzles) => {
-                            setNozzles(nozzles);
-                        });
+                            await NozzlesService.setNozzles(newNozzles);
+
+                            NozzlesService.getNozzles().then((nozzles) => {
+                                setNozzles(nozzles);
+                            });
+
+                            setAutoCalibratingDialogOpen(false);
+                        }, 10500);
                     }}
                     onCancelClick={() => {
                         setSpeedDialogOpen(false);
                     }}
                 />
+            }
+            {autoCalibratingDialogOpen &&
+                <AutoCalibratingDialog />
             }
             {changeNameDialogOpen && changeNameDialogNozzleIndex !== null &&
                 <TextInputDialog
@@ -451,4 +463,115 @@ const NozzleItem = forwardRef<NozzleItemElement, NozzleItemProps>((props, ref) =
             </div>
         </div>
     )
+});
+
+export type AutoCalibratingDialogElement = {}
+
+export type AutoCalibratingDialogProps = {
+
+}
+
+export const AutoCalibratingDialog = forwardRef<AutoCalibratingDialogElement, AutoCalibratingDialogProps>((props, ref) => {
+    const translate = useTranslate();
+    const [progress, setProgress] = useState(0);
+
+    useImperativeHandle(ref, () => ({
+
+    }), []);
+
+    useLayoutEffect(() => {
+        const interval = setInterval(() => {
+            setProgress((prev) => {
+                if (prev === 100) {
+                    clearInterval(interval);
+                    return 100;
+                }
+                return prev + 1;
+            });
+        }, 100);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className={styles.background}
+            style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                backdropFilter: "blur(0.1rem)",
+                overflow: "hidden",
+                zIndex: 3
+            }}
+        >
+            <div className={styles.wrapper}
+                style={{
+                    position: "absolute",
+                    height: "fit-content",
+                    width: "fit-content",
+
+                    backgroundColor: "var(--secondary-color)",
+
+                    left: "50%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+
+                    borderRadius: "1rem",
+                    overflow: "hidden",
+
+                    maxWidth: "75vw",
+
+                    boxShadow: "0rem 0.1rem 0.25rem 0.25rem rgba(0, 0, 0, 0.15)"
+                }}
+            >
+                <div className={styles.header}
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: "1rem",
+                        borderBottom: "1px solid var(--primary-color)",
+                        backgroundColor: "var(--primary-color)",
+                        width: "100%",
+                    }}>
+                    <span
+                        style={{
+                            color: "var(--secondary-font-color)",
+                            fontSize: "1.25rem",
+                        }}
+                    >{translate('Auto calibration')}</span>
+                </div>
+                <div className={styles.content}
+                    style={{
+                        padding: "2rem 1rem 3rem 1rem",
+                        gap: "1rem"
+                    }}
+                >
+                    <span
+                        style={{
+                            whiteSpace: "pre-wrap",
+                        }}
+                    >{translate('Calibrating...')} ({progress.toFixed(0)}%)</span>
+                    <div className={styles.progressBar}
+                        style={{
+                            backgroundColor: "rgb(200, 200, 200)",
+                            borderRadius: "0.5rem",
+                            overflow: "hidden",
+                            height: "0.5rem",
+                            width: "25vw"
+                        }}
+                    >
+                        <div className={styles.progress} style={{
+                            width: `${progress}%`,
+                            height: "100%",
+                            backgroundColor: "var(--primary-color)",
+                            transition: "width 0.1s"
+                        }} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 });
