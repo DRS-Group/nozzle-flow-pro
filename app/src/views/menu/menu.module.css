@@ -13,7 +13,8 @@
 }
 
 .logo {
-    height: 10rem;
+    max-height: 10rem;
+    max-width: 25rem;
 }
 
 .itemsWrapper {

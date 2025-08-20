@@ -147,7 +147,7 @@ export namespace SettingsService {
         return new Promise(async (resolve, reject) => {
             const useDefaultLogo: boolean = await getSettingOrDefault('useDefaultLogo', defaultSettings.useDefaultLogo);
 
-            const DEFAULT_LOGO_URI = '/images/logo_drs.png';
+            const DEFAULT_LOGO_URI = '/images/D-Flow.svg';
 
             if (useDefaultLogo) {
                 resolve(DEFAULT_LOGO_URI);
