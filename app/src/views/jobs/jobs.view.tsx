@@ -8,6 +8,7 @@ import { useTranslate } from '../../hooks/useTranslate';
 import { useNavigation } from '../../hooks/useNavigation';
 import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useJobs } from '../../hooks/useJobs';
+import { SettingsService } from '../../services/settings.service';
 
 export type JobsElement = {}
 
@@ -59,6 +60,50 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
         setContextMenuPosition(null);
     }
 
+    const getContextMenuItems = () => {
+        if (!contextMenuJob) return [];
+
+        let items = [
+            {
+                label: translate('Continue'),
+                onClick: () => {
+                    currentJob.set(contextMenuJob.id);
+                    navigation.navigate('dataView');
+                    navigation.clearHistory();
+
+                    setContextMenuJob(null);
+                    setContextMenuPosition(null);
+                },
+                icon: <i className="icon-play"></i>
+            },
+            {
+                label: translate('Logs'),
+                onClick: () => {
+                    onLogsClick();
+                },
+                icon: <i className="icon-file-clock-outline"></i>
+            }
+        ];
+
+        const isAdmin = SettingsService.getIsAdmin();
+
+        if (isAdmin) {
+            items.push({
+                label: translate('Delete'),
+                onClick: () => {
+                    setDeleteJobDialogJob(contextMenuJob);
+                    setDeleteJobDialogOpen(true);
+
+                    setContextMenuJob(null);
+                    setContextMenuPosition(null);
+                },
+                icon: <i className="icon-trash"></i>
+            });
+        }
+
+        return items;
+    }
+
     return (
         <>
             <div className={styles.wrapper}>
@@ -93,38 +138,7 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                 <ContextMenu
                     onBackgroundClick={onContextMenuBackgroundClick}
                     position={contextMenuPosition}
-                    items={[
-                        {
-                            label: translate('Continue'),
-                            onClick: () => {
-                                currentJob.set(contextMenuJob.id);
-                                navigation.navigate('dataView');
-                                navigation.clearHistory();
-
-                                setContextMenuJob(null);
-                                setContextMenuPosition(null);
-                            },
-                            icon: <i className="icon-play"></i>
-                        },
-                        {
-                            label: translate('Logs'),
-                            onClick: () => {
-                                onLogsClick();
-                            },
-                            icon: <i className="icon-file-clock-outline"></i>
-                        },
-                        {
-                            label: translate('Delete'),
-                            onClick: () => {
-                                setDeleteJobDialogJob(contextMenuJob);
-                                setDeleteJobDialogOpen(true);
-
-                                setContextMenuJob(null);
-                                setContextMenuPosition(null);
-                            },
-                            icon: <i className="icon-trash"></i>
-                        }
-                    ]} />
+                    items={getContextMenuItems()} />
             )}
             {deleteJobDialogOpen &&
                 <YesNoDialog
