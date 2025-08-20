@@ -166,7 +166,6 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
             
 
             if (nozzleOngoingEvent === undefined) {
-                debugger
                 if (isFlowAboveExpected) {
                     const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is above the expected value', currentLanguage)}`;
 
@@ -221,6 +220,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                 }
                 else if (isFlowWithinExpected) {
                     nozzleOngoingEvent.endTime = new Date();
+                    nozzleOngoingEvent.viewed = true;
                     shouldSaveJob = true;
                 }
                 else if (isFlowAboveExpected && eventTitle === TranslationServices.translate('Flow below expected', currentLanguage)) {
