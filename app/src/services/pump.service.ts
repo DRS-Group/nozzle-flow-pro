@@ -1,7 +1,10 @@
 import { services } from "../dependency-injection";
 import { BaseService, IBaseService } from "../types/base-service.type";
+import { ESPData } from "../types/ESP-data.type";
 import { Nozzle } from "../types/nozzle.type";
+import { CurrentJobService } from "./current-job.service";
 import { IDataFecherService } from "./data-fetcher.service";
+import { SettingsService } from "./settings.service";
 
 export type PumpServiceEvents = 'onStateChanged' | 'onOverriddenStateChanged';
 
@@ -18,11 +21,28 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
 
     constructor() {
         super();
-        this.dataFetcherService.addEventListener('onDataFetched', (data) => {
-            const isPumpActive = data.nozzles.find((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10 && !nozzle.ignored);
-            const state = isPumpActive ? 'on' : 'off';
-            if (state !== this.getState()) {
-                this.setState(state);
+        this.dataFetcherService.addEventListener('onDataFetched', async (data: ESPData) => {
+            const currentJob = await services.currentJobService.getCurrentJob();
+            if (currentJob) {
+                const expectedFlow = currentJob.expectedFlow;
+                const tolerance = currentJob.tolerance;
+                const minimumExpectedFlow = expectedFlow * (1 - tolerance) * 0.5;
+                const isPumpActive = data.nozzles.some((nozzle: Nozzle) => {
+                    const litersPerMinute = nozzle.pulsesPerMinute / nozzle.pulsesPerLiter;
+                    return litersPerMinute > minimumExpectedFlow && !nozzle.ignored;
+                });
+
+                const state = isPumpActive ? 'on' : 'off';
+                if (state !== this.getState()) {
+                    this.setState(state);
+                }
+            }
+            else {
+                const isPumpActive = data.nozzles.find((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10 && !nozzle.ignored);
+                const state = isPumpActive ? 'on' : 'off';
+                if (state !== this.getState()) {
+                    this.setState(state);
+                }
             }
         });
     }
