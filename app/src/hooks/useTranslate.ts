@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { SettingsService } from "../services/settings.service";
 import { Settings as SettingsType } from "../types/settings.type";
 import { TranslationServices } from "../services/translations.service";
@@ -6,7 +6,7 @@ import { TranslationServices } from "../services/translations.service";
 export function useTranslate() {
     const [currentLanguage, setCurrentLanguage] = useState<'en-us' | 'pt-br'>('en-us');
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         SettingsService.getSettingOrDefault('language', 'en-us').then((language) => {
             setCurrentLanguage(language);
         });

@@ -1,3 +1,4 @@
+import { useTranslate } from '../../hooks/useTranslate';
 import { SoundsService } from '../../services/sounds.service';
 import { Event } from '../../types/event.type';
 import styles from './alert-modal.module.css';
@@ -15,6 +16,8 @@ export type AlertModalProps = {
 }
 
 export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props, ref) => {
+    const translate = useTranslate();
+
     useImperativeHandle(ref, () => ({
 
     }), []);
@@ -56,9 +59,9 @@ export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props,
                     <span dangerouslySetInnerHTML={{ __html: props.event.description }}></span>
                 </div>
                 <div className={styles.footer}>
-                    <button onClick={onOkClick}>Ok</button>
+                    <button onPointerDown={onOkClick}>{translate('Ok')}</button>
                     {props.totalEvents! > 1 &&
-                        <button onClick={onOkForAllClick}>Ok for all ({props.totalEvents})</button>
+                        <button onPointerDown={onOkForAllClick}>{translate('Ok for all')} ({props.totalEvents})</button>
                     }
                 </div>
             </div>

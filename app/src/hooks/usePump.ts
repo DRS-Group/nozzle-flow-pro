@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { services } from "../dependency-injection";
 
 export function usePump() {
@@ -7,8 +7,9 @@ export function usePump() {
     const [rawState, setRawState] = useState<'on' | 'off'>('off');
     const [pumpState, setPumpState] = useState<'on' | 'off'>('off');
     const [overriddenState, setOverriddenState] = useState<'on' | 'off' | 'auto'>('auto');
+    const [isStabilized, setIsStabilized] = useState<boolean>(pumpService.getIsStabilized());
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setPumpState(pumpService.getState());
         setOverriddenState(pumpService.getOverriddenState());
         setRawState(pumpService.getRawState());
@@ -25,7 +26,7 @@ export function usePump() {
         }
     }, [setPumpState]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const eventHandler = (state: 'on' | 'off' | 'auto') => {
             setOverriddenState(state);
         }
@@ -36,6 +37,19 @@ export function usePump() {
             pumpService.removeEventListener('onOverriddenStateChanged', eventHandler);
         }
     }, [setOverriddenState]);
+
+    useLayoutEffect(()=>{
+        const eventHandler = (isStabilized: boolean) => {
+            setIsStabilized(isStabilized);
+            console.log("Pump is stabilized:", isStabilized);
+        }
+
+        pumpService.addEventListener('onIsStabilizedChanged', eventHandler);
+
+        return () => {
+            pumpService.removeEventListener('onIsStabilizedChanged', eventHandler);
+        }
+    })
 
     const setState = (state: 'on' | 'off') => {
         pumpService.setState(state);
@@ -50,6 +64,7 @@ export function usePump() {
         overriddenState,
         setState,
         setOverridden,
-        rawState
+        rawState,
+        isStabilized
     }
 }

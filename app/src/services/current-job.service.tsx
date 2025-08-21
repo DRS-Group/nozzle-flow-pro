@@ -60,7 +60,6 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         const refreshEnd = new Date();
         const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
         const nextTimeout = 250 - refreshDuration;
-        // const nextTimeout = 250;
 
         setTimeout(() => {
             this.loop();
@@ -105,6 +104,12 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
     }
 
     private processNewData = async (espData: ESPData) => {
+        const isPumpStabilized = services.pumpService.getIsStabilized();
+
+        if(!isPumpStabilized) return;
+
+debugger
+
         const isPumpActive = services.pumpService.getState() === 'on';
 
         if (!isPumpActive) {
@@ -225,6 +230,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                 }
                 else if (isFlowAboveExpected && eventTitle === TranslationServices.translate('Flow below expected', currentLanguage)) {
                     nozzleOngoingEvent.endTime = new Date();
+                    nozzleOngoingEvent.viewed = true;
 
                     const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is above the expected value', currentLanguage)}`;
 
@@ -248,6 +254,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                 }
                 else if (isFlowBelowExpected && eventTitle === TranslationServices.translate('Flow above expected', currentLanguage)) {
                     nozzleOngoingEvent.endTime = new Date();
+                    nozzleOngoingEvent.viewed = true;
 
                     const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is below the expected value', currentLanguage)}`;
 

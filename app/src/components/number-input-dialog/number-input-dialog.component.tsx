@@ -65,13 +65,13 @@ export const NumberInputDialog = forwardRef<NumberInputDialogElement, NumberInpu
                 </div>
                 <div className={styles.footer}>
                     <button
-                        onClick={onConfirmClick}
+                        onPointerDown={onConfirmClick}
                         className={styles.button}
                     >
                         {translate('Confirm')}
                     </button>
                     <button
-                        onClick={onCancelClick}
+                        onPointerDown={onCancelClick}
                         className={styles.button}
                     >
                         {translate('Cancel')}

@@ -366,5 +366,22 @@
     {
         "en-us": "Secondary modules count",
         "pt-br": "Quantidade de módulos secundários"
+    },
+    {
+        "en-us": "Coordinates",
+        "pt-br": "Coordenadas"
+    },
+    {
+        "en-us": "Auto calibration",
+        "pt-br": "Calibração automática"
+    },
+    {
+        "en-us": "Calibrating...",
+        "pt-br": "Calibrando..."
+    },
+    {
+        "en-us": "Ok for all",
+        "pt-br": "Ok para todos"
     }
+
 ]

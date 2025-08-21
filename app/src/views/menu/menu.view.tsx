@@ -42,19 +42,19 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
             <div className={styles.itemsWrapper}>
                 <div
                     className={styles.item}
-                    onClick={onJobsClick}
+                    onPointerDown={onJobsClick}
                 >
                     <img src="/images/briefcase.svg" />
                     <span>{translate('Jobs')}</span>
                 </div>
                 <div className={styles.item}
-                    onClick={onNozzlesClick}
+                    onPointerDown={onNozzlesClick}
                 >
                     <img src="/images/nozzle.svg" />
                     <span>{translate('Nozzles')}</span>
                 </div>
                 <div className={styles.item}
-                    onClick={onSettingsClick}
+                    onPointerDown={onSettingsClick}
                 >
                     <img src="/images/settings.svg" />
                     <span>{translate('Settings')}</span>

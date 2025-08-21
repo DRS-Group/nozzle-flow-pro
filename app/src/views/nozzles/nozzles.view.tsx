@@ -169,17 +169,17 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 }
                 <div
                     className={styles.menuButton}
-                    onClick={toggleMenu}
+                    onPointerDown={toggleMenu}
                     data-state={menuState}
                 >
                     <i className="icon-plus"></i>
                     <div className={`${styles.menuItem} ${styles.refreshButton}`}
-                        onClick={onSyncNozzlesClick}
+                        onPointerDown={onSyncNozzlesClick}
                     >
                         <i className="icon-autorenew"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.calibrateButton}`}
-                        onClick={() => {
+                        onPointerDown={() => {
                             setCalibrateDialogOpen(true);
                             setCalibrateDialogNozzleIndex(null);
                         }}
@@ -187,14 +187,14 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         <i className="icon-speedometer-black"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.autoCalibrateButton}`}
-                        onClick={() => {
+                        onPointerDown={() => {
                             setFlowRateDialogOpen(true);
                         }}
                     >
                         <i className="icon-refresh-auto"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.clearButton}`}
-                        onClick={onClearNozzlesClick}
+                        onPointerDown={onClearNozzlesClick}
                     >
                         <i className="icon-broom"></i>
                     </div>
@@ -213,7 +213,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 )}
                 {nozzles === undefined || nozzles.length === 0 &&
                     <div className={styles.syncWrapper}>
-                        <button className={styles.syncButton} onClick={onSyncNozzlesClick}>{translate('Add nozzles')}</button>
+                        <button className={styles.syncButton} onPointerDown={onSyncNozzlesClick}>{translate('Add nozzles')}</button>
                     </div>
                 }
             </div>
@@ -324,7 +324,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         setAutoCalibratingDialogOpen(true);
 
                         await services.dataFetcherService.setInterval(10000);
-                        setInterval(async () => {
+                        setTimeout(async () => {
                             const espData: ESPData = await services.dataFetcherService.fetchData();
 
                             await services.dataFetcherService.setInterval(await SettingsService.getInterval());
@@ -453,7 +453,7 @@ const NozzleItem = forwardRef<NozzleItemElement, NozzleItemProps>((props, ref) =
     }
 
     return (
-        <div className={styles.jobItem} onClick={onClick}>
+        <div className={styles.jobItem} onPointerDown={onClick}>
             <div className={styles.left}>
                 <span>{props.nozzle.name}</span>
                 {/* <span>{props.nozzle.id}</span> */}

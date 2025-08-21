@@ -59,7 +59,7 @@ export const ContextMenu = forwardRef<ContextMenuElement, ContextMenuProps>((pro
     return (
         <div
             className={styles.background}
-            onClick={props.onBackgroundClick}
+            onPointerDown={props.onBackgroundClick}
         >
             <div
                 className={styles.wrapper}
@@ -75,7 +75,7 @@ export const ContextMenu = forwardRef<ContextMenuElement, ContextMenuProps>((pro
                     <div
                         key={index}
                         className={styles.item}
-                        onClick={() => {
+                        onPointerDown={() => {
                             props.onItemClick && props.onItemClick();
                             item.onClick();
                         }}

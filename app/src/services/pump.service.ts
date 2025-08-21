@@ -1,12 +1,13 @@
 import { services } from "../dependency-injection";
 import { BaseService, IBaseService } from "../types/base-service.type";
 import { ESPData } from "../types/ESP-data.type";
+import { Job } from "../types/job.type";
 import { Nozzle } from "../types/nozzle.type";
 import { CurrentJobService } from "./current-job.service";
 import { IDataFecherService } from "./data-fetcher.service";
 import { SettingsService } from "./settings.service";
 
-export type PumpServiceEvents = 'onStateChanged' | 'onOverriddenStateChanged';
+export type PumpServiceEvents = 'onStateChanged' | 'onOverriddenStateChanged' | 'onIsStabilizedChanged';
 
 export interface IPumpService extends IBaseService<PumpServiceEvents> {
     setState: (state: 'on' | 'off') => void;
@@ -14,31 +15,51 @@ export interface IPumpService extends IBaseService<PumpServiceEvents> {
     setOverriddenState: (state: 'on' | 'off' | 'auto') => void;
     getOverriddenState: () => 'on' | 'off' | 'auto';
     getRawState: () => 'on' | 'off';
+    getIsStabilized: () => boolean;
 }
 
 export class PumpService extends BaseService<PumpServiceEvents> implements IPumpService {
     private readonly dataFetcherService: IDataFecherService = services.dataFetcherService;
+
+    private isStabilized: boolean = true;
+    private timeoutHandler: NodeJS.Timeout | null = null;
+    private lastRawIsPumpActive: boolean = false;
 
     constructor() {
         super();
         this.dataFetcherService.addEventListener('onDataFetched', async (data: ESPData) => {
             const currentJob = await services.currentJobService.getCurrentJob();
             if (currentJob) {
-                const expectedFlow = currentJob.expectedFlow;
+                const expectedFlow = calculateTargetValue(currentJob, data.speed, await SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
                 const tolerance = currentJob.tolerance;
                 const minimumExpectedFlow = expectedFlow * (1 - tolerance) * 0.5;
                 const isPumpActive = data.nozzles.some((nozzle: Nozzle) => {
                     const litersPerMinute = nozzle.pulsesPerMinute / nozzle.pulsesPerLiter;
                     return litersPerMinute > minimumExpectedFlow && !nozzle.ignored;
                 });
+                const rawIsPumpActive = data.nozzles.some((nozzle: Nozzle) => nozzle.pulsesPerMinute > 20 && !nozzle.ignored);
+
+                // debugger
+                // Se a bomba saiu de off para on e não há um timeout em andamento...
+                if (!this.lastRawIsPumpActive && rawIsPumpActive && !this.timeoutHandler) {
+                    this.isStabilized = false;
+                    this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
+                    this.timeoutHandler = setTimeout(() => {
+                        this.isStabilized = true;
+                        this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
+                        this.timeoutHandler = null;
+                    }, (await SettingsService.getInterval()) * 3);
+                }
 
                 const state = isPumpActive ? 'on' : 'off';
                 if (state !== this.getState()) {
                     this.setState(state);
                 }
+
+                this.lastRawIsPumpActive = rawIsPumpActive;
             }
             else {
-                const isPumpActive = data.nozzles.find((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10 && !nozzle.ignored);
+                const isPumpActive = data.nozzles.some((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10 && !nozzle.ignored);
                 const state = isPumpActive ? 'on' : 'off';
                 if (state !== this.getState()) {
                     this.setState(state);
@@ -76,4 +97,13 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
         return this.overriddenState;
     }
 
+    public getIsStabilized = () => {
+        return this.isStabilized;
+    }
 }
+
+const calculateTargetValue = (job: Job, speed: number, nozzleSpacing: number) => {
+    const expectedFlow = job.expectedFlow;
+
+    return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow) / 60000;
+};

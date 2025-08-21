@@ -66,7 +66,7 @@ return (
                         <tr>
                             <th>{translate('Date')}</th>
                             <th>{translate('Title')}</th>
-                            <th>{translate('Coordenadas')}</th>
+                            <th>{translate('Coordinates')}</th>
                             <th>{translate('Description')}</th>
                         </tr>
                     </thead>
@@ -84,7 +84,7 @@ return (
             </div>
             <div
                 className={styles.confirmButton}
-                onClick={download}
+                onPointerDown={download}
             >
                 <i className="icon-export"></i>
             </div>

@@ -43,13 +43,13 @@ export const YesNoDialog = forwardRef<DialogElement, DialogProps>((props, ref) =
                 </div>
                 <div className={styles.footer}>
                     <button
-                        onClick={onYesClick}
+                        onPointerDown={onYesClick}
                         className={styles.button}
                     >
                         {translate('Yes')}
                     </button>
                     <button
-                        onClick={onNoClick}
+                        onPointerDown={onNoClick}
                         className={styles.button}
                     >
                         {translate('No')}

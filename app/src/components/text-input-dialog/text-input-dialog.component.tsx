@@ -64,7 +64,7 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
                 </div>
                 <div className={styles.footer}>
                     <button
-                        onClick={onConfirmClick}
+                        onPointerDown={onConfirmClick}
                         className={styles.button}
                     >
                         {translate('Confirm')}
@@ -72,7 +72,7 @@ export const TextInputDialog = forwardRef<TextInputDialogElement, TextInputDialo
                     {
                         props.onCancelClick &&
                         <button
-                            onClick={onCancelClick}
+                            onPointerDown={onCancelClick}
                             className={styles.button}
                         >
                             {translate('Cancel')}

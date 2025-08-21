@@ -198,12 +198,12 @@ function App() {
           />
         }
         {
-          currentJob.unviwedTriggeredEvents.length > 0 &&
+          currentJob.unviewedTriggeredEvents.length > 0 &&
           <AlertModal
-            event={currentJob.unviwedTriggeredEvents[0]}
-            onOkClick={() => { currentJob.markEventAsViewed(currentJob.unviwedTriggeredEvents[0].id) }}
+            event={currentJob.unviewedTriggeredEvents[0]}
+            onOkClick={() => { currentJob.markEventAsViewed(currentJob.unviewedTriggeredEvents[0].id) }}
             onOkForAllClick={currentJob.markAllEventsAsViewed}
-            totalEvents={currentJob.unviwedTriggeredEvents.length}
+            totalEvents={currentJob.unviewedTriggeredEvents.length}
           />
         }
       </div>
