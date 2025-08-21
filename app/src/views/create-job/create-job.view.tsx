@@ -89,7 +89,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
             </div>
             <div
                 className={styles.confirmButton}
-                onPointerDown={onConfirmButtonClick}
+                onClick={onConfirmButtonClick}
             >
                 <i className="icon-check"></i>
             </div>

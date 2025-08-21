@@ -196,7 +196,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         </div>
                         <div className={styles.sectionContent}>
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     SettingsService.setSettings(defaultSettings).then(() => {
                                         SettingsService.getSettings().then((settings) => {
                                             setSettings(settings);
@@ -221,7 +221,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     <div className={styles.sectionContent}>
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     setTimeBeforeAlertDialogOpen(true);
                                 }}
                             >
@@ -238,7 +238,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         }
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     setNozzleSpacingDialogOpen(true);
                                 }}
                             >
@@ -254,7 +254,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             </div>
                         }
                         <div className={styles.item}
-                            onPointerDown={onLanguageClick}
+                            onClick={onLanguageClick}
                         >
                             <div className={styles.itemLeft}>
                                 <span className={styles.itemName}>{translate('Language')}</span>
@@ -267,7 +267,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             </div>
                         </div>
                         <div className={styles.item}
-                            onPointerDown={onSimulatedSpeedClick}
+                            onClick={onSimulatedSpeedClick}
                         >
                             <div className={styles.itemLeft}>
                                 <span className={styles.itemName}>{translate('Simulated speed')}</span>
@@ -281,7 +281,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         </div>
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={onDemoModeClick}
+                                onClick={onDemoModeClick}
                             >
                                 <div className={styles.itemLeft}>
                                     <span className={styles.itemName}>{translate('Demo mode')}</span>
@@ -304,7 +304,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         <div className={styles.sectionContent}>
                             {isAdmin &&
                                 <div className={styles.item}
-                                    onPointerDown={() => {
+                                    onClick={() => {
                                         setApiBaseUriDialogOpen(true);
                                     }}
                                 >
@@ -321,7 +321,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             }
                             {isAdmin &&
                                 <div className={styles.item}
-                                    onPointerDown={onModuleModeClick}
+                                    onClick={onModuleModeClick}
                                 >
                                     <div className={styles.itemLeft}>
                                         <span className={styles.itemName}>{translate('Module mode')}</span>
@@ -336,7 +336,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             }
                             {isAdmin &&
                                 <div className={styles.item}
-                                    onPointerDown={onRemoveAllSecondaryModulesClick}
+                                    onClick={onRemoveAllSecondaryModulesClick}
                                 >
                                     <div className={styles.itemLeft}>
                                         <span className={styles.itemName}>{translate('Secondary modules count')}</span>
@@ -351,7 +351,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             }
                             {isAdmin &&
                                 <div className={styles.item}
-                                    onPointerDown={() => {
+                                    onClick={() => {
                                         setRefreshIntervalDialogOpen(true);
                                     }}
                                 >
@@ -375,7 +375,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     </div>
                     <div className={styles.sectionContent}>
                         <div className={styles.item}
-                            onPointerDown={onVolumeUnitClick}
+                            onClick={onVolumeUnitClick}
                         >
                             <div className={styles.itemLeft}>
                                 <span className={styles.itemName}>{translate('Volume')}</span>
@@ -388,7 +388,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             </div>
                         </div>
                         <div className={styles.item}
-                            onPointerDown={onAreaUnitClick}
+                            onClick={onAreaUnitClick}
                         >
                             <div className={styles.itemLeft}>
                                 <span className={styles.itemName}>{translate('Area')}</span>
@@ -409,7 +409,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     <div className={styles.sectionContent}>
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     setPrimaryColorDialogOpen(true);
                                 }}
                             >
@@ -426,7 +426,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         }
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     setSecondaryColorDialogOpen(true);
                                 }}
                             >
@@ -443,7 +443,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         }
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     setPrimaryFontColorDialogOpen(true);
                                 }}
                             >
@@ -460,7 +460,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         }
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     setSecondaryFontColorDialogOpen(true);
                                 }}
                             >
@@ -476,7 +476,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             </div>
                         }
                         <div className={styles.item}
-                            onPointerDown={onInterfaceScaleClick}
+                            onClick={onInterfaceScaleClick}
                         >
                             <div className={styles.itemLeft}>
                                 <span className={styles.itemName}>{translate('Interface scale')}</span>
@@ -490,7 +490,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         </div>
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     onLogoClick();
                                 }}
                             >
@@ -514,7 +514,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     <div className={styles.sectionContent}>
                         {!isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     setAdminPasswordDialogOpen(true);
                                 }}
                             >
@@ -528,7 +528,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         }
                         {isAdmin &&
                             <div className={styles.item}
-                                onPointerDown={() => {
+                                onClick={() => {
                                     exitAdminMode();
                                 }}
                             >

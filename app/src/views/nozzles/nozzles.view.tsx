@@ -6,6 +6,7 @@ import { YesNoDialog } from '../../components/yes-no-dialog/yes-no-dialog.compon
 import { services } from '../../dependency-injection';
 import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useNavigation } from '../../hooks/useNavigation';
+import { usePump } from '../../hooks/usePump';
 import { useTranslate } from '../../hooks/useTranslate';
 import { DataFecherService } from '../../services/data-fetcher.service';
 import { NozzlesService } from '../../services/nozzles.service';
@@ -22,6 +23,7 @@ export type NozzlesViewProps = {}
 export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((props, ref) => {
     const translate = useTranslate();
     const navigation = useNavigation();
+    const pump = usePump();
 
     const [contextMenuNozzleIndex, setContextMenuNozzleIndex] = useState<number | null>(null);
     const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
@@ -169,17 +171,17 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 }
                 <div
                     className={styles.menuButton}
-                    onPointerDown={toggleMenu}
+                    onClick={toggleMenu}
                     data-state={menuState}
                 >
                     <i className="icon-plus"></i>
                     <div className={`${styles.menuItem} ${styles.refreshButton}`}
-                        onPointerDown={onSyncNozzlesClick}
+                        onClick={onSyncNozzlesClick}
                     >
                         <i className="icon-autorenew"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.calibrateButton}`}
-                        onPointerDown={() => {
+                        onClick={() => {
                             setCalibrateDialogOpen(true);
                             setCalibrateDialogNozzleIndex(null);
                         }}
@@ -187,14 +189,14 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         <i className="icon-speedometer-black"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.autoCalibrateButton}`}
-                        onPointerDown={() => {
+                        onClick={() => {
                             setFlowRateDialogOpen(true);
                         }}
                     >
                         <i className="icon-refresh-auto"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.clearButton}`}
-                        onPointerDown={onClearNozzlesClick}
+                        onClick={onClearNozzlesClick}
                     >
                         <i className="icon-broom"></i>
                     </div>
@@ -213,7 +215,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 )}
                 {nozzles === undefined || nozzles.length === 0 &&
                     <div className={styles.syncWrapper}>
-                        <button className={styles.syncButton} onPointerDown={onSyncNozzlesClick}>{translate('Add nozzles')}</button>
+                        <button className={styles.syncButton} onClick={onSyncNozzlesClick}>{translate('Add nozzles')}</button>
                     </div>
                 }
             </div>
@@ -322,6 +324,9 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
 
                         setSpeedDialogOpen(false);
                         setAutoCalibratingDialogOpen(true);
+                        
+                        const currentPumpOverridenState = pump.overriddenState;
+                        pump.setOverridden('off');
 
                         await services.dataFetcherService.setInterval(10000);
                         setTimeout(async () => {
@@ -347,6 +352,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                             });
 
                             setAutoCalibratingDialogOpen(false);
+                            pump.setOverridden(currentPumpOverridenState);
                         }, 10500);
                     }}
                     onCancelClick={() => {
@@ -453,7 +459,7 @@ const NozzleItem = forwardRef<NozzleItemElement, NozzleItemProps>((props, ref) =
     }
 
     return (
-        <div className={styles.jobItem} onPointerDown={onClick}>
+        <div className={styles.jobItem} onClick={onClick}>
             <div className={styles.left}>
                 <span>{props.nozzle.name}</span>
                 {/* <span>{props.nozzle.id}</span> */}

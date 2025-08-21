@@ -50,7 +50,7 @@ export const NumberInput = forwardRef<NumberInputElement, NumberInputProps>((pro
                     defaultValue={formatNumber((Number(props.value || '0') * Math.pow(10, props.decimals || 0)).toString())}
                     onInput={onInput}
                     readOnly={true}
-                    onPointerDown={() => {
+                    onClick={() => {
                         setIsNumberInputModalOpen(true);
                     }}
                 />

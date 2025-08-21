@@ -28,13 +28,13 @@ export const defaultSettings: Settings = {
     nozzleSpacing: 0.6,
     volumeUnit: 'L',
     areaUnit: 'ha',
-    interval: 1000,
+    interval: 2500,
     useDefaultLogo: true,
     shouldSimulateSpeed: false,
     simulatedSpeed: 0,
     demoMode: false,
     logo: '',
-    timeBeforeAlert: 2 * 1000
+    timeBeforeAlert: 5 * 1000
 }
 
 export namespace SettingsService {

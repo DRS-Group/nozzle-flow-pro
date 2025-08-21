@@ -46,7 +46,7 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
                         this.isStabilized = true;
                         this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
                         this.timeoutHandler = null;
-                    }, (await SettingsService.getInterval()) * 3);
+                    }, (5000));
                 }
 
                 const state = isPumpActive ? 'on' : 'off';

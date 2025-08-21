@@ -124,13 +124,13 @@ export const Jobs = forwardRef<JobsElement, JobsProps>((props, ref) => {
                 )}
                 {jobs.jobs.length === 0 && (
                     <div className={styles.noJobsContent}>
-                        <button onPointerDown={onAddButtonClick}>{translate('Create Job')}</button>
+                        <button onClick={onAddButtonClick}>{translate('Create Job')}</button>
                     </div>
                 )}
             </div>
             <div
                 className={styles.addButton}
-                onPointerDown={onAddButtonClick}
+                onClick={onAddButtonClick}
             >
                 <i className="icon-plus"></i>
             </div>
@@ -186,7 +186,7 @@ const JobItem = forwardRef<JobItemElement, JobItemProps>((props, ref) => {
     }
 
     return (
-        <div className={styles.jobItem} onPointerDown={onClick}>
+        <div className={styles.jobItem} onClick={onClick}>
             <span>{props.job.title}</span>
             <span>{props.job.creationDate.toLocaleDateString()}</span>
         </div>

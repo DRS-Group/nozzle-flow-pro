@@ -54,7 +54,7 @@ export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, re
                     defaultValue={props.value || ''}
                     onChange={(e) => props.onChange?.(e.target.value)}
                     readOnly={true}
-                    onPointerDown={() => {
+                    onClick={() => {
                         setIsTextInputModalOpen(true);
                     }}
                 />

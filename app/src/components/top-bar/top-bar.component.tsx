@@ -23,7 +23,7 @@ export const TopBar = forwardRef<TopBarElement, TopBarProps>((props, ref) => {
         <div className={styles.header}>
             <div
                 className={styles.backButton}
-                onPointerDown={onBackClick}
+                onClick={onBackClick}
             >
                 <i className='icon-arrow-left'></i>
             </div>

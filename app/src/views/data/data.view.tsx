@@ -84,7 +84,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                         <div className={styles.syncWrapper}>
                             <span>{translate('There is no registered nozzle.')}</span>
                             <span>{translate('Click the button bellow to go to nozzles page.')}</span>
-                            <button className={styles.syncButton} onPointerDown={onSyncClick}>{translate('Nozzles')}</button>
+                            <button className={styles.syncButton} onClick={onSyncClick}>{translate('Nozzles')}</button>
                         </div>
                     }
                     {data.nozzles.length > 0 && (isConnectedToWifi || isDemoMode) &&

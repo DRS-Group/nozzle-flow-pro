@@ -84,7 +84,7 @@ return (
             </div>
             <div
                 className={styles.confirmButton}
-                onPointerDown={download}
+                onClick={download}
             >
                 <i className="icon-export"></i>
             </div>

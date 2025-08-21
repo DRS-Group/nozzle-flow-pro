@@ -223,7 +223,7 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
     return (
         <>
             <div
-                className={` ${styles.barWrapper} ${(isOutOfBounds && pump.rawState !== "off" && pump.isStabilized) ? styles.pulse : ''}`}
+                className={` ${styles.barWrapper} ${(isOutOfBounds && pump.pumpState !== "off" && pump.isStabilized) ? styles.pulse : ''}`}
                 onPointerDown={() => {
                     if (nozzle.ignored)
                         setUnignoreNozzleDialogOpen(true);
