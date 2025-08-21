@@ -4,6 +4,9 @@ import { usePump } from '../../hooks/usePump';
 import { useData } from '../../hooks/useData';
 import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { Nozzle } from '../../types/nozzle.type';
+import { YesNoDialog } from '../yes-no-dialog/yes-no-dialog.component';
+import { useTranslate } from '../../hooks/useTranslate';
+import { NozzlesService } from '../../services/nozzles.service';
 
 const TARGET_COLOR = 'rgb(50, 200, 100)';
 const MAX_TARGET_COLOR = 'rgb(255, 0, 0)';
@@ -133,17 +136,20 @@ type BarElement = {
 }
 
 type BarProps = {
-    onClick?: (nozzleIndex: number) => void;
     nozzleIndex: number;
 }
 
 export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
+    const translate = useTranslate();
     const pump = usePump();
     const data = useData();
     const currentJob = useCurrentJob();
 
     const [nozzle, setNozzle] = useState<Nozzle>(data.nozzles[props.nozzleIndex]);
     const [isOutOfBounds, setIsOutOfBounds] = useState<boolean>(false);
+
+    const [ignoreNozzleDialogOpen, setIgnoreNozzleDialogOpen] = useState<boolean>(false);
+    const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
 
     useLayoutEffect(() => {
         setNozzle(data.nozzles[props.nozzleIndex]);
@@ -215,16 +221,54 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
     }, [isOutOfBounds, nozzle, nozzle]);
 
     return (
-        <div
-            className={` ${styles.barWrapper} ${(isOutOfBounds && pump.rawState !== "off" && pump.isStabilized) ? styles.pulse : ''}`}
-            onPointerDown={() => {
-                if (props.onClick) props.onClick(props.nozzleIndex);
-            }}
-            style={{ opacity: style.opacity }}
-        >
-            <div className={`${styles.bar}`} style={{ ...style, opacity: 1 }}>
-                <span>{nozzle?.name}</span>
+        <>
+            <div
+                className={` ${styles.barWrapper} ${(isOutOfBounds && pump.rawState !== "off" && pump.isStabilized) ? styles.pulse : ''}`}
+                onPointerDown={() => {
+                    if (nozzle.ignored)
+                        setUnignoreNozzleDialogOpen(true);
+                    else
+                        setIgnoreNozzleDialogOpen(true);
+                }}
+                style={{ opacity: style.opacity }}
+            >
+                <div className={`${styles.bar}`} style={{ ...style, opacity: 1 }}>
+                    <span>{nozzle?.name}</span>
+                </div>
             </div>
-        </div>
+
+            {ignoreNozzleDialogOpen &&
+                <YesNoDialog
+                    title={translate('Ignore nozzle')}
+                    message={translate('Are you sure you want to ignore this nozzle?')}
+                    onYesClick={() => {
+                        nozzle.ignored = true;
+                        NozzlesService.updateNozzle(nozzle, props.nozzleIndex);
+
+                        setIgnoreNozzleDialogOpen(false);
+                    }}
+
+                    onNoClick={() => {
+                        setIgnoreNozzleDialogOpen(false);
+                    }}
+                />
+            }
+            {unignoreNozzleDialogOpen &&
+                <YesNoDialog
+                    title={translate('Unignore nozzle')}
+                    message={translate('Are you sure you want to unignore this nozzle?')}
+                    onYesClick={() => {
+                        nozzle.ignored = false;
+                        NozzlesService.updateNozzle(nozzle, props.nozzleIndex);
+
+                        setUnignoreNozzleDialogOpen(false);
+                    }}
+
+                    onNoClick={() => {
+                        setUnignoreNozzleDialogOpen(false);
+                    }}
+                />
+            }
+        </>
     )
 });

@@ -108,8 +108,6 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
 
         if(!isPumpStabilized) return;
 
-debugger
-
         const isPumpActive = services.pumpService.getState() === 'on';
 
         if (!isPumpActive) {

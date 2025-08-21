@@ -189,7 +189,6 @@
     right: 1rem;
     bottom: 1rem;
     left: var(--left-distance);
-    z-index: 2;
 
     display: flex;
     justify-content: center;

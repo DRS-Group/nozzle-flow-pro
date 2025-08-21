@@ -69,22 +69,6 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
 
     }), []);
 
-    // const onBarClick = async (nozzleIndex: number) => {
-    //     if (nozzles === undefined) return;
-    //     const nozzle = nozzles[nozzleIndex];
-
-    //     if (nozzle === null) return;
-
-    //     if (nozzle.ignored) {
-    //         setUnignoreNozzleDialogNozzleIndex(nozzleIndex);
-    //         setUnignoreNozzleDialogOpen(true);
-    //     }
-    //     else {
-    //         setIgnoreNozzleDialogNozzleIndex(nozzleIndex);
-    //         setIgnoreNozzleDialogOpen(true);
-    //     }
-    // }
-
     const onSyncClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         e.stopPropagation();
@@ -114,48 +98,6 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
                     <span className={styles.jobTitle}>{currentJob.job?.title}</span>
                     <span className={styles.jobExpectedFlow}>{currentJob.job?.expectedFlow} L/ha</span>
                 </div>
-                {/* {nozzles !== undefined && isConnectedToWifi && (<>
-                    {ignoreNozzleDialogOpen &&
-                        <YesNoDialog
-                            title={translate('Ignore nozzle')}
-                            message={translate('Are you sure you want to ignore this nozzle?')}
-                            onYesClick={() => {
-                                if (ignoreNozzleDialogNozlleIndex === null) return;
-                                const nozzle = nozzles[ignoreNozzleDialogNozlleIndex];
-                                nozzle.ignored = true;
-                                NozzlesService.updateNozzle(nozzle, ignoreNozzleDialogNozlleIndex);
-
-                                setIgnoreNozzleDialogOpen(false);
-                                setIgnoreNozzleDialogNozzleIndex(null);
-                            }}
-
-                            onNoClick={() => {
-                                setIgnoreNozzleDialogOpen(false);
-                                setIgnoreNozzleDialogNozzleIndex(null);
-                            }}
-                        />
-                    }
-                    {unignoreNozzleDialogOpen &&
-                        <YesNoDialog
-                            title={translate('Unignore nozzle')}
-                            message={translate('Are you sure you want to unignore this nozzle?')}
-                            onYesClick={() => {
-                                if (unignoreNozzleDialogNozlleIndex === null) return;
-                                const nozzle = nozzles[unignoreNozzleDialogNozlleIndex];
-                                nozzle.ignored = false;
-                                NozzlesService.updateNozzle(nozzle, unignoreNozzleDialogNozlleIndex);
-
-                                setUnignoreNozzleDialogOpen(false);
-                                setUnignoreNozzleDialogNozzleIndex(null);
-                            }}
-
-                            onNoClick={() => {
-                                setUnignoreNozzleDialogOpen(false);
-                                setUnignoreNozzleDialogNozzleIndex(null);
-                            }}
-                        />
-                    }
-                </>)} */}
             </>)
             }
         </>

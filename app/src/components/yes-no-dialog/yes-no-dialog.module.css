@@ -1,5 +1,5 @@
 .background {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -8,7 +8,7 @@
     backdrop-filter: blur(0.1rem);
     overflow: hidden;
 
-    z-index: 3;
+    z-index: 999;
 }
 
 .wrapper {
