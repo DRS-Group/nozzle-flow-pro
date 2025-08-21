@@ -44,6 +44,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
     };
 
     loop = async () => {
+        console.log(this.currentJobId)
         if (this.currentJobId === null) {
             setTimeout(() => {
                 this.loop();
@@ -53,7 +54,13 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
 
         const previousPage = services.navigationService.getPreviousPage();
         const currentPage = services.navigationService.getCurrentPage();
-        if (previousPage === 'jobs' && currentPage !== 'createJob') return;
+        if (previousPage === 'jobs' && currentPage !== 'createJob') {
+            setTimeout(() => {
+                this.loop();
+            }, 100);
+
+            return;
+        };
 
         const refreshBegin = new Date();
         await this.refreshData();
@@ -106,7 +113,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
     private processNewData = async (espData: ESPData) => {
         const isPumpStabilized = services.pumpService.getIsStabilized();
 
-        if(!isPumpStabilized) return;
+        if (!isPumpStabilized) return;
 
         const isPumpActive = services.pumpService.getState() === 'on';
 
@@ -166,7 +173,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
             const nozzleOngoingEvent: NozzleEvent | undefined = nozzleEvents.find((event: NozzleEvent) => {
                 return event.endTime === undefined;
             });
-            
+
 
             if (nozzleOngoingEvent === undefined) {
                 if (isFlowAboveExpected) {

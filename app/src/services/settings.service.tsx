@@ -177,8 +177,6 @@ export namespace SettingsService {
         }
 
         return new Promise(async (resolve, reject) => {
-            debugger
-
             if (!image) {
                 const settings = await getSettings();
                 settings.useDefaultLogo = true;

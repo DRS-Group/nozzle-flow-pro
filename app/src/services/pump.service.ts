@@ -39,8 +39,6 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
                 });
                 const rawIsPumpActive = data.nozzles.some((nozzle: Nozzle) => nozzle.pulsesPerMinute > 20 && !nozzle.ignored);
 
-                // debugger
-                // Se a bomba saiu de off para on e não há um timeout em andamento...
                 if (!this.lastRawIsPumpActive && rawIsPumpActive && !this.timeoutHandler) {
                     this.isStabilized = false;
                     this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
