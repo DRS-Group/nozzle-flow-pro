@@ -59,9 +59,9 @@ export const AlertModal = forwardRef<AlertModalElement, AlertModalProps>((props,
                     <span dangerouslySetInnerHTML={{ __html: props.event.description }}></span>
                 </div>
                 <div className={styles.footer}>
-                    <button onPointerDown={onOkClick}>{translate('Ok')}</button>
+                    <button onClick={onOkClick}>{translate('Ok')}</button>
                     {props.totalEvents! > 1 &&
-                        <button onPointerDown={onOkForAllClick}>{translate('Ok for all')} ({props.totalEvents})</button>
+                        <button onClick={onOkForAllClick}>{translate('Ok for all')} ({props.totalEvents})</button>
                     }
                 </div>
             </div>

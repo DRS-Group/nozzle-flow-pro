@@ -16,4 +16,5 @@ export type Settings = {
     demoMode: boolean;
     logo: string;
     timeBeforeAlert: number;
+    SSID: string;
 }

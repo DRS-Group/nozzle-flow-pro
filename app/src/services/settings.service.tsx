@@ -14,7 +14,7 @@ const checkIfIsConnected = async () => {
     const appSSID = await CapacitorWifiConnect.getAppSSID()
     const androidSSID = await CapacitorWifiConnect.getDeviceSSID()
 
-    return appSSID.value === 'D-Flow DEMO' || androidSSID.value === 'D-Flow DEMO';
+    return appSSID.value === await SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO') || androidSSID.value === await SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
 }
 
 export const defaultSettings: Settings = {
@@ -34,14 +34,15 @@ export const defaultSettings: Settings = {
     simulatedSpeed: 0,
     demoMode: false,
     logo: '',
-    timeBeforeAlert: 5 * 1000
+    timeBeforeAlert: 5 * 1000,
+    SSID: 'D-Flow',
 }
 
 export namespace SettingsService {
     let eventListeners: Map<string, EventHandler<any>[]> = new Map();
     let isAdmin: boolean = false;
     let _isConnectedToWifi = false;
-    export const isConnectedToWifi = () => true //_isConnectedToWifi;
+    export const isConnectedToWifi = () => _isConnectedToWifi;
     export const setIsConnectedToWifi = (value: boolean) => _isConnectedToWifi = value;
 
     export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
@@ -127,6 +128,19 @@ export namespace SettingsService {
             });
 
             dispatchEvent('onInterfaceScaleChanged', interfaceScale);
+            dispatchEvent('onSettingsChanged', settings);
+        });
+    }
+
+    export const setSSID = async (SSID: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            let settings = await getSettings();
+            settings.SSID = SSID;
+
+            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
+                resolve();
+            });
+            dispatchEvent('onSSIDChanged', SSID);
             dispatchEvent('onSettingsChanged', settings);
         });
     }
@@ -466,6 +480,9 @@ export namespace SettingsService {
 let isConnecting = false;
 
 const connectToAPIWifi = async () => {
+
+    const SSID = await SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
+
     if (isConnecting) return;
     isConnecting = true;
 
@@ -476,7 +493,7 @@ const connectToAPIWifi = async () => {
     }
     if (value === 'granted') {
         await CapacitorWifiConnect.secureConnect({
-            ssid: 'D-Flow DEMO',
+            ssid: SSID,
             password: '123456789',
         }).then(async (data) => {
             if (data.value === 0) {
@@ -493,13 +510,13 @@ const connectToAPIWifi = async () => {
 Network.addListener('networkStatusChange', async (status) => {
     const isConnected = await checkIfIsConnected();
     if (isConnected) {
+        SettingsService.setIsConnectedToWifi(true);
+        SettingsService.dispatchEvent('onNetworkStatusChange', true);
+    }
+    else {
         SettingsService.setIsConnectedToWifi(false);
         SettingsService.dispatchEvent('onNetworkStatusChange', false);
         connectToAPIWifi();
-    }
-    else {
-        SettingsService.setIsConnectedToWifi(true);
-        SettingsService.dispatchEvent('onNetworkStatusChange', true);
     }
 });
 

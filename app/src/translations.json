@@ -382,6 +382,21 @@
     {
         "en-us": "Ok for all",
         "pt-br": "Ok para todos"
+    },
+    {
+        "en-us": "Connection",
+        "pt-br": "Conexão"
+    },
+    {
+        "en-us": "Pairing",
+        "pt-br": "Emparelhamento"
+    },
+    {
+        "en-us": "Running",
+        "pt-br": "Executando"
+    },
+    {
+        "en-us": "Set SSID",
+        "pt-br": "Definir SSID"
     }
-
 ]

@@ -42,6 +42,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     const [nozzleSpacingDialogOpen, setNozzleSpacingDialogOpen] = useState<boolean>(false);
     const [removeAllSecondaryModulesDialogOpen, setRemoveAllSecondaryModulesDialogOpen] = useState<boolean>(false);
     const [timeBeforeAlertDialogOpen, setTimeBeforeAlertDialogOpen] = useState<boolean>(false);
+    const [ssidDialogOpen, setSSIDDialogOpen] = useState<boolean>(false);
 
     const [languageContextMenuPosition, setLanguageContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [interfaceScaleContextMenuPosition, setInterfaceScaleContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
@@ -305,6 +306,23 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             {isAdmin &&
                                 <div className={styles.item}
                                     onClick={() => {
+                                        setSSIDDialogOpen(true);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('SSID')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{settings?.SSID}</span>
+                                        </div>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
                                         setApiBaseUriDialogOpen(true);
                                     }}
                                 >
@@ -557,6 +575,24 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     }}
                     onNoClick={() => {
                         setRemoveAllSecondaryModulesDialogOpen(false);
+                    }}
+                />
+            }
+            {ssidDialogOpen &&
+                <TextInputDialog
+                    title='Set SSID'
+                    label='SSID'
+                    defaultValue={settings?.SSID}
+                    onConfirmClick={(value: string) => {
+                        SettingsService.setSSID(value).then(() => {
+                            SettingsService.getSettings().then((settings) => {
+                                setSettings(settings);
+                            });
+                        });
+                        setSSIDDialogOpen(false);
+                    }}
+                    onCancelClick={() => {
+                        setSSIDDialogOpen(false);
                     }}
                 />
             }
