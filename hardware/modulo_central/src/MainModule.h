@@ -18,7 +18,7 @@ public:
 
 private:
     macAddress_t macAddress = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    MainModuleWebServer *webServer = new MainModuleWebServer("DRS D-Flow", "123456789");
+    MainModuleWebServer *webServer = new MainModuleWebServer("D-Flow 0003", "123456789");
     ESPNowCentralManager *espNowCentralManager = ESPNowCentralManager::getInstance();
 
     std::vector<std::function<void(flowmeters_data)>> getFlowmetersDataCallbacks;

@@ -32,6 +32,7 @@ public:
     void loop();
 
     float getSpeed();
+    double getLatitude();
+    double getLongitude();
     uint32_t getSatelliteCount();
-
 };

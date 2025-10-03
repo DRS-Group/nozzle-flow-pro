@@ -34,6 +34,16 @@ float GPS::getSpeed()
     return gps->speed.mps();
 }
 
+double GPS::getLatitude()
+{
+    return gps->location.lat();
+}
+
+double GPS::getLongitude()
+{
+    return gps->location.lng();
+}
+
 uint32_t GPS::getSatelliteCount()
 {
     return gps->satellites.value();

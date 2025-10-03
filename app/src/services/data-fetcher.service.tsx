@@ -112,16 +112,14 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                         const nozzles = await NozzlesService.getNozzles();
                         const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
                         const speed = shouldSimulateSpeed ? simulatedSpeed : response.data.speed;
-                        const coordinates = response.data.coordinates || {
-                            latitude: -21.122778,
-                            longitude: -48.993056
-                        };
+                        const latitude = response.data.latitude || -21.122778;
+                        const longitude = response.data.longitude || -48.993056;
 
                         for (let i = 0; i < nozzles.length; i++) {
                             nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;
                         }
 
-                        const res: ESPData = { nozzles: nozzles, speed: speed, coordinates: coordinates };
+                        const res: ESPData = { nozzles: nozzles, speed: speed, coordinates: { latitude: latitude, longitude: longitude } };
 
                         this.dispatchEvent('onDataFetched', res);
 

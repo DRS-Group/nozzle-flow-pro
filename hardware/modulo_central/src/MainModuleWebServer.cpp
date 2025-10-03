@@ -134,6 +134,9 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
             uint32_t satelliteCount = GPS::getInstance()->getSatelliteCount();
             doc["satelliteCount"] = satelliteCount;
 
+            doc["latitude"] = GPS::getInstance()->getLatitude();
+            doc["longitude"] = GPS::getInstance()->getLongitude();
+
             String response;
             serializeJson(doc, response);
 
