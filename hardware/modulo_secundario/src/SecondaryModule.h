@@ -32,7 +32,7 @@ private:
 
 public:
     flowmeters_data getFlowmeterData();
-    void setRefreshRate(unsigned short refreshRate);
+    void setRefreshRate(unsigned short refreshRate, uint8_t flowmeterIndex);
 
     void loop();
 };

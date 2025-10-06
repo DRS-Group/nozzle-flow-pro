@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 #include <GPS.h>
 #include <esp_task_wdt.h>
+#include <WiFi.h>
 
 MainModuleWebServer::MainModuleWebServer(const char *ssid, const char *password)
 {
@@ -92,14 +93,33 @@ void MainModuleWebServer::setupEndpoints()
         {
             if (!request->hasParam("refresh_rate", false))
             {
-                request->send(400, "application/json", "{\"error\": \"Missing rate parameter\"}");
+                request->send(400, "application/json", "{\"error\": \"Missing refresh_rate parameter\"}");
                 return;
             }
+
+            if(!request->hasParam("flowmeter_indexes", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing flowmeter_indexes parameter\"}");
+                return;
+            }
+
             unsigned short newRate = request->getParam("refresh_rate", false)->value().toInt();
+            String indexesStr = request->getParam("flowmeter_indexes", false)->value();
 
-            MainModule::getInstance()->setRefreshRate(newRate);
+            std::vector<uint8_t> flowmeterIndexes;
+            int start = 0;
+            int end = indexesStr.indexOf(',');
 
-            request->send(200); });
+            while (end != -1) {
+                flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start, end).toInt());
+                start = end + 1;
+                end = indexesStr.indexOf(',', start);
+            }
+            flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start).toInt()); // Add the last element
+
+            MainModule::getInstance()->setRefreshRate(newRate, flowmeterIndexes);
+
+            request->send(200); }); 
 }
 
 void MainModuleWebServer::setupDefaultHeaders()
@@ -109,11 +129,8 @@ void MainModuleWebServer::setupDefaultHeaders()
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
 }
 
-int count = 0;
 void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
 {
-    Serial.printf("Data request received: %d\n", count++);
-
     MainModule *mainModule = MainModule::getInstance();
 
     bool canSendResponse = false;
@@ -121,6 +138,7 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
     mainModule->getFlowmetersData(
         [request, &canSendResponse](flowmeters_data data)
         {
+            Serial.println("Sending data response...");
             JsonDocument doc;
             JsonArray flowmeters = doc["flowmetersPulsesPerMinute"].to<JsonArray>();
             for (int i = 0; i < data.flowmeterCount; i++)

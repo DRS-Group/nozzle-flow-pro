@@ -103,20 +103,36 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
     }
 }
 
-void MainModule::setRefreshRate(unsigned short refreshRate)
+void MainModule::setRefreshRate(unsigned short refreshRate, std::vector<uint8_t> flowmeterIndexes)
 {
+    uint8_t flowmeterIndexesBySlave[espNowCentralManager->getSlavesCount()][9];
+
+    for(int i = 0; i < flowmeterIndexes.size(); i++)
+    {
+        uint8_t index = flowmeterIndexes[i] % 9;
+        uint8_t slave = flowmeterIndexes[i] / 9;
+        if(slave < espNowCentralManager->getSlavesCount())
+        {
+            flowmeterIndexesBySlave[slave][index] = 1;
+        }
+    }
+
+    // Send flowmeter irefreshrate followed by the indexes to each slave. Each slave can handle up to 9 flowmeters. The indexes are represented by 9 bits.
     for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
     {
         uint8_t *mac_addr = (uint8_t *)malloc(6);
         espNowCentralManager->getSlaveMacAddress(i, mac_addr);
 
         uint8_t messageType = SET_REFRESH_RATE;
-        uint8_t *buffer = (uint8_t *)malloc(sizeof(unsigned short));
-
+        uint8_t *buffer = (uint8_t *)malloc(sizeof(unsigned short) + 9);
         memcpy(buffer, &refreshRate, sizeof(unsigned short));
 
-        ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, sizeof(unsigned short));
+        for(int j = 0; j < 9; j++)
+        {
+            buffer[sizeof(unsigned short) + j] = flowmeterIndexesBySlave[i][j];
+        }
 
+        ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, sizeof(unsigned short) + 9);
         free(buffer);
         free(mac_addr);
     }

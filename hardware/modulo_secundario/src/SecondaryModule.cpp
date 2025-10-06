@@ -66,8 +66,16 @@ void SecondaryModule::onSetRefreshRate(const uint8_t *mac_addr, const uint8_t *i
     SecondaryModule *instance = SecondaryModule::getInstance();
 
     unsigned short refreshRate = *reinterpret_cast<const unsigned short *>(incomingData);
+    uint8_t flowmeterIndexes = *(incomingData + sizeof(unsigned short)); // Get the flowmeter indexes from the incoming data
 
-    instance->setRefreshRate(refreshRate);
+    for (uint8_t i = 0; i < 9; i++) // Assuming 9 flowmeters
+    {
+        if (flowmeterIndexes & (1 << i)) // Check if the i-th bit is set
+        {
+            instance->setRefreshRate(refreshRate, i); // Set refresh rate for the specific flowmeter
+            // You may want to implement a method to set refresh rate for a specific flowmeter
+        }
+    }
 }
 
 void SecondaryModule::addFlowmeter(uint8_t pin, unsigned short refreshRate)
@@ -101,12 +109,9 @@ flowmeters_data SecondaryModule::getFlowmeterData()
     return data;
 }
 
-void SecondaryModule::setRefreshRate(unsigned short refreshRate)
+void SecondaryModule::setRefreshRate(unsigned short refreshRate, uint8_t flowmeterIndex)
 {
-    for (uint8_t i = 0; i < this->flowmeterCount; i++)
-    {
-        this->flowmeters[i]->setRefreshRate(refreshRate);
-    }
+    this->flowmeters[flowmeterIndex]->setRefreshRate(refreshRate);
 }
 
 void SecondaryModule::loop()
