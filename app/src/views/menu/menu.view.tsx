@@ -19,9 +19,7 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
     }), []);
 
     useEffect(() => {
-        SettingsService.getLogoUri().then((logo) => {
-            setLogo(logo);
-        });
+        setLogo(SettingsService.getLogoUri());
     }, []);
 
     const onJobsClick = () => {
@@ -44,19 +42,19 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
                     className={styles.item}
                     onClick={onJobsClick}
                 >
-                    <img src="/images/briefcase.svg" />
+                    <img src={`${process.env.PUBLIC_URL}/images/briefcase.svg`} />
                     <span>{translate('Jobs')}</span>
                 </div>
                 <div className={styles.item}
                     onClick={onNozzlesClick}
                 >
-                    <img src="/images/nozzle.svg" />
+                    <img src={`${process.env.PUBLIC_URL}/images/nozzle.svg`} />
                     <span>{translate('Nozzles')}</span>
                 </div>
                 <div className={styles.item}
                     onClick={onSettingsClick}
                 >
-                    <img src="/images/settings.svg" />
+                    <img src={`${process.env.PUBLIC_URL}/images/settings.svg`} />
                     <span>{translate('Settings')}</span>
                 </div>
             </div>

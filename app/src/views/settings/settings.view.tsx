@@ -57,10 +57,9 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     }), []);
 
     useEffect(() => {
-        SettingsService.getSettings().then(async (settings) => {
-            setSettings(settings);
-            setLogoUri(await SettingsService.getLogoUri());
-        });
+        const settings = SettingsService.getSettings();
+        setSettings(settings);
+        setLogoUri(SettingsService.getLogoUri());
     }, []);
 
     useEffect(() => {
@@ -88,7 +87,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
     useEffect(() => {
         const eventHandler = async (settings: SettingsType) => {
             setSettings(settings);
-            setLogoUri(await SettingsService.getLogoUri());
+            setLogoUri(SettingsService.getLogoUri());
 
         };
         SettingsService.addEventListener('onSettingsChanged', eventHandler);
@@ -198,11 +197,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         <div className={styles.sectionContent}>
                             <div className={styles.item}
                                 onClick={() => {
-                                    SettingsService.setSettings(defaultSettings).then(() => {
-                                        SettingsService.getSettings().then((settings) => {
-                                            setSettings(settings);
-                                        });
-                                    });
+                                    SettingsService.setSettings(defaultSettings)
+                                    setSettings(defaultSettings);
                                 }}
                             >
                                 <div className={styles.itemLeft}>
@@ -584,11 +580,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label='SSID'
                     defaultValue={settings?.SSID}
                     onConfirmClick={(value: string) => {
-                        SettingsService.setSSID(value).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setSSID(value);
+                        setSettings(SettingsService.getSettings());
                         setSSIDDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -602,11 +595,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label='API Base URI'
                     defaultValue={settings?.apiBaseUrl}
                     onConfirmClick={(value: string) => {
-                        SettingsService.setApiBaseUrl(value).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setApiBaseUrl(value);
+                        setSettings(SettingsService.getSettings());
                         setApiBaseUriDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -621,11 +611,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label={translate('Refresh interval')}
                     defaultValue={settings?.interval}
                     onConfirmClick={(value: number) => {
-                        SettingsService.setInterval(value).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setInterval(value);
+                        setSettings(SettingsService.getSettings());
                         setRefreshIntervalDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -640,11 +627,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label={translate('Nozzle spacing (cm)')}
                     defaultValue={(settings?.nozzleSpacing || 0.6) * 100}
                     onConfirmClick={(value: number) => {
-                        SettingsService.setNozzleSpacing(value / 100).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setNozzleSpacing(value / 100);
                         setNozzleSpacingDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -660,11 +643,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     decimals={0}
                     defaultValue={(settings?.timeBeforeAlert || 2000) / 1000}
                     onConfirmClick={(value: number) => {
-                        SettingsService.setTimeBeforeAlert(value * 1000).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setTimeBeforeAlert(value * 1000);
+                        setSettings(SettingsService.getSettings());
                         setTimeBeforeAlertDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -678,11 +658,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label='Primary color'
                     defaultValue={settings?.primaryColor}
                     onConfirmClick={(value: string) => {
-                        SettingsService.setPrimaryColor(value).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setPrimaryColor(value);
+                        setSettings(SettingsService.getSettings());
                         setPrimaryColorDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -696,11 +673,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label='Secondary color'
                     defaultValue={settings?.secondaryColor}
                     onConfirmClick={(value: string) => {
-                        SettingsService.setSecondaryColor(value).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setSecondaryColor(value);
+                        setSettings(SettingsService.getSettings());
                         setSecondaryColorDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -714,11 +688,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label='Primary font color'
                     defaultValue={settings?.primaryFontColor}
                     onConfirmClick={(value: string) => {
-                        SettingsService.setPrimaryFontColor(value).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setPrimaryFontColor(value);
+                        setSettings(SettingsService.getSettings());
                         setPrimaryFontColorDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -733,11 +704,8 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label='Secondary font color'
                     defaultValue={settings?.secondaryFontColor}
                     onConfirmClick={(value: string) => {
-                        SettingsService.setSecondaryFontColor(value).then(() => {
-                            SettingsService.getSettings().then((settings) => {
-                                setSettings(settings);
-                            });
-                        });
+                        SettingsService.setSecondaryFontColor(value);
+                        setSettings(SettingsService.getSettings());
                         setSecondaryFontColorDialogOpen(false);
                     }}
                     onCancelClick={() => {
@@ -773,21 +741,15 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         {
                             label: translate('Yes'),
                             onClick: () => {
-                                SettingsService.setShouldSimulateSpeed(true).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setShouldSimulateSpeed(true);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: translate('No'),
                             onClick: () => {
-                                SettingsService.setShouldSimulateSpeed(false).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setShouldSimulateSpeed(false);
+                                setSettings(SettingsService.getSettings());
                             }
                         }
                     ]}
@@ -805,21 +767,15 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         {
                             label: translate('Yes'),
                             onClick: () => {
-                                SettingsService.setDemoMode(true).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setDemoMode(true);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: translate('No'),
                             onClick: () => {
-                                SettingsService.setDemoMode(false).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setDemoMode(false);
+                                setSettings(SettingsService.getSettings());
                             }
                         }
                     ]}
@@ -838,21 +794,15 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         {
                             label: translate('Liters'),
                             onClick: () => {
-                                SettingsService.setVolumeUnit('L').then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setVolumeUnit('L');
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: translate('Gallons'),
                             onClick: () => {
-                                SettingsService.setVolumeUnit('gal').then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setVolumeUnit('gal');
+                                setSettings(SettingsService.getSettings());
                             }
                         }
                     ]}
@@ -869,21 +819,15 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         {
                             label: translate('Hectares'),
                             onClick: () => {
-                                SettingsService.setAreaUnit('ha').then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setAreaUnit('ha');
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: translate('Square meters'),
                             onClick: () => {
-                                SettingsService.setAreaUnit('m²').then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setAreaUnit('m²');
+                                setSettings(SettingsService.getSettings());
                             }
                         }
                     ]}
@@ -931,71 +875,50 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         {
                             label: '0.5x',
                             onClick: () => {
-                                SettingsService.setInterfaceScale(0.5).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setInterfaceScale(0.5);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: '0.75x',
                             onClick: () => {
-                                SettingsService.setInterfaceScale(0.75).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setInterfaceScale(0.75);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: '1.0x',
                             onClick: () => {
-                                SettingsService.setInterfaceScale(1).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setInterfaceScale(1);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: '1.25x',
                             onClick: () => {
-                                SettingsService.setInterfaceScale(1.25).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setInterfaceScale(1.25);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: '1.5x',
                             onClick: () => {
-                                SettingsService.setInterfaceScale(1.5).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setInterfaceScale(1.5);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: '1.75x',
                             onClick: () => {
-                                SettingsService.setInterfaceScale(1.75).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setInterfaceScale(1.75);
+                                setSettings(SettingsService.getSettings());
                             }
                         },
                         {
                             label: '2.0x',
                             onClick: () => {
-                                SettingsService.setInterfaceScale(2).then(() => {
-                                    SettingsService.getSettings().then((settings) => {
-                                        setSettings(settings);
-                                    });
-                                });
+                                SettingsService.setInterfaceScale(2);
+                                setSettings(SettingsService.getSettings());
                             }
                         }
                     ]}
@@ -1012,14 +935,14 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     label={translate('Admin password')}
                     type='password'
                     onConfirmClick={(value: string) => {
-                        checkPassword(value).then((isCorrect) => {
-                            if (isCorrect) {
-                                enterAdminMode();
-                                setAdminPasswordDialogOpen(false);
-                            } else {
-                                alert(translate('Incorrect password'));
-                            }
-                        });
+                        const isCorrect = checkPassword(value);
+
+                        if (isCorrect) {
+                            enterAdminMode();
+                            setAdminPasswordDialogOpen(false);
+                        } else {
+                            alert(translate('Incorrect password'));
+                        }
                     }}
                     onCancelClick={() => {
                         setAdminPasswordDialogOpen(false);

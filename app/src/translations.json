@@ -398,5 +398,13 @@
     {
         "en-us": "Set SSID",
         "pt-br": "Definir SSID"
+    },
+    {
+        "en-us": "Are you sure you want to remove all secondary modules",
+        "pt-br": "Você tem certeza que deseja remover todos os módulos secundários"
+    },
+    {
+        "en-us": "Remove all secondary modules",
+        "pt-br": "Remover todos os módulos secundários"
     }
 ]

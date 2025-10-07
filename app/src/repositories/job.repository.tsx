@@ -1,10 +1,9 @@
-import { Preferences } from "@capacitor/preferences";
 import { Job } from "../types/job.type";
 
 export abstract class JobRepository {
     public static async get(): Promise<Job[]> {
-        const result = await Preferences.get({ key: 'jobs' });
-        const jobs = JSON.parse(result.value || '[]').map((job: any) => {
+        const result = window.electron.store.get('jobs');
+        const jobs = JSON.parse(result || '[]').map((job: any) => {
             return {
                 title: job.title,
                 expectedFlow: job.expectedFlow,
@@ -45,13 +44,13 @@ export abstract class JobRepository {
         } else {
             jobs[index] = job;
         }
-        await Preferences.set({ key: 'jobs', value: JSON.stringify(jobs) });
+        window.electron.store.set('jobs', JSON.stringify(jobs));
         return job;
     }
 
     public static async delete(id: string): Promise<void> {
         let jobs = await this.get();
         jobs = jobs.filter(j => j.id !== id);
-        await Preferences.set({ key: 'jobs', value: JSON.stringify(jobs) });
+        window.electron.store.set('jobs', JSON.stringify(jobs));
     }
 }

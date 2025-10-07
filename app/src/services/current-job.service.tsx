@@ -44,7 +44,6 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
     };
 
     loop = async () => {
-        console.log(this.currentJobId)
         if (this.currentJobId === null) {
             setTimeout(() => {
                 this.loop();
@@ -140,7 +139,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
             return (speed * 3.6 * nozzleSpacing * 100 * expectedFlow) / 60000;
         };
 
-        const currentLanguage: 'pt-br' | 'en-us' = await SettingsService.getSettingOrDefault('language', 'en-us');
+        const currentLanguage: 'pt-br' | 'en-us' = SettingsService.getSettingOrDefault('language', 'en-us');
 
         let shouldSaveJob = false;
 
@@ -149,8 +148,8 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
 
         const nozzles = espData.nozzles;
         const speed = espData.speed;
-        const timeBeforeAlert = await SettingsService.getTimeBeforeAlert();
-        const nozzleSpacing = await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
+        const timeBeforeAlert = SettingsService.getTimeBeforeAlert();
+        const nozzleSpacing = SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
         const expectedFlow = calculateTargetValue(currentJob, speed, nozzleSpacing);
         const maxExpectedFlow = expectedFlow * (1 + currentJob.tolerance);
         const minExpectedFlow = expectedFlow * (1 - currentJob.tolerance);

@@ -41,7 +41,6 @@ export function usePump() {
     useLayoutEffect(()=>{
         const eventHandler = (isStabilized: boolean) => {
             setIsStabilized(isStabilized);
-            console.log("Pump is stabilized:", isStabilized);
         }
 
         pumpService.addEventListener('onIsStabilizedChanged', eventHandler);

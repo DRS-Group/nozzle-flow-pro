@@ -7,9 +7,9 @@ export function useTranslate() {
     const [currentLanguage, setCurrentLanguage] = useState<'en-us' | 'pt-br'>('en-us');
 
     useLayoutEffect(() => {
-        SettingsService.getSettingOrDefault('language', 'en-us').then((language) => {
-            setCurrentLanguage(language);
-        });
+        const language: 'en-us' | 'pt-br' = SettingsService.getSettingOrDefault('language', 'en-us');
+        setCurrentLanguage(language);
+
 
         const eventHandler = async (settings: SettingsType) => {
             setCurrentLanguage(settings.language);

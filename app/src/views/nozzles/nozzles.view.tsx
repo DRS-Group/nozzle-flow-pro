@@ -332,9 +332,9 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         setTimeout(async () => {
                             const espData: ESPData = await services.dataFetcherService.fetchData();
 
-                            await services.dataFetcherService.setInterval(await SettingsService.getInterval());
+                            await services.dataFetcherService.setInterval(SettingsService.getInterval());
 
-                            const nozzleSpacing = await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
+                            const nozzleSpacing = SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
                             const expectedFlow = (value * nozzleSpacing * 100 * flowRate) / 60000;
 
                             let newNozzles = espData.nozzles.map((nozzle) => {

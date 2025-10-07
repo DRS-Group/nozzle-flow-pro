@@ -22,12 +22,6 @@ import { CurrentJobService } from './services/current-job.service';
 import { PumpService } from './services/pump.service';
 import { usePump } from './hooks/usePump';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
-import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen';
-
-
-AndroidFullScreen.isImmersiveModeSupported()
-  .then(() => AndroidFullScreen.immersiveMode())
-  .catch(() => { });
 
 services.jobsService = new JobsService();
 services.currentJobService = new CurrentJobService();
@@ -45,19 +39,16 @@ function App() {
   useEffect(() => {
     navigation.navigate('menu');
 
-    SettingsService.getSettings().then((settings: SettingsType) => {
-      const interval = settings.interval;
-      services.dataFetcherService.setInterval(interval);
-    });
-
+    const settings: SettingsType = SettingsService.getSettings();
+    const interval = settings.interval;
+    services.dataFetcherService.setInterval(interval);
   }, []);
 
   useEffect(() => {
-    SettingsService.getSettingOrDefault('interfaceScale', 1).then((interfaceScale) => {
-      const root = document.documentElement;
-      const fontSize = 16 * interfaceScale;
-      root.style.setProperty('font-size', `${fontSize}px`);
-    });
+    const interfaceScale = SettingsService.getSettingOrDefault('interfaceScale', 1);
+    const root = document.documentElement;
+    const fontSize = 16 * interfaceScale;
+    root.style.setProperty('font-size', `${fontSize}px`);
 
     const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
@@ -73,10 +64,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    SettingsService.getSettingOrDefault('primaryColor', '#466905').then((color) => {
-      const root = document.documentElement;
-      root.style.setProperty('--primary-color', color);
-    });
+    const color = SettingsService.getSettingOrDefault('primaryColor', '#466905');
+    const root = document.documentElement;
+    root.style.setProperty('--primary-color', color);
 
     const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
@@ -91,10 +81,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    SettingsService.getSettingOrDefault('secondaryColor', '#ffffff').then((color) => {
-      const root = document.documentElement;
-      root.style.setProperty('--secondary-color', color);
-    });
+    const color = SettingsService.getSettingOrDefault('secondaryColor', '#ffffff');
+    const root = document.documentElement;
+    root.style.setProperty('--secondary-color', color);
 
     const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
@@ -109,10 +98,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    SettingsService.getSettingOrDefault('primaryFontColor', '#000000').then((color) => {
-      const root = document.documentElement;
-      root.style.setProperty('--primary-font-color', color);
-    });
+    const color = SettingsService.getSettingOrDefault('primaryFontColor', '#000000');
+    const root = document.documentElement;
+    root.style.setProperty('--primary-font-color', color);
 
     const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;
@@ -127,10 +115,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    SettingsService.getSettingOrDefault('secondaryFontColor', '#ffffff').then((color) => {
-      const root = document.documentElement;
-      root.style.setProperty('--secondary-font-color', color);
-    });
+    const color = SettingsService.getSettingOrDefault('secondaryFontColor', '#ffffff');
+    const root = document.documentElement;
+    root.style.setProperty('--secondary-font-color', color);
 
     const eventHandler = async (settings: SettingsType) => {
       const root = document.documentElement;

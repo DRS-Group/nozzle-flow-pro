@@ -1,20 +1,17 @@
-import { Preferences } from "@capacitor/preferences";
 import { Settings } from "../types/settings.type";
 import { EventHandler } from "../types/event-handler";
-import { DataFecherService } from "./data-fetcher.service";
-import { Directory, Encoding, FileInfo, Filesystem, ReaddirResult, WriteFileResult } from "@capacitor/filesystem";
-import { Capacitor } from "@capacitor/core";
 import sha256 from 'crypto-js/sha256';
 import { services } from "../dependency-injection";
 
-import { CapacitorWifiConnect } from "@falconeta/capacitor-wifi-connect";
-import { Network } from "@capacitor/network";
+import Store from 'electron-store';
 
-const checkIfIsConnected = async () => {
-    const appSSID = await CapacitorWifiConnect.getAppSSID()
-    const androidSSID = await CapacitorWifiConnect.getDeviceSSID()
+export async function checkIfIsConnected() {
+    const networks = await window.electron.getCurrentWifi();
+    if (!networks || networks.length === 0) return false;
 
-    return appSSID.value === await SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO') || androidSSID.value === await SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
+    const ssid = networks[0].ssid;
+    const expected = SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
+    return ssid === expected;
 }
 
 export const defaultSettings: Settings = {
@@ -71,116 +68,65 @@ export namespace SettingsService {
         }
     }
 
-    export const setSettings = async (settings: Settings): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-                dispatchEvent('onSettingsChanged', settings);
-            });
-        });
+    export const setSettings = (settings: Settings) => {
+        window.electron.store.setAll(settings);
     }
 
-    export const getSettings = async (): Promise<Settings> => {
-        return new Promise((resolve, reject) => {
-            Preferences.get({ key: 'settings' }).then((result) => {
-                const settings = (result.value ? JSON.parse(result.value) : defaultSettings) as Settings;
-                resolve(settings);
-            });
-        });
+    export const getSettings = () => {
+        return window.electron.store.getAll() as Settings;
     }
 
-    export const getSettingOrDefault = async (key: string, defaultValue: any): Promise<any> => {
-        return new Promise(async (resolve, reject) => {
-
-            let settings: Settings | any = await getSettings();
-
-            if (settings[key] === undefined) {
-                settings[key] = defaultValue;
-            }
-
-            resolve(settings[key]);
-        });
+    export const getSettingOrDefault = (key: string, defaultValue: any) => {
+        return window.electron.store.get(key) ?? defaultValue;
     }
 
-    export const setLanguage = async (language: 'en-us' | 'pt-br'): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
+    export const setLanguage = (language: 'en-us' | 'pt-br') => {
+        window.electron.store.set('language', language);
+        dispatchEvent('onLanguageChanged', language);
 
-            settings.language = language;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onLanguageChanged', language);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setInterfaceScale = async (interfaceScale: number): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.interfaceScale = interfaceScale;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onInterfaceScaleChanged', interfaceScale);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setInterfaceScale = (interfaceScale: number) => {
+        window.electron.store.set('interfaceScale', interfaceScale);
+        dispatchEvent('onInterfaceScaleChanged', interfaceScale);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setSSID = async (SSID: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-            settings.SSID = SSID;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-            dispatchEvent('onSSIDChanged', SSID);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setSSID = (SSID: string) => {
+        window.electron.store.set('SSID', SSID);
+        dispatchEvent('onSSIDChanged', SSID);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setApiBaseUrl = async (apiBaseUrl: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.apiBaseUrl = apiBaseUrl;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-        });
+    export const setApiBaseUrl = (apiBaseUrl: string) => {
+        window.electron.store.set('apiBaseUrl', apiBaseUrl);
+        dispatchEvent('onApiBaseUrlChanged', apiBaseUrl);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const getLogoUri = (): Promise<string> => {
-        return new Promise(async (resolve, reject) => {
-            const useDefaultLogo: boolean = await getSettingOrDefault('useDefaultLogo', defaultSettings.useDefaultLogo);
-
-            const DEFAULT_LOGO_URI = '/images/D-Flow.svg';
-
-            if (useDefaultLogo) {
-                resolve(DEFAULT_LOGO_URI);
-                return;
-            }
-
-            const settings = await getSettings();
-            const logoFilePath = settings.logo;
-            if (!logoFilePath) {
-                resolve(DEFAULT_LOGO_URI);
-                return;
-            }
-
-            resolve(logoFilePath);
-            return;
-        });
+    export const setUseDefaultLogo = (useDefaultLogo: boolean) => {
+        window.electron.store.set('useDefaultLogo', useDefaultLogo);
+        dispatchEvent('onUseDefaultLogoChanged', useDefaultLogo);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setLogo = async (image?: File): Promise<void> => {
+    export const getLogoUri = (): string => {
+        const useDefaultLogo: boolean = getSettingOrDefault('useDefaultLogo', defaultSettings.useDefaultLogo);
+        const DEFAULT_LOGO_URI = `${process.env.PUBLIC_URL}/images/D-Flow.svg`;
+
+        if (useDefaultLogo) {
+            return DEFAULT_LOGO_URI;
+        }
+
+        const logo = getSettingOrDefault('logo', defaultSettings.logo);
+        if (!logo) {
+            return DEFAULT_LOGO_URI;
+        }
+        return logo;
+    }
+
+    export const setLogo = (image?: File): Promise<void> => {
         function getBase64(file: File): Promise<string> {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -192,117 +138,57 @@ export namespace SettingsService {
 
         return new Promise(async (resolve, reject) => {
             if (!image) {
-                const settings = await getSettings();
-                settings.useDefaultLogo = true;
-                await setSettings(settings);
+                setUseDefaultLogo(true);
                 resolve();
-                dispatchEvent('onSettingsChanged', settings);
             }
             else {
                 const base64 = await getBase64(image);
-
-                const settings = await getSettings();
-                settings.useDefaultLogo = false;
-                settings.logo = base64;
-                await setSettings(settings);
+                window.electron.store.set('logo', base64);
+                setUseDefaultLogo(false);
                 resolve();
-                dispatchEvent('onSettingsChanged', settings);
+                dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
             }
         });
     }
 
-    export const setPrimaryColor = async (primaryColor: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.primaryColor = primaryColor;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onPrimaryColorChanged', primaryColor);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setPrimaryColor = (primaryColor: string) => {
+        window.electron.store.set('primaryColor', primaryColor);
+        dispatchEvent('onPrimaryColorChanged', primaryColor);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setSecondaryColor = async (secondaryColor: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.secondaryColor = secondaryColor;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onSecondaryColorChanged', secondaryColor);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setSecondaryColor = (secondaryColor: string) => {
+        window.electron.store.set('secondaryColor', secondaryColor);
+        dispatchEvent('onSecondaryColorChanged', secondaryColor);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setPrimaryFontColor = async (primaryFontColor: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.primaryFontColor = primaryFontColor;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onPrimaryFontColorChanged', primaryFontColor);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setPrimaryFontColor = (primaryFontColor: string) => {
+        window.electron.store.set('primaryFontColor', primaryFontColor);
+        dispatchEvent('onPrimaryFontColorChanged', primaryFontColor);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setSecondaryFontColor = async (secondaryFontColor: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.secondaryFontColor = secondaryFontColor;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onSecondaryFontColorChanged', secondaryFontColor);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setSecondaryFontColor = (secondaryFontColor: string) => {
+        window.electron.store.set('secondaryFontColor', secondaryFontColor);
+        dispatchEvent('onSecondaryFontColorChanged', secondaryFontColor);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setVolumeUnit = async (volumeUnit: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.volumeUnit = volumeUnit;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onVolumeUnitChanged', volumeUnit);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setVolumeUnit = (volumeUnit: string) => {
+        window.electron.store.set('volumeUnit', volumeUnit);
+        dispatchEvent('onVolumeUnitChanged', volumeUnit);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setAreaUnit = async (areaUnit: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.areaUnit = areaUnit;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onAreaUnitChanged', areaUnit);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setAreaUnit = (areaUnit: string) => {
+        window.electron.store.set('areaUnit', areaUnit);
+        dispatchEvent('onAreaUnitChanged', areaUnit);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
     export const selectImage = (): Promise<File> => {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -315,65 +201,33 @@ export namespace SettingsService {
         });
     }
 
-    export const setInterval = async (interval: number): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
+    export const setInterval = (interval: number) => {
+        window.electron.store.set('interval', interval);
 
-            settings.interval = interval;
+        services.dataFetcherService.setInterval(interval);
 
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            services.dataFetcherService.setInterval(interval);
-
-            dispatchEvent('onIntervalChanged', interval);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+        dispatchEvent('onIntervalChanged', interval);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const getInterval = async (): Promise<number> => {
-        return new Promise(async (resolve, reject) => {
-            const settings = await getSettings();
-            resolve(settings.interval);
-        });
+    export const getInterval = () => {
+        return window.electron.store.get('interval');
     }
 
-    export const setNozzleSpacing = async (nozzleSpacing: number): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.nozzleSpacing = nozzleSpacing;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onNozzleSpacingChanged', nozzleSpacing);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setNozzleSpacing = (nozzleSpacing: number) => {
+        window.electron.store.set('nozzleSpacing', nozzleSpacing);
+        dispatchEvent('onNozzleSpacingChanged', nozzleSpacing);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setTimeBeforeAlert = async (timeBeforeAlert: number): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.timeBeforeAlert = timeBeforeAlert;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onTimeBeforeAlertChanged', timeBeforeAlert);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setTimeBeforeAlert = (timeBeforeAlert: number) => {
+        window.electron.store.set('timeBeforeAlert', timeBeforeAlert);
+        dispatchEvent('onTimeBeforeAlertChanged', timeBeforeAlert);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const getTimeBeforeAlert = async (): Promise<number> => {
-        return new Promise(async (resolve, reject) => {
-            const settings = await getSettings();
-            resolve(settings.timeBeforeAlert);
-        });
+    export const getTimeBeforeAlert = () => {
+        return window.electron.store.get('timeBeforeAlert');
     }
 
     export const getIsAdmin = (): boolean => {
@@ -386,139 +240,96 @@ export namespace SettingsService {
         dispatchEvent('onIsAdminChanged', value);
     }
 
-    export const setAdminPassword = async (password: string): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            await Preferences.set({ key: 'adminPassword', value: sha256(password).toString() });
-
-            dispatchEvent('onAdminPasswordChanged');
-
-            resolve();
-        });
+    export const setAdminPassword = (password: string) => {
+        window.electron.store.set('adminPassword', sha256(password).toString());
+        dispatchEvent('onAdminPasswordChanged');
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const checkAdminPassword = async (password: string): Promise<boolean> => {
-        return new Promise(async (resolve, reject) => {
-            const adminPassword = await Preferences.get({ key: 'adminPassword' });
-            resolve(adminPassword.value === sha256(password).toString());
-        });
+    export const checkAdminPassword = (password: string) => {
+        const adminPassword = window.electron.store.get('adminPassword');
+        return adminPassword === sha256(password).toString();
     }
 
-    export const isAdminPasswordSet = async (): Promise<boolean> => {
-        return new Promise(async (resolve, reject) => {
-            const adminPassword = await Preferences.get({ key: 'adminPassword' });
-            resolve(adminPassword.value !== null);
-        });
+    export const isAdminPasswordSet = () => {
+        const adminPassword = window.electron.store.get('adminPassword');
+        return adminPassword !== null && adminPassword !== undefined;
     }
 
-    export const setShouldSimulateSpeed = async (value: boolean): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.shouldSimulateSpeed = value;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onShouldSimulateSpeedChanged', value);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setShouldSimulateSpeed = (value: boolean) => {
+        window.electron.store.set('shouldSimulateSpeed', value);
+        dispatchEvent('onShouldSimulateSpeedChanged', value);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const setSimulatedSpeed = async (value: number): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.simulatedSpeed = value / 3.6; // Convert from km/h to m/s
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onSimulatedSpeedChanged', value / 3.6);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setSimulatedSpeed = (value: number) => {
+        window.electron.store.set('simulatedSpeed', value / 3.6); // Convert from km/h to m/s
+        dispatchEvent('onSimulatedSpeedChanged', value / 3.6);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const getSimulatedSpeed = async (): Promise<number> => {
-        return new Promise(async (resolve, reject) => {
-            const settings = await getSettings();
-            resolve(settings.simulatedSpeed * 3.6); // Convert from m/s to km/h
-        });
+    export const getSimulatedSpeed = () => {
+        const simulatedSpeed = window.electron.store.get('simulatedSpeed');
+        return simulatedSpeed * 3.6; // Convert from m/s to km/h
     }
 
-    export const getShouldSimulateSpeed = async (): Promise<boolean> => {
-        return new Promise(async (resolve, reject) => {
-            const settings = await getSettings();
-            resolve(settings.shouldSimulateSpeed);
-        });
+    export const getShouldSimulateSpeed = () => {
+        const shouldSimulateSpeed = window.electron.store.get('shouldSimulateSpeed');
+        return shouldSimulateSpeed;
     }
 
-    export const getDemoMode = async (): Promise<boolean> => {
-        return new Promise(async (resolve, reject) => {
-            const settings = await getSettings();
-            resolve(settings.demoMode);
-        });
+    export const getDemoMode = () => {
+        const demoMode = window.electron.store.get('demoMode');
+        return demoMode;
     }
 
-    export const setDemoMode = async (value: boolean): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            let settings = await getSettings();
-
-            settings.demoMode = value;
-
-            Preferences.set({ key: 'settings', value: JSON.stringify(settings) }).then(() => {
-                resolve();
-            });
-
-            dispatchEvent('onDemoModeChanged', value);
-            dispatchEvent('onSettingsChanged', settings);
-        });
+    export const setDemoMode = (value: boolean) => {
+        window.electron.store.set('demoMode', value);
+        dispatchEvent('onDemoModeChanged', value);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
+}
+
+const isAdminPasswordSet = SettingsService.isAdminPasswordSet();
+if (!isAdminPasswordSet) {
+    SettingsService.setSettings(defaultSettings);
 }
 
 let isConnecting = false;
 
-const connectToAPIWifi = async () => {
-
-    const SSID = await SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
-
+export async function connectToAPIWifi() {
     if (isConnecting) return;
     isConnecting = true;
 
-    let { value } = await CapacitorWifiConnect.checkPermission();
-    if (value === 'prompt') {
-        const data = await CapacitorWifiConnect.requestPermission();
-        value = data.value;
-    }
-    if (value === 'granted') {
-        await CapacitorWifiConnect.secureConnect({
-            ssid: SSID,
-            password: '123456789',
-        }).then(async (data) => {
-            if (data.value === 0) {
-                SettingsService.setIsConnectedToWifi(true);
-                SettingsService.dispatchEvent('onNetworkStatusChange', true);
-            }
-        });;
-    } else {
-        throw new Error('permission denied');
-    }
-    isConnecting = false;
-}
+    const SSID = SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
 
-Network.addListener('networkStatusChange', async (status) => {
-    const isConnected = await checkIfIsConnected();
-    if (isConnected) {
+    try {
+        await window.electron.connectToWifi({ ssid: SSID, password: '123456789' });
         SettingsService.setIsConnectedToWifi(true);
         SettingsService.dispatchEvent('onNetworkStatusChange', true);
+    } catch (err) {
+        console.error('Wi-Fi connection failed:', err);
+        throw err;
+    } finally {
+        isConnecting = false;
     }
-    else {
-        SettingsService.setIsConnectedToWifi(false);
-        SettingsService.dispatchEvent('onNetworkStatusChange', false);
-        connectToAPIWifi();
+}
+
+let lastIsConnected = false;
+
+async function monitorNetwork() {
+    const isConnected = await checkIfIsConnected();
+    if (isConnected !== lastIsConnected) {
+        lastIsConnected = isConnected;
+        SettingsService.setIsConnectedToWifi(isConnected);
+        SettingsService.dispatchEvent('onNetworkStatusChange', isConnected);
+        if (!isConnected) {
+            connectToAPIWifi();
+        }
     }
-});
+}
+
+setInterval(monitorNetwork, 250);
 
 checkIfIsConnected().then((isConnected) => {
     if (isConnected) {
@@ -530,12 +341,3 @@ checkIfIsConnected().then((isConnected) => {
         connectToAPIWifi();
     }
 });
-
-
-setInterval(async () => {
-    if (Capacitor.getPlatform() === 'web') return;
-
-    checkIfIsConnected().then((isConnected) => {
-        if (!isConnected) connectToAPIWifi();
-    });
-}, 100);

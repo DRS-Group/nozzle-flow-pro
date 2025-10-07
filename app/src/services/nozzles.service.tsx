@@ -1,4 +1,3 @@
-import { Preferences } from "@capacitor/preferences";
 import { Job } from "../types/job.type";
 import { Nozzle } from "../types/nozzle.type";
 import { SettingsService } from "./settings.service";
@@ -36,21 +35,12 @@ export namespace NozzlesService {
         }
     }
 
-    export const getNozzles = async (): Promise<Nozzle[]> => {
-        return new Promise((resolve, reject) => {
-            Preferences.get({ key: 'nozzles' }).then((result) => {
-                let nozzles = JSON.parse(result.value || '[]') as Nozzle[];
-                resolve(nozzles);
-            });
-        });
+    export const getNozzles = async () => {
+        return window.electron.store.get('nozzles') || [];
     }
 
-    export const setNozzles = async (nozzles: Nozzle[]): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            Preferences.set({ key: 'nozzles', value: JSON.stringify(nozzles) }).then(() => {
-                resolve();
-            });
-        });
+    export const setNozzles = async (nozzles: Nozzle[]) => {
+        window.electron.store.set('nozzles', nozzles);
     }
 
     export const addNozzle = async (nozzle: Nozzle): Promise<Nozzle> => {
@@ -69,7 +59,7 @@ export namespace NozzlesService {
         return new Promise(async (resolve, reject) => {
             let nozzles = await getNozzles();
 
-            nozzles = nozzles.filter((n, i) => i !== index);
+            nozzles = nozzles.filter((n: Nozzle, i: number) => i !== index);
 
             setNozzles(nozzles).then(() => {
                 resolve();

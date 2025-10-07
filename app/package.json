@@ -1,9 +1,16 @@
 {
+  "license": "MIT",
   "name": "nozzleflow-pro",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "homepage": ".",
+  "main": "main.js",
+  "author": {
+    "email": "gdbperes@gmail.com",
+    "name": "Gustavo Peres"
+  },
+  "description": "Nozzle Flow Pro Desktop Application",
   "dependencies": {
-    "@awesome-cordova-plugins/android-full-screen": "^8.0.2",
     "@capacitor/android": "^6.1.2",
     "@capacitor/core": "^6.1.2",
     "@capacitor/filesystem": "^6.0.1",
@@ -19,7 +26,10 @@
     "@types/react-dom": "^18.3.0",
     "cordova-plugin-fullscreen": "^1.3.0",
     "crypto-js": "^4.2.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^11.0.2",
     "file-saver": "^2.0.5",
+    "node-wifi": "^2.0.16",
     "react": "^18.3.1",
     "react-colorful": "^5.6.1",
     "react-dom": "^18.3.1",
@@ -29,12 +39,17 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "electron-forge start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start:android": "npm run build && npx cap copy && npx cap run android",
-    "build:android": "npm run build && npx cap copy --inline && npx cap copy android --inline && npx cap open android"
+    "build:android": "npm run build && npx cap copy --inline && npx cap copy android --inline && npx cap open android",
+    "electron": "electron .",
+    "dist": "electron-builder",
+    "main": "electron.js",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "eslintConfig": {
     "extends": [
@@ -56,6 +71,18 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2",
-    "@types/crypto-js": "^4.2.2"
+    "@electron-forge/cli": "^7.9.0",
+    "@electron-forge/maker-deb": "^7.9.0",
+    "@electron-forge/maker-rpm": "^7.9.0",
+    "@electron-forge/maker-squirrel": "^7.9.0",
+    "@electron-forge/maker-zip": "^7.9.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.9.0",
+    "@electron-forge/plugin-fuses": "^7.9.0",
+    "@electron/fuses": "^1.8.0",
+    "@types/crypto-js": "^4.2.2",
+    "@types/node-wifi": "^2.0.2",
+    "concurrently": "^9.2.1",
+    "electron": "^38.2.1",
+    "wait-on": "^9.0.1"
   }
 }

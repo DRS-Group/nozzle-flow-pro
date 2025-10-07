@@ -30,7 +30,7 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
         this.dataFetcherService.addEventListener('onDataFetched', async (data: ESPData) => {
             const currentJob = await services.currentJobService.getCurrentJob();
             if (currentJob) {
-                const expectedFlow = calculateTargetValue(currentJob, data.speed, await SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
+                const expectedFlow = calculateTargetValue(currentJob, data.speed, SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
                 const tolerance = currentJob.tolerance;
                 const minimumExpectedFlow = expectedFlow * (1 - tolerance) * 0.5;
                 const isPumpActive = data.nozzles.some((nozzle: Nozzle) => {

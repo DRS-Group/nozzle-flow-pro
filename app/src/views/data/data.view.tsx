@@ -29,9 +29,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
     useEffect(() => {
-        SettingsService.getShouldSimulateSpeed().then((value) => {
-            setShouldSimulateSpeed(value);
-        });
+        setShouldSimulateSpeed(SettingsService.getShouldSimulateSpeed());
 
         const onShouldSimulateSpeedChange = (state: boolean) => {
             setShouldSimulateSpeed(state);
@@ -55,14 +53,17 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
     }, []);
 
     useEffect(() => {
+        setIsDemoMode(SettingsService.getSettingOrDefault('demoMode', false));
+
         const onDemoModeChanged = (state: boolean) => {
             setIsDemoMode(state);
         }
 
         SettingsService.addEventListener('onDemoModeChanged', onDemoModeChanged);
-        SettingsService.getSettingOrDefault('demoMode', false).then((value) => {
-            setIsDemoMode(value);
-        });
+
+        return () => {
+            SettingsService.removeEventListener('onDemoModeChanged', onDemoModeChanged);
+        }
     }, []);
 
     useImperativeHandle(ref, () => ({

@@ -1,6 +1,6 @@
 export namespace SoundsService {
-    const alertSound = new Audio('/sounds/alert.mp3');
-    const clickSound = new Audio('/sounds/click.mp3');
+    const alertSound = new Audio(`${process.env.PUBLIC_URL}/sounds/alert.mp3`);
+    const clickSound = new Audio(`${process.env.PUBLIC_URL}/sounds/click.mp3`);
 
     export const playSound = async (sound: string): Promise<void> => {
         return new Promise(async (resolve, reject) => {

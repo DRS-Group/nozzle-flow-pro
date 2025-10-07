@@ -26,10 +26,8 @@ export const SimulatedSpeed = forwardRef<SimulatedSpeedElement, SimulatedSpeedPr
     };
 
     useEffect(() => {
-        SettingsService.getSimulatedSpeed().then((value) => {
-            rangeRef.current!.value = value.toString();
-            setSpeed(value);
-        });
+        rangeRef.current!.value = SettingsService.getSimulatedSpeed().toString();
+        setSpeed(SettingsService.getSimulatedSpeed());
     }, []);
 
     return (

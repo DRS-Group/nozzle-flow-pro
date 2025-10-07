@@ -20,14 +20,10 @@ export function useAdmin() {
     }, [setIsAdmin]);
 
     useEffect(() => {
-        SettingsService.isAdminPasswordSet().then((isPasswordSet) => {
-            setIsPasswordSet(isPasswordSet);
-        });
+        setIsPasswordSet(SettingsService.isAdminPasswordSet());
 
         const eventHandler = () => {
-            SettingsService.isAdminPasswordSet().then((isPasswordSet) => {
-                setIsPasswordSet(isPasswordSet);
-            });
+            setIsPasswordSet(SettingsService.isAdminPasswordSet());
         }
 
         SettingsService.addEventListener('onAdminPasswordChanged', eventHandler);

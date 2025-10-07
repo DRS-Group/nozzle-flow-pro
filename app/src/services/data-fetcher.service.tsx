@@ -1,11 +1,10 @@
-import { CapacitorHttp } from '@capacitor/core';
 import { NozzlesService } from './nozzles.service';
 import { SettingsService } from './settings.service';
 import { ESPData } from '../types/ESP-data.type';
 import { BaseService, IBaseService } from '../types/base-service.type';
-import { CapacitorHttpPluginWeb, HttpResponse } from '@capacitor/core/types/core-plugins';
 import { Nozzle } from '../types/nozzle.type';
 import { services } from '../dependency-injection';
+import axios from 'axios';
 
 let demoModeData: { nozzles: Nozzle[], speed: number } = { nozzles: [], speed: 0 };
 
@@ -23,7 +22,7 @@ export interface IDataFecherService extends IBaseService<DataFecherServiceEvents
 export class DataFecherService extends BaseService<DataFecherServiceEvents> implements IDataFecherService {
     public fetchData = async (): Promise<ESPData> => {
         return new Promise(async (resolve, reject) => {
-            const isDemoMode = await SettingsService.getSettingOrDefault('demoMode', false);
+            const isDemoMode = SettingsService.getSettingOrDefault('demoMode', false);
 
             if (isDemoMode) {
                 const nozzles = await NozzlesService.getNozzles();
@@ -39,8 +38,8 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 }
 
                 if (demoModeData.nozzles.length != nozzles.length) {
-                    const expectedFlow = (demoModeData.speed * 3.6 * (await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6)) * 100 * currentJob?.expectedFlow) / 60000;
-                    demoModeData.nozzles = nozzles.map((nozzle) => ({ ...nozzle, pulsesPerMinute: expectedFlow * nozzle.pulsesPerLiter }));
+                    const expectedFlow = (demoModeData.speed * 3.6 * (SettingsService.getSettingOrDefault('nozzleSpacing', 0.6)) * 100 * currentJob?.expectedFlow) / 60000;
+                    demoModeData.nozzles = nozzles.map((nozzle: Nozzle) => ({ ...nozzle, pulsesPerMinute: expectedFlow * nozzle.pulsesPerLiter }));
                 }
                 else {
                     const shouldChangeSpeed = Math.random() < 0.05; // 10% chance to change speed
@@ -56,7 +55,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                     }
 
                     for (let i = 0; i < nozzles.length; i++) {
-                        const expectedFlow = (demoModeData.speed * 3.6 * (await SettingsService.getSettingOrDefault('nozzleSpacing', 0.6)) * 100 * currentJob?.expectedFlow) / 60000;
+                        const expectedFlow = (demoModeData.speed * 3.6 * (SettingsService.getSettingOrDefault('nozzleSpacing', 0.6)) * 100 * currentJob?.expectedFlow) / 60000;
                         const expectedPulsesPerMinute = expectedFlow * nozzles[i].pulsesPerLiter;
 
                         const shouldChangePulses = Math.random() < 0.25; // 10% chance to change pulses
@@ -99,129 +98,95 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 return;
             }
 
-            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+            const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
 
-            CapacitorHttp
-                .get({ url: `${ApiBaseUri}/data`, connectTimeout: 60000 })
-                .then(
-                    async (response: HttpResponse) => {
+            try {
+                const response = await axios.get(`${ApiBaseUri}/data`, { timeout: 60000 });
 
-                        const shouldSimulateSpeed = await SettingsService.getShouldSimulateSpeed();
-                        const simulatedSpeed = (await SettingsService.getSimulatedSpeed()) / 3.6; // Convert from m/s to km/h
+                const shouldSimulateSpeed = SettingsService.getShouldSimulateSpeed();
+                const simulatedSpeed = (SettingsService.getSimulatedSpeed()) / 3.6; // m/s → km/h
 
-                        const nozzles = await NozzlesService.getNozzles();
-                        const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
-                        const speed = shouldSimulateSpeed ? simulatedSpeed : response.data.speed;
-                        const latitude = response.data.latitude || -21.122778;
-                        const longitude = response.data.longitude || -48.993056;
+                const nozzles = await NozzlesService.getNozzles();
+                const pulsesPerMinute = response.data.flowmetersPulsesPerMinute;
+                const speed = shouldSimulateSpeed ? simulatedSpeed : response.data.speed;
+                const latitude = response.data.latitude || -21.122778;
+                const longitude = response.data.longitude || -48.993056;
 
-                        for (let i = 0; i < nozzles.length; i++) {
-                            nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;
-                        }
+                for (let i = 0; i < nozzles.length; i++) {
+                    nozzles[i].pulsesPerMinute = pulsesPerMinute[i] || 0;
+                }
 
-                        const res: ESPData = { nozzles: nozzles, speed: speed, coordinates: { latitude: latitude, longitude: longitude } };
+                const res: ESPData = {
+                    nozzles,
+                    speed,
+                    coordinates: { latitude, longitude }
+                };
 
-                        this.dispatchEvent('onDataFetched', res);
+                this.dispatchEvent('onDataFetched', res);
+                resolve(res);
 
-                        resolve(res);
-                    },
-                    (reason: any) => {
-                        // if (reason && reason.code === 'SocketTimeoutException') {
-                        //     alert('Timout');
-                        //     reject(reason);
-                        // }
+            } catch (reason: any) {
+                console.error('Erro de comunicação:', reason);
 
-                        // alert('||| Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
-                        alert('Ocorreu um erro de comunicação: ' + JSON.stringify(reason) + '\n\nCaso o erro persista, entre em contato com o suporte.');
-                        setTimeout(() => {
-                            reject(reason);
-                        }, 1000);
-                    }
-                )
-                .catch((reason: any) => {
-                    // alert('Não foi possível conectar ao módulo central. Verifique a conexão e tente novamente.');
-                    alert(JSON.stringify(reason) + '\n\nCaso o erro persista, entre em contato com suporte.');
-                    setTimeout(() => {
-                        reject(reason);
-                    }, 1000);
-                });
+                // Example: send to renderer for non-blocking notification
+                alert(`Ocorreu um erro de comunicação: ${reason.message || JSON.stringify(reason)} \n\nCaso o erro persista, entre em contato com o suporte.`);
+                setTimeout(() => {
+                    reject(reason);
+                }, 3000);
+            }
         });
     }
 
     public setInterval = async (value: number): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
-
-            CapacitorHttp.post(
-                {
-                    url: `${ApiBaseUri}/set_refresh_rate`,
-                    params: { refresh_rate: value.toString() },
-                }
-            ).then(async (response) => {
-                resolve();
-            });
-        });
-    }
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            await axios.post(`${ApiBaseUri}/set_refresh_rate`, { refresh_rate: value.toString() });
+        } catch (reason: any) {
+            console.error('Failed to set interval:', reason);
+            throw reason;
+        }
+    };
 
     public getModuleMode = async (): Promise<number> => {
-        return new Promise(async (resolve, reject) => {
-            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
-
-            CapacitorHttp
-                .get({ url: `${ApiBaseUri}/get_module_mode` }).then(async (response) => {
-                    resolve(response.data.mode);
-                })
-                .catch((reason: any) => {
-                    resolve(0);
-                });;
-        });
-    }
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            const response = await axios.get(`${ApiBaseUri}/get_module_mode`);
+            return response.data.mode;
+        } catch (reason: any) {
+            console.warn('Failed to get module mode, defaulting to 0', reason);
+            return 0;
+        }
+    };
 
     public setModuleMode = async (value: number): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
-
-            CapacitorHttp.post(
-                {
-                    url: `${ApiBaseUri}/set_module_mode`,
-                    params: { mode: value.toString() },
-                }
-            ).then(async (response) => {
-                resolve();
-            })
-                .catch((reason: any) => {
-                    console.error(reason);
-                    reject(reason);
-                });
-        });
-    }
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            await axios.post(`${ApiBaseUri}/set_module_mode`, { mode: value.toString() });
+        } catch (reason: any) {
+            console.error('Failed to set module mode:', reason);
+            throw reason;
+        }
+    };
 
     public getSecondaryModulesCount = async (): Promise<number> => {
-        return new Promise(async (resolve, reject) => {
-            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
-
-            CapacitorHttp
-                .get({ url: `${ApiBaseUri}/get_secondary_modules_count` }).then(async (response) => {
-                    resolve(response.data.count);
-                })
-                .catch((reason: any) => {
-                    resolve(0);
-                });;
-        });
-    }
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            const response = await axios.get(`${ApiBaseUri}/get_secondary_modules_count`);
+            return response.data.count;
+        } catch (reason: any) {
+            console.warn('Failed to get secondary modules count, defaulting to 0', reason);
+            return 0;
+        }
+    };
 
     public removeAllSecondaryModules = async (): Promise<void> => {
-        return new Promise(async (resolve, reject) => {
-            const ApiBaseUri = await SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
-
-            CapacitorHttp.post(
-                {
-                    url: `${ApiBaseUri}/remove_all_secondary_modules`,
-                }
-            ).then(async (response) => {
-                resolve();
-            });
-        });
-    }
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            await axios.post(`${ApiBaseUri}/remove_all_secondary_modules`);
+        } catch (reason: any) {
+            console.error('Failed to remove secondary modules:', reason);
+            throw reason;
+        }
+    };
 
 }

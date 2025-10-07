@@ -18,9 +18,7 @@ export function useData() {
     const [nozzleSpacing, setNozzleSpacing] = useState<number>(0.6);
 
     useLayoutEffect(() => {
-        SettingsService.getSettingOrDefault("nozzleSpacing", 0.6).then((spacing) => {
-            setNozzleSpacing(spacing);
-        });
+        setNozzleSpacing(SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
     }, []);
 
     useLayoutEffect(() => {
