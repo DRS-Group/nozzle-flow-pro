@@ -69,6 +69,6 @@ ipcMain.handle('get-current-wifi', async () => {
   return connections;
 });
 ipcMain.handle('connect-to-wifi', async (event, opts) => {
-  // console.log('Connecting to WiFi', opts);
+  await wifi.scan();
   await wifi.connect({ ssid: opts.ssid, password: opts.password });
 });

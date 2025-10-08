@@ -45,7 +45,7 @@
     "eject": "react-scripts eject",
     "start:android": "npm run build && npx cap copy && npx cap run android",
     "build:android": "npm run build && npx cap copy --inline && npx cap copy android --inline && npx cap open android",
-    "electron": "electron .",
+    "electron": "npm run build && electron .",
     "dist": "electron-builder",
     "main": "electron.js",
     "package": "electron-forge package",

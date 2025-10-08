@@ -3,13 +3,11 @@ import { EventHandler } from "../types/event-handler";
 import sha256 from 'crypto-js/sha256';
 import { services } from "../dependency-injection";
 
-import Store from 'electron-store';
-
 export async function checkIfIsConnected() {
     const networks = await window.electron.getCurrentWifi();
     if (!networks || networks.length === 0) return false;
 
-    const ssid = networks[0].ssid;
+    const ssid = networks[0].bssid;
     const expected = SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
     return ssid === expected;
 }
@@ -309,7 +307,6 @@ export async function connectToAPIWifi() {
         SettingsService.dispatchEvent('onNetworkStatusChange', true);
     } catch (err) {
         console.error('Wi-Fi connection failed:', err);
-        throw err;
     } finally {
         isConnecting = false;
     }
@@ -317,27 +314,20 @@ export async function connectToAPIWifi() {
 
 let lastIsConnected = false;
 
-async function monitorNetwork() {
+async function monitorNetworkLoop() {
+    const start = Date.now();
     const isConnected = await checkIfIsConnected();
     if (isConnected !== lastIsConnected) {
         lastIsConnected = isConnected;
         SettingsService.setIsConnectedToWifi(isConnected);
         SettingsService.dispatchEvent('onNetworkStatusChange', isConnected);
-        if (!isConnected) {
-            connectToAPIWifi();
-        }
     }
+    if (!isConnected) {
+        await connectToAPIWifi();
+    }
+    const elapsed = Date.now() - start;
+    const delay = Math.max(1000 - elapsed, 0);
+    setTimeout(monitorNetworkLoop, delay);
 }
 
-setInterval(monitorNetwork, 250);
-
-checkIfIsConnected().then((isConnected) => {
-    if (isConnected) {
-        SettingsService.setIsConnectedToWifi(true);
-        SettingsService.dispatchEvent('onNetworkStatusChange', true);
-    } else {
-        SettingsService.setIsConnectedToWifi(false);
-        SettingsService.dispatchEvent('onNetworkStatusChange', false);
-        connectToAPIWifi();
-    }
-});
+monitorNetworkLoop();

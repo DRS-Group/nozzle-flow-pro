@@ -81,7 +81,7 @@ export const DataView = forwardRef<DataViewElement, DataViewProps>((props, ref) 
             {currentJob.job && (<>
                 {shouldSimulateSpeed && <SimulatedSpeed />}
                 <div className={styles.wrapper}>
-                    {data.nozzles.length === 0 &&
+                    {data.nozzles.length === 0 && (isConnectedToWifi || isDemoMode) &&
                         <div className={styles.syncWrapper}>
                             <span>{translate('There is no registered nozzle.')}</span>
                             <span>{translate('Click the button bellow to go to nozzles page.')}</span>
