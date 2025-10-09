@@ -75,7 +75,7 @@ export const ContextMenu = forwardRef<ContextMenuElement, ContextMenuProps>((pro
                     <div
                         key={index}
                         className={styles.item}
-                        onPointerDown={() => {
+                        onClick={() => {
                             props.onItemClick && props.onItemClick();
                             item.onClick();
                         }}

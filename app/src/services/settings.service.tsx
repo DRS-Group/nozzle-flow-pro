@@ -328,7 +328,6 @@ async function monitorNetworkLoop() {
 
     const oldWifiQuality = SettingsService.getWifiQuality();
     SettingsService.setWifiQuality(await window.electron.getWifiQuality());
-    console.log(SettingsService.getWifiQuality())
 
     if (oldWifiQuality !== SettingsService.getWifiQuality()) {
         SettingsService.dispatchEvent('onWifiQualityChanged', SettingsService.getWifiQuality());
