@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from "react"
+import { forwardRef, useImperativeHandle, useState } from "react"
 import styles from './bottom-menu.module.css';
 import { ToggleButton } from "../toggle-button/toggle-button.component";
 import { useTranslate } from "../../hooks/useTranslate";
@@ -81,7 +81,7 @@ export const BottomMenu = forwardRef<BottomMenuElement, BottomMenuProps>((props,
             />
             <div className={styles.content}>
                 <button className={styles.menuItem} data-current={navigation.currentPage === 'dataView'} onClick={onDataClick}><i className="icon-chart-bar"></i><span>{translate('Data')}</span></button>
-                <button className={styles.menuItem} data-current={navigation.currentPage === 'nozzles'} onClick={onNozzlesClick}><i className="icon-nozzle"></i><span>{translate('Nozzles')}</span></button>
+                <button className={styles.menuItem} data-current={navigation.currentPage === 'nozzles'} onClick={onNozzlesClick}><i className="icon-nozzle"></i><span>{translate('Sensors')}</span></button>
                 <button className={styles.menuItem} data-current={navigation.currentPage === 'logs'} onClick={onLogsClick}><i className="icon-file-clock-outline"></i><span>{translate('Logs')}</span></button>
                 <button className={styles.menuItem} data-current={navigation.currentPage === 'settings'} onClick={onSettingsClick}><i className="icon-cog"></i><span>{translate('Settings')}</span></button>
             </div>

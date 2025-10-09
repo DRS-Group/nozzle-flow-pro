@@ -1,5 +1,5 @@
 import styles from './number-input-dialog.module.css';
-import { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { useTranslate } from '../../hooks/useTranslate';
 import { KeyboardNumberInput } from '../keyboard-number-input/keyboard-number-input.component';
 

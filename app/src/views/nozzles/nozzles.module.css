@@ -55,6 +55,10 @@
     font-size: 1rem;
 }
 
+.jobItem .left>span:not(:first-of-type) {
+    opacity: 0.75;
+}
+
 .menuButton {
     position: absolute;
     bottom: 1rem;

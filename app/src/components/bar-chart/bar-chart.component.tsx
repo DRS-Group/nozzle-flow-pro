@@ -3,10 +3,10 @@ import styles from './bar-chart.module.css';
 import { usePump } from '../../hooks/usePump';
 import { useData } from '../../hooks/useData';
 import { useCurrentJob } from '../../hooks/useCurrentJob';
-import { Nozzle } from '../../types/nozzle.type';
 import { YesNoDialog } from '../yes-no-dialog/yes-no-dialog.component';
 import { useTranslate } from '../../hooks/useTranslate';
-import { NozzlesService } from '../../services/nozzles.service';
+import { IFlowmeterSensor } from '../../types/flowmeter-sensor';
+import { services } from '../../dependency-injection';
 
 const TARGET_COLOR = 'rgb(50, 200, 100)';
 const MAX_TARGET_COLOR = 'rgb(255, 0, 0)';
@@ -35,7 +35,7 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
 
     useEffect(() => {
         updateGridLinesValues();
-    }, [data.nozzles]);
+    }, [data.flowmeterSensors]);
 
     const updateGridLinesValues = () => {
         let values: number[] = [];
@@ -87,7 +87,7 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
 
     return (
         <>
-            {currentJob.job &&
+            {currentJob.job && data.flowmeterSensors.length > 0 &&
 
                 <div className={styles.wrapper}>
                     <div className={styles.YAxis}></div>
@@ -112,7 +112,7 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
                     </div>
 
                     <div className={styles.bars} ref={barsWrapperRef}>
-                        {data.nozzles && data.nozzles.map((nozzle, index) =>
+                        {data.flowmeterSensors && data.flowmeterSensors.map((flowmeterSensor, index) =>
                             <Bar
                                 key={index}
                                 nozzleIndex={index}
@@ -145,24 +145,24 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
     const data = useData();
     const currentJob = useCurrentJob();
 
-    const [nozzle, setNozzle] = useState<Nozzle>(data.nozzles[props.nozzleIndex]);
+    const [flowmeterSensor, setFlowmeterSensor] = useState<IFlowmeterSensor>(data.flowmeterSensors[props.nozzleIndex]);
     const [isOutOfBounds, setIsOutOfBounds] = useState<boolean>(false);
 
     const [ignoreNozzleDialogOpen, setIgnoreNozzleDialogOpen] = useState<boolean>(false);
     const [unignoreNozzleDialogOpen, setUnignoreNozzleDialogOpen] = useState<boolean>(false);
 
     useLayoutEffect(() => {
-        setNozzle(data.nozzles[props.nozzleIndex]);
-    }, [data.nozzles, props.nozzleIndex]);
+        setFlowmeterSensor(data.flowmeterSensors[props.nozzleIndex]);
+    }, [data.flowmeterSensors, props.nozzleIndex]);
 
     useLayoutEffect(() => {
-        if (!currentJob.job || !nozzle) return;
+        if (!currentJob.job || !flowmeterSensor) return;
 
         const maxFlow = data.targetValue * (1 + currentJob.job!.tolerance);
         const minFlow = data.targetValue * (1 - currentJob.job!.tolerance);
-        const currentFlow = nozzle.pulsesPerMinute / nozzle.pulsesPerLiter;
+        const currentFlow = flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter;
         setIsOutOfBounds((currentFlow < minFlow) || (currentFlow > maxFlow));
-    }, [data.targetValue, currentJob.job, nozzle, nozzle]);
+    }, [data.targetValue, currentJob.job, flowmeterSensor, flowmeterSensor]);
 
     const valueToChartPercentage = useCallback((value: number) => {
         if (!currentJob.job || !data?.targetValue) return 0;
@@ -193,7 +193,6 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
             percentage = newPercentage;
         }
 
-
         return percentage;
     }, [currentJob.job, data.targetValue]);
 
@@ -208,24 +207,24 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
     });
 
     useEffect(() => {
-        if (!nozzle) return;
+        if (!flowmeterSensor) return;
 
         const color = pump.isStabilized ? (isOutOfBounds ? 'red' : TARGET_COLOR) : 'darkgray';
         let height = 0;
 
         setStyle({
-            height: pump.isStabilized ? `${valueToChartPercentage(nozzle.pulsesPerMinute / nozzle.pulsesPerLiter)}%` : '50%',
-            opacity: nozzle.ignored ? 0.15 : 1,
+            height: pump.isStabilized ? `${valueToChartPercentage(flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter)}%` : '50%',
+            opacity: flowmeterSensor.ignored ? 0.15 : 1,
             backgroundColor: color
         });
-    }, [isOutOfBounds, nozzle, nozzle]);
+    }, [isOutOfBounds, flowmeterSensor, flowmeterSensor]);
 
     return (
         <>
             <div
                 className={` ${styles.barWrapper} ${(isOutOfBounds && pump.pumpState !== "off" && pump.isStabilized) ? styles.pulse : ''}`}
                 onClick={() => {
-                    if (nozzle.ignored)
+                    if (flowmeterSensor.ignored)
                         setUnignoreNozzleDialogOpen(true);
                     else
                         setIgnoreNozzleDialogOpen(true);
@@ -233,17 +232,17 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
                 style={{ opacity: style.opacity }}
             >
                 <div className={`${styles.bar}`} style={{ ...style, opacity: 1 }}>
-                    <span>{nozzle?.name}</span>
+                    <span>{flowmeterSensor?.name}</span>
                 </div>
             </div>
 
             {ignoreNozzleDialogOpen &&
                 <YesNoDialog
-                    title={translate('Ignore nozzle')}
-                    message={translate('Are you sure you want to ignore this nozzle?')}
+                    title={`${translate('Ignore')} ${flowmeterSensor.name}`}
+                    message={translate('Are you sure you want to ignore this sensor?')}
                     onYesClick={() => {
-                        nozzle.ignored = true;
-                        NozzlesService.updateNozzle(nozzle, props.nozzleIndex);
+                        flowmeterSensor.ignored = true;
+                        services.sensorsService.updateFlowmeterSensor(flowmeterSensor, props.nozzleIndex);
 
                         setIgnoreNozzleDialogOpen(false);
                     }}
@@ -255,11 +254,11 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
             }
             {unignoreNozzleDialogOpen &&
                 <YesNoDialog
-                    title={translate('Unignore nozzle')}
-                    message={translate('Are you sure you want to unignore this nozzle?')}
+                    title={`${translate('Unignore')} ${flowmeterSensor.name}`}
+                    message={translate('Are you sure you want to unignore this sensor?')}
                     onYesClick={() => {
-                        nozzle.ignored = false;
-                        NozzlesService.updateNozzle(nozzle, props.nozzleIndex);
+                        flowmeterSensor.ignored = false;
+                        services.sensorsService.updateFlowmeterSensor(flowmeterSensor, props.nozzleIndex)
 
                         setUnignoreNozzleDialogOpen(false);
                     }}

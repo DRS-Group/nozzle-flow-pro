@@ -34,7 +34,8 @@ typedef unsigned short flowmeter_data_t;
 typedef struct flowmeters_data
 {
     uint8_t flowmeterCount;
-    flowmeter_data_t *flowmetersPulsesPerMinute;
+    flowmeter_data_t *flowmetersPulseCount;
+    unsigned long *flowmetersLastPulseAge;
 } flowmeters_data;
 
 typedef struct secondary_module_data_request

@@ -48,17 +48,25 @@ void SecondaryModule::onDataRequest(const uint8_t *mac_addr, const uint8_t *inco
 
     flowmeters_data flowmetersData = instance->getFlowmeterData();
 
-    const size_t responseSize = flowmetersData.flowmeterCount * sizeof(flowmeter_data_t) + sizeof(uint8_t); // 1 byte for flowmeter count and other bytes for flowmeter data.
+    // Calculate response size: 1 byte for count, pulse counts, and last pulse ages
+    const size_t responseSize = sizeof(uint8_t) +
+        flowmetersData.flowmeterCount * sizeof(flowmeter_data_t) +
+        flowmetersData.flowmeterCount * sizeof(unsigned long);
 
     uint8_t *responseBuffer = static_cast<uint8_t *>(malloc(responseSize));
     responseBuffer[0] = flowmetersData.flowmeterCount;
 
-    memcpy(responseBuffer + 1, flowmetersData.flowmetersPulsesPerMinute, flowmetersData.flowmeterCount * sizeof(flowmeter_data_t));
+    // Copy pulse counts
+    memcpy(responseBuffer + 1, flowmetersData.flowmetersPulseCount, flowmetersData.flowmeterCount * sizeof(flowmeter_data_t));
+    // Copy last pulse ages
+    memcpy(responseBuffer + 1 + flowmetersData.flowmeterCount * sizeof(flowmeter_data_t),
+           flowmetersData.flowmetersLastPulseAge, flowmetersData.flowmeterCount * sizeof(unsigned long));
 
     instance->espNowManager->sendBuffer(mac_addr, FLOWMETER_DATA_REQUEST + 0x80, responseBuffer, responseSize);
 
     free(responseBuffer);
-    free(flowmetersData.flowmetersPulsesPerMinute);
+    free(flowmetersData.flowmetersPulseCount);
+    free(flowmetersData.flowmetersLastPulseAge);
 }
 
 void SecondaryModule::onSetRefreshRate(const uint8_t *mac_addr, const uint8_t *incomingData, int len)
@@ -100,10 +108,13 @@ flowmeters_data SecondaryModule::getFlowmeterData()
     flowmeters_data data;
     data.flowmeterCount = this->flowmeterCount;
 
-    data.flowmetersPulsesPerMinute = static_cast<flowmeter_data_t *>(malloc(this->flowmeterCount * sizeof(flowmeter_data_t)));
+    data.flowmetersPulseCount = static_cast<flowmeter_data_t *>(malloc(this->flowmeterCount * sizeof(flowmeter_data_t)));
+    data.flowmetersLastPulseAge = static_cast<unsigned long *>(malloc(this->flowmeterCount * sizeof(unsigned long)));
+
     for (uint8_t i = 0; i < this->flowmeterCount; i++)
     {
-        data.flowmetersPulsesPerMinute[i] = this->flowmeters[i]->getPulsesPerMinute();
+        data.flowmetersPulseCount[i] = this->flowmeters[i]->getPulseCount();
+        data.flowmetersLastPulseAge[i] = this->flowmeters[i]->getLastPulseAge();
     }
 
     return data;

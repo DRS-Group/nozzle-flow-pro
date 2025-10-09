@@ -1,7 +1,7 @@
 import { TopBar } from '../../components/top-bar/top-bar.component';
 import { defaultSettings, SettingsService } from '../../services/settings.service';
 import styles from './settings.module.css';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { Settings as SettingsType } from '../../types/settings.type';
 import { TextInputDialog } from '../../components/text-input-dialog/text-input-dialog.component';
 import { ContextMenu } from '../../components/context-menu/context-menu.component';
@@ -276,7 +276,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                 <i className="icon-unfold-more-horizontal"></i>
                             </div>
                         </div>
-                        {isAdmin &&
+                        {/* {isAdmin &&
                             <div className={styles.item}
                                 onClick={onDemoModeClick}
                             >
@@ -290,7 +290,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                     <i className="icon-unfold-more-horizontal"></i>
                                 </div>
                             </div>
-                        }
+                        } */}
                     </div>
                 </div>
                 {isAdmin &&
@@ -342,7 +342,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                     </div>
                                     <div className={styles.itemRight}>
                                         <div className={styles.itemValue}>
-                                            <span>{moduleMode === 0 ? 'Running' : 'Pairing'}</span>
+                                            <span>{moduleMode === 0 ? translate('Running') : translate('Pairing')}</span>
                                         </div>
                                         <i className="icon-unfold-more-horizontal"></i>
                                     </div>
@@ -383,7 +383,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                         </div>
                     </div>
                 }
-                <div className={styles.section}>
+                {/* <div className={styles.section}>
                     <div className={styles.sectionTitle}>
                         {translate('Units of measurement')}
                     </div>
@@ -415,7 +415,7 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
                 <div className={styles.section}>
                     <div className={styles.sectionTitle}>
                         {translate('Style')}

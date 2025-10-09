@@ -7,6 +7,7 @@
     flex-grow: 1;
     flex-direction: column;
     position: relative;
+    justify-content: center;
 }
 
 .syncWrapper {

@@ -1,13 +1,13 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Job } from "../types/job.type";
 import { services } from "../dependency-injection";
-import { Event } from "../types/event.type";
+import { IEvent } from "../types/event.type";
 
 export function useCurrentJob() {
     const currentJobService = services.currentJobService;
 
     const [job, setJob] = useState<Job | null>(null);
-    const [unviewedTriggeredEvents, setUnviewedTriggeredEvents] = useState<Event[]>([]);
+    const [unviewedTriggeredEvents, setUnviewedTriggeredEvents] = useState<IEvent[]>([]);
 
     useLayoutEffect(() => {
         currentJobService.getCurrentJob().then(job => {
@@ -18,8 +18,8 @@ export function useCurrentJob() {
             currentJobService.getCurrentJob().then(job => {
                 setJob(job);
 
-                if (jobId && job?.nozzleEvents) {
-                    const triggeredEvents = job.nozzleEvents.filter(event => event.triggered && !event.viewed);
+                if (jobId && job?.events) {
+                    const triggeredEvents = job.events.filter(event => event.triggered && !event.viewed);
                     setUnviewedTriggeredEvents(triggeredEvents);
                 }
             });
@@ -30,7 +30,7 @@ export function useCurrentJob() {
         return () => {
             currentJobService.removeEventListener('onCurrentJobChanged', eventHandler);
         }
-    }, []);
+    }, [currentJobService]);
 
     const set = (jobId: string | null) => {
         currentJobService.setCurrentJob(jobId);

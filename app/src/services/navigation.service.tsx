@@ -1,16 +1,7 @@
-import { BaseService, IBaseService } from "../types/base-service.type";
+import { BaseService, IBaseService } from "./base-service.type";
 import { Page } from "../types/page.type";
 
-
 type navigationServiceEvents = 'onNavigate';
-
-export interface INavigationService extends IBaseService<navigationServiceEvents> {
-    navigate: (page: Page) => void;
-    getCurrentPage: () => Page;
-    navigateBack: () => void;
-    getPreviousPage: () => Page | undefined;
-    clearHistory: () => void;
-}
 
 export interface INavigationService extends IBaseService<navigationServiceEvents> {
     navigate: (page: Page) => void;

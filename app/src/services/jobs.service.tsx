@@ -1,5 +1,5 @@
 import { Job } from "../types/job.type";
-import { BaseService, IBaseService } from "../types/base-service.type";
+import { BaseService, IBaseService } from "./base-service.type";
 import { JobRepository } from "../repositories/job.repository";
 
 export type JobsServiceEvents = 'onCurrentJobChanged' | 'onJobsChanged' | 'onCurrentJobNozzleEventsUpdated' | 'onNozzleEventTriggered';

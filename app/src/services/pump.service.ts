@@ -1,11 +1,12 @@
 import { services } from "../dependency-injection";
-import { BaseService, IBaseService } from "../types/base-service.type";
+import { BaseService, IBaseService } from "./base-service.type";
 import { ESPData } from "../types/ESP-data.type";
 import { Job } from "../types/job.type";
-import { Nozzle } from "../types/nozzle.type";
 import { CurrentJobService } from "./current-job.service";
 import { IDataFecherService } from "./data-fetcher.service";
 import { SettingsService } from "./settings.service";
+import { ISensor } from "../types/sensor";
+import { IFlowmeterSensor } from "../types/flowmeter-sensor";
 
 export type PumpServiceEvents = 'onStateChanged' | 'onOverriddenStateChanged' | 'onIsStabilizedChanged';
 
@@ -33,11 +34,18 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
                 const expectedFlow = calculateTargetValue(currentJob, data.speed, SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
                 const tolerance = currentJob.tolerance;
                 const minimumExpectedFlow = expectedFlow * (1 - tolerance) * 0.5;
-                const isPumpActive = data.nozzles.some((nozzle: Nozzle) => {
-                    const litersPerMinute = nozzle.pulsesPerMinute / nozzle.pulsesPerLiter;
-                    return litersPerMinute > minimumExpectedFlow && !nozzle.ignored;
+                const isPumpActive = data.sensors.some((sensor: ISensor) => {
+                    if (sensor.type !== 'flowmeter') return false;
+                    const flowmeterSensor = sensor as IFlowmeterSensor;
+                    if (flowmeterSensor.ignored) return false;
+                    const litersPerMinute = flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter;
+                    return litersPerMinute > minimumExpectedFlow && !flowmeterSensor.ignored;
                 });
-                const rawIsPumpActive = data.nozzles.some((nozzle: Nozzle) => nozzle.pulsesPerMinute > 20 && !nozzle.ignored);
+                const rawIsPumpActive = data.sensors.some((sensor: ISensor) => {
+                    if (sensor.type !== 'flowmeter') return false;
+                    const flowmeterSensor = sensor as IFlowmeterSensor;
+                    return flowmeterSensor.pulsesPerMinute > 20 && !flowmeterSensor.ignored;
+                });
 
                 if (!this.lastRawIsPumpActive && rawIsPumpActive && !this.timeoutHandler) {
                     this.isStabilized = false;
@@ -57,7 +65,11 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
                 this.lastRawIsPumpActive = rawIsPumpActive;
             }
             else {
-                const isPumpActive = data.nozzles.some((nozzle: Nozzle) => nozzle.pulsesPerMinute > 10 && !nozzle.ignored);
+                const isPumpActive = data.sensors.some((sensor: ISensor) => {
+                    if (sensor.type !== 'flowmeter') return false;
+                    const flowmeterSensor = sensor as IFlowmeterSensor;
+                    return flowmeterSensor.pulsesPerMinute > 20 && !flowmeterSensor.ignored;
+                });
                 const state = isPumpActive ? 'on' : 'off';
                 if (state !== this.getState()) {
                     this.setState(state);

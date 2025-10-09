@@ -2,9 +2,9 @@ import { TopBar } from '../../components/top-bar/top-bar.component';
 import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useNavigation } from '../../hooks/useNavigation';
 import { useTranslate } from '../../hooks/useTranslate';
-import { Event } from '../../types/event.type';
+import { IEvent } from '../../types/event.type';
 import styles from './logs.module.css';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 
 export type LogsElement = {}
 
@@ -15,14 +15,14 @@ export const Logs = forwardRef<LogsElement, LogsProps>((props, ref) => {
     const navigation = useNavigation();
     const currentJob = useCurrentJob();
 
-    const [eventsToShow, setEventsToShow] = useState<Event[]>([]);
+    const [eventsToShow, setEventsToShow] = useState<IEvent[]>([]);
 
     useImperativeHandle(ref, () => ({
 
     }), []);
 
     useEffect(() => {
-        setEventsToShow(currentJob.job?.nozzleEvents.filter(event => event.triggered).sort(
+        setEventsToShow(currentJob.job?.events.filter(event => event.triggered).sort(
             (a, b) => b.startTime.getTime() - a.startTime.getTime()
         ) || []);
     }, [currentJob.job]);
@@ -71,7 +71,7 @@ return (
                         </tr>
                     </thead>
                     <tbody>
-                        {eventsToShow.map((event: Event, index: number) => (
+                        {eventsToShow.map((event: IEvent, index: number) => (
                             <tr key={index}>
                                 <td>{event.startTime.toLocaleDateString()} {event.startTime.toLocaleTimeString()}</td>
                                 <td>{event.title}</td>

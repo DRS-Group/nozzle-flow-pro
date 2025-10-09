@@ -1,16 +1,7 @@
 import { Settings } from "../types/settings.type";
-import { EventHandler } from "../types/event-handler";
+import { EventHandler } from "../types/event-handler.type";
 import sha256 from 'crypto-js/sha256';
 import { services } from "../dependency-injection";
-
-export async function checkIfIsConnected() {
-    const networks = await window.electron.getCurrentWifi();
-    if (!networks || networks.length === 0) return false;
-
-    const ssid = networks[0].bssid;
-    const expected = SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
-    return ssid === expected;
-}
 
 export const defaultSettings: Settings = {
     language: 'pt-br',
@@ -26,7 +17,7 @@ export const defaultSettings: Settings = {
     interval: 2500,
     useDefaultLogo: true,
     shouldSimulateSpeed: false,
-    simulatedSpeed: 0,
+    simulatedSpeed: 10,
     demoMode: false,
     logo: '',
     timeBeforeAlert: 5 * 1000,
@@ -224,7 +215,7 @@ export namespace SettingsService {
         dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
-    export const getTimeBeforeAlert = () => {
+    export const getTimeBeforeAlert = (): number => {
         return window.electron.store.get('timeBeforeAlert');
     }
 
@@ -286,6 +277,15 @@ export namespace SettingsService {
         dispatchEvent('onDemoModeChanged', value);
         dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
+
+    export async function checkIfIsConnected() {
+        const networks = await window.electron.getCurrentWifi();
+        if (!networks || networks.length === 0) return false;
+
+        const ssid = networks[0].bssid;
+        const expected = SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
+        return ssid === expected;
+    }
 }
 
 const isAdminPasswordSet = SettingsService.isAdminPasswordSet();
@@ -316,7 +316,7 @@ let lastIsConnected = false;
 
 async function monitorNetworkLoop() {
     const start = Date.now();
-    const isConnected = await checkIfIsConnected();
+    const isConnected = await SettingsService.checkIfIsConnected();
     if (isConnected !== lastIsConnected) {
         lastIsConnected = isConnected;
         SettingsService.setIsConnectedToWifi(isConnected);

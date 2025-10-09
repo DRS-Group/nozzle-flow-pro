@@ -140,10 +140,12 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
         {
             Serial.println("Sending data response...");
             JsonDocument doc;
-            JsonArray flowmeters = doc["flowmetersPulsesPerMinute"].to<JsonArray>();
+            JsonArray flowmeters = doc["flowmetersPulseCount"].to<JsonArray>();
+            JsonArray ages = doc["flowmetersLastPulseAge"].to<JsonArray>();
             for (int i = 0; i < data.flowmeterCount; i++)
             {
-                flowmeters.add(data.flowmetersPulsesPerMinute[i]);
+                flowmeters.add(data.flowmetersPulseCount[i]);
+                ages.add(data.flowmetersLastPulseAge[i]);
             }
 
             float speed = GPS::getInstance()->getSpeed();

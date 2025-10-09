@@ -40,9 +40,14 @@ void MainModule::onDataResponseReceived(const uint8_t *mac_addr, const uint8_t *
 
     flowmeters_data flowmetersData;
     flowmetersData.flowmeterCount = data[0];
-    flowmetersData.flowmetersPulsesPerMinute = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
+    // Allocate and copy pulse counts
+    flowmetersData.flowmetersPulseCount = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
+    memcpy(flowmetersData.flowmetersPulseCount, &data[1], sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
 
-    memcpy(flowmetersData.flowmetersPulsesPerMinute, &data[1], sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
+    // After the pulse counts, the secondary sends last pulse ages (unsigned long per flowmeter)
+    flowmetersData.flowmetersLastPulseAge = (unsigned long *)malloc(sizeof(unsigned long) * flowmetersData.flowmeterCount);
+    const uint8_t *agesSrc = &data[1 + sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount];
+    memcpy(flowmetersData.flowmetersLastPulseAge, agesSrc, sizeof(unsigned long) * flowmetersData.flowmeterCount);
 
     instance->setLastFlowmeterDataResponseTimestamp(senderAddress, millis());
     instance->registerFlowmetersData(senderAddress, flowmetersData);
@@ -55,13 +60,22 @@ void MainModule::onDataResponseReceived(const uint8_t *mac_addr, const uint8_t *
         instance->setLastFlowmetersDataRequestTimestamp(0);
         for (auto &pair : instance->flowmetersData)
         {
-            free(pair.second.flowmetersPulsesPerMinute);
+            free(pair.second.flowmetersPulseCount);
+            if(pair.second.flowmetersLastPulseAge != nullptr) {
+                free(pair.second.flowmetersLastPulseAge);
+            }
         }
         instance->flowmetersData.clear();
-        free(allFlowmetersData.flowmetersPulsesPerMinute);
+        free(allFlowmetersData.flowmetersPulseCount);
+        if(allFlowmetersData.flowmetersLastPulseAge != nullptr) {
+            free(allFlowmetersData.flowmetersLastPulseAge);
+        }
     }
 
-    free(flowmetersData.flowmetersPulsesPerMinute);
+    free(flowmetersData.flowmetersPulseCount);
+    if(flowmetersData.flowmetersLastPulseAge != nullptr) {
+        free(flowmetersData.flowmetersLastPulseAge);
+    }
 }
 
 void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback)
@@ -73,7 +87,8 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
     {
         flowmeters_data data;
         data.flowmeterCount = 0;
-        data.flowmetersPulsesPerMinute = nullptr;
+        data.flowmetersPulseCount = nullptr;
+        data.flowmetersLastPulseAge = nullptr;
         callGetFlowmetersDataCallbacks(data);
         return;
     }
@@ -170,8 +185,16 @@ void MainModule::registerFlowmetersData(const macAddress_t mac_addr, flowmeters_
 
     flowmeters_data flowmetersData;
     flowmetersData.flowmeterCount = data.flowmeterCount;
-    flowmetersData.flowmetersPulsesPerMinute = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * data.flowmeterCount);
-    memcpy(flowmetersData.flowmetersPulsesPerMinute, data.flowmetersPulsesPerMinute, sizeof(flowmeter_data_t) * data.flowmeterCount);
+    flowmetersData.flowmetersPulseCount = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * data.flowmeterCount);
+    memcpy(flowmetersData.flowmetersPulseCount, data.flowmetersPulseCount, sizeof(flowmeter_data_t) * data.flowmeterCount);
+    // Copy last pulse ages if present
+    flowmetersData.flowmetersLastPulseAge = (unsigned long *)malloc(sizeof(unsigned long) * data.flowmeterCount);
+    if(data.flowmetersLastPulseAge != nullptr) {
+        memcpy(flowmetersData.flowmetersLastPulseAge, data.flowmetersLastPulseAge, sizeof(unsigned long) * data.flowmeterCount);
+    } else {
+        // Initialize to zero if not provided
+        memset(flowmetersData.flowmetersLastPulseAge, 0, sizeof(unsigned long) * data.flowmeterCount);
+    }
 
     this->flowmetersData[mac_addr_str] = flowmetersData;
 }
@@ -204,7 +227,8 @@ void MainModule::getLastFlowmeterData(flowmeters_data *result)
         std::string mac_addr_str = espNowCentralManager->getSlaveMacAddress(i);
         result->flowmeterCount += this->flowmetersData[mac_addr_str].flowmeterCount;
     }
-    result->flowmetersPulsesPerMinute = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * result->flowmeterCount);
+    result->flowmetersPulseCount = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * result->flowmeterCount);
+    result->flowmetersLastPulseAge = (unsigned long *)malloc(sizeof(unsigned long) * result->flowmeterCount);
 
     int index = 0;
     for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
@@ -212,7 +236,8 @@ void MainModule::getLastFlowmeterData(flowmeters_data *result)
         std::string mac_addr_str = espNowCentralManager->getSlaveMacAddress(i);
         for (int j = 0; j < this->flowmetersData[mac_addr_str].flowmeterCount; j++)
         {
-            result->flowmetersPulsesPerMinute[index] = this->flowmetersData[mac_addr_str].flowmetersPulsesPerMinute[j];
+            result->flowmetersPulseCount[index] = this->flowmetersData[mac_addr_str].flowmetersPulseCount[j];
+            result->flowmetersLastPulseAge[index] = this->flowmetersData[mac_addr_str].flowmetersLastPulseAge[j];
             index++;
         }
     }

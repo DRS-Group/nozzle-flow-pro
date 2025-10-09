@@ -22,8 +22,9 @@ private:
     uint8_t pin;
     unsigned short refreshRate;
 
-    volatile timestamp_arr_t pulsesTimestamps;
-    volatile short pulseCount;
+    volatile unsigned long lastPulseTimestamp = 0;
+    volatile timestamp_arr_t pulsesTimestamps = nullptr;
+    volatile unsigned short pulseCount = 0;
 
     static void onPulseStatic(void *arg);
 
@@ -34,6 +35,9 @@ public:
     void onPulse();
     static std::map<uint8_t, Flowmeter *> instances;
     unsigned short getPulsesPerMinute();
+    unsigned short getPulseCount();
+    unsigned long getLastPulseTimestamp();
+    unsigned long getLastPulseAge();
     uint8_t getPin();
     void setRefreshRate(unsigned short refreshRate);
 };

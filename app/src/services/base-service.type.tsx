@@ -1,4 +1,4 @@
-import { EventHandler } from "../types/event-handler";
+import { EventHandler } from "../types/event-handler.type";
 
 export interface IBaseService<T extends string> {
     addEventListener: (eventName: T, callback: EventHandler<any>) => void;

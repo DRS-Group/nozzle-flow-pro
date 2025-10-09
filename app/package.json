@@ -1,6 +1,6 @@
 {
   "license": "MIT",
-  "name": "nozzleflow-pro",
+  "name": "d-flow",
   "version": "1.0.0",
   "private": true,
   "homepage": ".",
@@ -9,7 +9,7 @@
     "email": "gdbperes@gmail.com",
     "name": "Gustavo Peres"
   },
-  "description": "Nozzle Flow Pro Desktop Application",
+  "description": "D-Flow",
   "dependencies": {
     "@capacitor/android": "^6.1.2",
     "@capacitor/core": "^6.1.2",

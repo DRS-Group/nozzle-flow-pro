@@ -48,8 +48,8 @@ export const Menu = forwardRef<MenuElement, MenuProps>((props, ref) => {
                 <div className={styles.item}
                     onClick={onNozzlesClick}
                 >
-                    <img src={`${process.env.PUBLIC_URL}/images/nozzle.svg`} />
-                    <span>{translate('Nozzles')}</span>
+                    <img src={`${process.env.PUBLIC_URL}/images/sensor.svg`} />
+                    <span>{translate('Sensors')}</span>
                 </div>
                 <div className={styles.item}
                     onClick={onSettingsClick}

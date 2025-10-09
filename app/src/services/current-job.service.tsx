@@ -1,12 +1,16 @@
 import { services } from "../dependency-injection";
-import { BaseService, IBaseService } from "../types/base-service.type";
+import { BaseService, IBaseService } from "./base-service.type";
 import { ESPData } from "../types/ESP-data.type";
 import { Job } from "../types/job.type";
-import { NozzleEvent } from "../types/nozzle-event.type";
-import { Nozzle } from "../types/nozzle.type";
+import { IFlowmeterEvent } from "../types/flowmeter-event.type";
 import { IJobsService } from "./jobs.service";
 import { SettingsService } from "./settings.service";
 import { TranslationServices } from "./translations.service";
+import { IFlowmeterSensor } from "../types/flowmeter-sensor";
+import { IEvent } from "../types/event.type";
+import { IOpticalSensor } from "../types/optical-sensor";
+import { ISensor } from "../types/sensor";
+import { IOpticalSensorEvent } from "../types/optical-sensor-event.type";
 
 export type CurrentJobServiceEvents = 'onCurrentJobChanged' | 'onNozzleEventTriggered';
 
@@ -86,7 +90,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         const currentJob = await this.getCurrentJob();
         if (!currentJob) return;
 
-        const event = currentJob.nozzleEvents.find((event: NozzleEvent) => {
+        const event = currentJob.events.find((event: IEvent) => {
             return event.id === eventId;
         });
 
@@ -101,7 +105,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         const currentJob = await this.getCurrentJob();
         if (!currentJob) return;
 
-        currentJob.nozzleEvents.forEach((event: NozzleEvent) => {
+        currentJob.events.forEach((event: IEvent) => {
             event.viewed = true;
         });
 
@@ -120,12 +124,13 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
             const currentJob = await this.getCurrentJob();
             if (!currentJob) return;
 
-            const ongoingEvents = currentJob.nozzleEvents.filter((event: NozzleEvent) => {
+            const ongoingEvents = currentJob.events.filter((event: IEvent) => {
                 return event.endTime === undefined;
             });
 
-            ongoingEvents.forEach((event: NozzleEvent) => {
+            ongoingEvents.forEach((event: IEvent) => {
                 event.endTime = new Date();
+                event.viewed = true;
             });
 
             await this.jobsService.saveJob(currentJob);
@@ -146,7 +151,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         const currentJob = await this.getCurrentJob();
         if (!currentJob) return;
 
-        const nozzles = espData.nozzles;
+        const sensors: ISensor[] = espData.sensors;
         const speed = espData.speed;
         const timeBeforeAlert = SettingsService.getTimeBeforeAlert();
         const nozzleSpacing = SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
@@ -154,131 +159,189 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         const maxExpectedFlow = expectedFlow * (1 + currentJob.tolerance);
         const minExpectedFlow = expectedFlow * (1 - currentJob.tolerance);
 
-        for (let nozzleIndex = 0; nozzleIndex < nozzles.length; nozzleIndex++) {
-            const nozzle: Nozzle = nozzles[nozzleIndex];
+        for (let sensorIndex = 0; sensorIndex < sensors.length; sensorIndex++) {
+            const sensor: ISensor = sensors[sensorIndex];
 
-            if (nozzle.ignored) continue;
+            if (sensor.ignored) continue;
 
-            const nozzleFlow = nozzle.pulsesPerMinute / nozzle.pulsesPerLiter;
+            if (sensor.type === 'flowmeter') {
+                const flowmeterSensor = sensor as IFlowmeterSensor;
 
-            const isFlowAboveExpected = nozzleFlow > maxExpectedFlow;
-            const isFlowBelowExpected = nozzleFlow < minExpectedFlow;
-            const isFlowWithinExpected = !isFlowAboveExpected && !isFlowBelowExpected;
+                const flowmeterFlow = flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter;
 
-            const nozzleEvents: NozzleEvent[] = currentJob.nozzleEvents.filter((event: NozzleEvent) => {
-                return event.nozzleIndex === nozzleIndex;
-            });
+                const isFlowAboveExpected = flowmeterFlow > maxExpectedFlow;
+                const isFlowBelowExpected = flowmeterFlow < minExpectedFlow;
+                const isFlowWithinExpected = !isFlowAboveExpected && !isFlowBelowExpected;
 
-            const nozzleOngoingEvent: NozzleEvent | undefined = nozzleEvents.find((event: NozzleEvent) => {
-                return event.endTime === undefined;
-            });
+                const flowmeterSensorEvents: IFlowmeterEvent[] = currentJob.events.filter((event: IEvent): event is IFlowmeterEvent => {
+                    if (event.type !== 'flowmeterSensor') return false;
 
+                    return (event as IFlowmeterEvent).sensorIndex === sensorIndex;
+                });
 
-            if (nozzleOngoingEvent === undefined) {
-                if (isFlowAboveExpected) {
-                    const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is above the expected value', currentLanguage)}`;
+                const flowmeterOngoingEvent: IFlowmeterEvent | undefined = flowmeterSensorEvents.find((event: IFlowmeterEvent) => {
+                    return event.endTime === undefined;
+                });
 
-                    const newEvent: NozzleEvent = {
-                        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                        title: TranslationServices.translate('Flow above expected', currentLanguage),
-                        description: description,
-                        startTime: new Date(),
-                        endTime: undefined,
-                        nozzleIndex: nozzleIndex,
-                        triggered: false,
-                        viewed: false,
-                        coordinates: {
-                            latitude: espData.coordinates.latitude,
-                            longitude: espData.coordinates.longitude
+                if (flowmeterOngoingEvent === undefined) {
+                    if (isFlowAboveExpected) {
+                        const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${flowmeterSensor.name}</b> ${TranslationServices.translate('is above the expected value', currentLanguage)}`;
+
+                        const newEvent: IFlowmeterEvent = {
+                            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                            title: TranslationServices.translate('Flow above expected', currentLanguage),
+                            description: description,
+                            startTime: new Date(),
+                            endTime: undefined,
+                            sensorIndex: sensorIndex,
+                            triggered: false,
+                            viewed: false,
+                            coordinates: {
+                                latitude: espData.coordinates.latitude,
+                                longitude: espData.coordinates.longitude
+                            },
+                            isFlowAboveExpected: true,
+                            isFlowBelowExpected: false,
+                            type: 'flowmeterSensor'
                         }
+                        currentJob.events.push(newEvent);
+                        shouldSaveJob = true;
                     }
-                    currentJob.nozzleEvents.push(newEvent);
-                    shouldSaveJob = true;
+                    else if (isFlowBelowExpected) {
+                        const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${flowmeterSensor.name}</b> ${TranslationServices.translate('is below the expected value', currentLanguage)}`;
+
+                        const newEvent: IFlowmeterEvent = {
+                            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                            title: TranslationServices.translate('Flow below expected', currentLanguage),
+                            description: description,
+                            startTime: new Date(),
+                            endTime: undefined,
+                            sensorIndex: sensorIndex,
+                            triggered: false,
+                            viewed: false,
+                            coordinates: {
+                                latitude: espData.coordinates.latitude,
+                                longitude: espData.coordinates.longitude
+                            },
+                            isFlowAboveExpected: false,
+                            isFlowBelowExpected: true,
+                            type: 'flowmeterSensor'
+                        }
+                        currentJob.events.push(newEvent);
+                        shouldSaveJob = true
+                    }
                 }
-                else if (isFlowBelowExpected) {
-                    const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is below the expected value', currentLanguage)}`;
+                else {
+                    const wasEventTriggered = flowmeterOngoingEvent.triggered;
+                    const eventDuration = new Date().getTime() - flowmeterOngoingEvent.startTime.getTime();
+                    const eventTitle = flowmeterOngoingEvent.title;
 
-                    const newEvent: NozzleEvent = {
-                        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                        title: TranslationServices.translate('Flow below expected', currentLanguage),
-                        description: description,
-                        startTime: new Date(),
-                        endTime: undefined,
-                        nozzleIndex: nozzleIndex,
-                        triggered: false,
-                        viewed: false,
-                        coordinates: {
-                            latitude: espData.coordinates.latitude,
-                            longitude: espData.coordinates.longitude
-                        }
+                    if (!wasEventTriggered && eventDuration > timeBeforeAlert) {
+                        flowmeterOngoingEvent.triggered = true;
+                        shouldSaveJob = true;
+
+                        this.dispatchEvent('onNozzleEventTriggered', flowmeterOngoingEvent);
                     }
-                    currentJob.nozzleEvents.push(newEvent);
-                    shouldSaveJob = true
+                    else if (isFlowWithinExpected) {
+                        flowmeterOngoingEvent.endTime = new Date();
+                        flowmeterOngoingEvent.viewed = true;
+                        shouldSaveJob = true;
+                    }
+                    else if (isFlowAboveExpected && eventTitle === TranslationServices.translate('Flow below expected', currentLanguage)) {
+                        flowmeterOngoingEvent.endTime = new Date();
+                        flowmeterOngoingEvent.viewed = true;
+
+                        const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${flowmeterSensor.name}</b> ${TranslationServices.translate('is above the expected value', currentLanguage)}`;
+
+                        const newEvent: IFlowmeterEvent = {
+                            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                            title: TranslationServices.translate('Flow above expected', currentLanguage),
+                            description: description,
+                            startTime: new Date(),
+                            endTime: undefined,
+                            sensorIndex: sensorIndex,
+                            triggered: false,
+                            viewed: false,
+                            coordinates: {
+                                latitude: espData.coordinates.latitude,
+                                longitude: espData.coordinates.longitude
+                            },
+                            isFlowAboveExpected: true,
+                            isFlowBelowExpected: false,
+                            type: 'flowmeterSensor'
+                        }
+                        currentJob.events.push(newEvent);
+                        shouldSaveJob = true;
+                    }
+                    else if (isFlowBelowExpected && eventTitle === TranslationServices.translate('Flow above expected', currentLanguage)) {
+                        flowmeterOngoingEvent.endTime = new Date();
+                        flowmeterOngoingEvent.viewed = true;
+
+                        const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${flowmeterSensor.name}</b> ${TranslationServices.translate('is below the expected value', currentLanguage)}`;
+
+                        const newEvent: IFlowmeterEvent = {
+                            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                            title: TranslationServices.translate('Flow below expected', currentLanguage),
+                            description: description,
+                            startTime: new Date(),
+                            endTime: undefined,
+                            sensorIndex: sensorIndex,
+                            triggered: false,
+                            viewed: false,
+                            coordinates: {
+                                latitude: espData.coordinates.latitude,
+                                longitude: espData.coordinates.longitude
+                            },
+                            isFlowAboveExpected: false,
+                            isFlowBelowExpected: true,
+                            type: 'flowmeterSensor'
+                        }
+                        currentJob.events.push(newEvent);
+                        shouldSaveJob = true;
+                    }
                 }
             }
-            else {
-                const wasEventTriggered = nozzleOngoingEvent.triggered;
-                const eventDuration = new Date().getTime() - nozzleOngoingEvent.startTime.getTime();
-                const eventTitle = nozzleOngoingEvent.title;
+            else if (sensor.type === 'optical') {
+                debugger
+                const opticalSensor = sensor as IOpticalSensor;
 
-                if (!wasEventTriggered && eventDuration > timeBeforeAlert) {
-                    nozzleOngoingEvent.triggered = true;
-                    shouldSaveJob = true;
+                const opticalSensorEvents: IOpticalSensorEvent[] = currentJob.events.filter((event: IEvent): event is IOpticalSensorEvent => {
+                    if (event.type !== 'opticalSensor') return false;
+                    return (event as IOpticalSensorEvent).sensorIndex === sensorIndex;
+                });
 
-                    this.dispatchEvent('onNozzleEventTriggered', nozzleOngoingEvent);
-                }
-                else if (isFlowWithinExpected) {
-                    nozzleOngoingEvent.endTime = new Date();
-                    nozzleOngoingEvent.viewed = true;
-                    shouldSaveJob = true;
-                }
-                else if (isFlowAboveExpected && eventTitle === TranslationServices.translate('Flow below expected', currentLanguage)) {
-                    nozzleOngoingEvent.endTime = new Date();
-                    nozzleOngoingEvent.viewed = true;
+                const opticalSensorOngoingEvent: IOpticalSensorEvent | undefined = opticalSensorEvents.find((event: IOpticalSensorEvent) => {
+                    return event.endTime === undefined;
+                });
 
-                    const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is above the expected value', currentLanguage)}`;
-
-                    const newEvent = {
-                        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                        title: TranslationServices.translate('Flow above expected', currentLanguage),
-                        description: description,
-                        startTime: new Date(),
-                        endTime: undefined,
-                        nozzleIndex: nozzleIndex,
-                        nozzle: nozzle,
-                        triggered: false,
-                        viewed: false,
-                        coordinates: {
-                            latitude: espData.coordinates.latitude,
-                            longitude: espData.coordinates.longitude
-                        }
+                if (opticalSensorOngoingEvent === undefined) {
+                    if (opticalSensor.lastPulseAge >= timeBeforeAlert) {
+                        const description = `<b>${opticalSensor.name}</b> ${TranslationServices.translate('detected a failure', currentLanguage)}`;
+                        const newEvent: IOpticalSensorEvent = {
+                            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                            title: TranslationServices.translate('Optical sensor alert', currentLanguage),
+                            description: description,
+                            startTime: new Date(),
+                            endTime: undefined,
+                            sensorIndex: sensorIndex,
+                            triggered: true,
+                            viewed: false,
+                            coordinates: {
+                                latitude: espData.coordinates.latitude,
+                                longitude: espData.coordinates.longitude
+                            },
+                            type: 'opticalSensor'
+                        };
+                        currentJob.events.push(newEvent);
+                        shouldSaveJob = true;
                     }
-                    currentJob.nozzleEvents.push(newEvent);
-                    shouldSaveJob = true;
                 }
-                else if (isFlowBelowExpected && eventTitle === TranslationServices.translate('Flow above expected', currentLanguage)) {
-                    nozzleOngoingEvent.endTime = new Date();
-                    nozzleOngoingEvent.viewed = true;
-
-                    const description = `${TranslationServices.translate('Flow of', currentLanguage)} <b>${nozzle.name}</b> ${TranslationServices.translate('is below the expected value', currentLanguage)}`;
-
-                    const newEvent = {
-                        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                        title: TranslationServices.translate('Flow below expected', currentLanguage),
-                        description: description,
-                        startTime: new Date(),
-                        endTime: undefined,
-                        nozzleIndex: nozzleIndex,
-                        nozzle: nozzle,
-                        triggered: false,
-                        viewed: false,
-                        coordinates: {
-                            latitude: espData.coordinates.latitude,
-                            longitude: espData.coordinates.longitude
-                        }
+                else {
+                    if (opticalSensor.lastPulseAge < timeBeforeAlert) {
+                        opticalSensorOngoingEvent.endTime = new Date();
+                        opticalSensorOngoingEvent.viewed = true;
+                        shouldSaveJob = true;
                     }
-                    currentJob.nozzleEvents.push(newEvent);
-                    shouldSaveJob = true;
                 }
             }
         }

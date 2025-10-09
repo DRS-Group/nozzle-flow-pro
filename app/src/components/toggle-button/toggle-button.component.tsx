@@ -76,9 +76,10 @@ export const ToggleButton = forwardRef<ToggleButtonElement, ToggleButtonProps>((
             data-state={buttonState}
             onPointerDown={onTouchStart}
             onPointerLeave={onTouchEnd}
+            onPointerUp={onTouchEnd}
             onClick={onClick}
         >
-            <div className={styles.light} data-pumpState={pumpState}></div>
+            <div className={styles.light} data-pumpstate={pumpState}></div>
             <span className={styles.label}>{getLabel()}</span>
         </div>
     )

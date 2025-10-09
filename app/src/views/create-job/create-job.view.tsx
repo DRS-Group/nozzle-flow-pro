@@ -8,7 +8,7 @@ import { useNavigation } from '../../hooks/useNavigation';
 import { useTranslate } from '../../hooks/useTranslate';
 import { Job } from '../../types/job.type';
 import styles from './create-job.module.css';
-import { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 
 export type CreateJobElement = {
 
@@ -47,7 +47,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
             expectedFlow: expectedFlow,
             creationDate: new Date(),
             tolerance: flowTolerance,
-            nozzleEvents: [],
+            events: [],
             id: jobs.generateId()
         }).then((job: Job) => {
             currentJob.set(job.id);

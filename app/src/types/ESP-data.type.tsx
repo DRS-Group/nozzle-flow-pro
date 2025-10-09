@@ -1,8 +1,8 @@
-import { Nozzle } from "./nozzle.type";
+import { ISensor } from "./sensor";
 
 export type ESPData = {
     speed: number;
-    nozzles: Nozzle[];
+    sensors: ISensor[];
     coordinates: {
         latitude: number;
         longitude: number;

@@ -68,24 +68,24 @@
         "pt-br": "bicos"
     },
     {
-        "en-us": "Reset nozzles",
-        "pt-br": "Redefinir bicos"
+        "en-us": "Reset sensors",
+        "pt-br": "Redefinir sensores"
     },
     {
         "en-us": "Save",
         "pt-br": "Salvar"
     },
     {
-        "en-us": "Nozzle count",
-        "pt-br": "Quantidade de bicos"
+        "en-us": "Sensor count",
+        "pt-br": "Quantidade de sensores"
     },
     {
         "en-us": "Confirm",
         "pt-br": "Confirmar"
     },
     {
-        "en-us": "Are you sure you want to clear all nozzles?",
-        "pt-br": "Você tem certeza que deseja limpar todos os bicos?"
+        "en-us": "Are you sure you want to clear all sensors?",
+        "pt-br": "Você tem certeza que deseja limpar todos os sensores?"
     },
     {
         "en-us": "Yes",
@@ -96,8 +96,8 @@
         "pt-br": "Não"
     },
     {
-        "en-us": "Clear nozzles",
-        "pt-br": "Limpar bicos"
+        "en-us": "Clear sensors",
+        "pt-br": "Limpar sensores"
     },
     {
         "en-us": "Create Job",
@@ -128,12 +128,12 @@
         "pt-br": "Margem de variação (%)"
     },
     {
-        "en-us": "Calibrate nozzle",
-        "pt-br": "Calibrar bico"
+        "en-us": "Calibrate flowmeter",
+        "pt-br": "Calibrar fluxômetro"
     },
     {
-        "en-us": "Calibrate nozzles",
-        "pt-br": "Calibrar bicos"
+        "en-us": "Calibrate flowmeters",
+        "pt-br": "Calibrar fluxômetros"
     },
     {
         "en-us": "Pulses/Liter",
@@ -156,20 +156,20 @@
         "pt-br": "Designorar"
     },
     {
-        "en-us": "Ignore nozzle",
-        "pt-br": "Ignorar bico"
+        "en-us": "Ignore sensor",
+        "pt-br": "Ignorar sensor"
     },
     {
-        "en-us": "Unignore nozzle",
-        "pt-br": "Designorar bico"
+        "en-us": "Unignore sensor",
+        "pt-br": "Designorar sensor"
     },
     {
-        "en-us": "Are you sure you want to ignore this nozzle?",
-        "pt-br": "Você tem certeza que deseja ignorar este bico?"
+        "en-us": "Are you sure you want to ignore this sensor?",
+        "pt-br": "Você tem certeza que deseja ignorar este sensor?"
     },
     {
-        "en-us": "Are you sure you want to unignore this nozzle?",
-        "pt-br": "Você tem certeza que deseja designorar este bico?"
+        "en-us": "Are you sure you want to unignore this sensor?",
+        "pt-br": "Você tem certeza que deseja designorar este sensor?"
     },
     {
         "en-us": "Calibrate",
@@ -196,12 +196,12 @@
         "pt-br": "Continuar"
     },
     {
-        "en-us": "Change nozzle name",
-        "pt-br": "Alterar nome do bico"
+        "en-us": "Change sensor name",
+        "pt-br": "Alterar nome do sensor"
     },
     {
-        "en-us": "Nozzle name",
-        "pt-br": "Nome do bico"
+        "en-us": "Sensor name",
+        "pt-br": "Nome do sensor"
     },
     {
         "en-us": "Date",
@@ -284,16 +284,16 @@
         "pt-br": "Intervalo de atualização"
     },
     {
-        "en-us": "There is no registered nozzle.",
-        "pt-br": "Não há bico registrado."
+        "en-us": "There is no registered flowmeter.",
+        "pt-br": "Não há fluxômetro registrado."
     },
     {
-        "en-us": "Click the button bellow to go to nozzles page.",
-        "pt-br": "Clique no botão abaixo para ir para a página de bicos."
+        "en-us": "Click the button bellow to go to sensors page.",
+        "pt-br": "Clique no botão abaixo para ir para a página de sensores."
     },
     {
-        "en-us": "Go to nozzles",
-        "pt-br": "Ir para bicos"
+        "en-us": "Go to sensors",
+        "pt-br": "Ir para sensores"
     },
     {
         "en-us": "Set Admin Password",
@@ -406,5 +406,37 @@
     {
         "en-us": "Remove all secondary modules",
         "pt-br": "Remover todos os módulos secundários"
+    },
+    {
+        "en-us": "Sensors",
+        "pt-br": "Sensores"
+    },
+    {
+        "en-us": "sensors",
+        "pt-br": "sensores"
+    },
+    {
+        "en-us": "Flowmeter",
+        "pt-br": "Fluxômetro"
+    },
+    {
+        "en-us": "Optical sensor",
+        "pt-br": "Sensor óptico"
+    },
+    {
+        "en-us": "Change to optical sensor",
+        "pt-br": "Mudar para sensor óptico"
+    },
+    {
+        "en-us": "Change to flowmeter",
+        "pt-br": "Mudar para fluxômetro"
+    },
+    {
+        "en-us": "Optical sensor alert",
+        "pt-br": "Alerta de sensor óptico"
+    },
+    {
+        "en-us": "detected a failure",
+        "pt-br": "detectou uma falha"
     }
 ]

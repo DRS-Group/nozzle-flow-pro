@@ -1,6 +1,6 @@
 import { useTranslate } from '../../hooks/useTranslate';
 import { SoundsService } from '../../services/sounds.service';
-import { Event } from '../../types/event.type';
+import { IEvent } from '../../types/event.type';
 import styles from './alert-modal.module.css';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 
@@ -9,7 +9,7 @@ export type AlertModalElement = {
 }
 
 export type AlertModalProps = {
-    event: Event;
+    event: IEvent;
     onOkClick?: () => void;
     onOkForAllClick?: () => void;
     totalEvents?: number;

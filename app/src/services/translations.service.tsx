@@ -2,7 +2,7 @@ import { SettingsService } from "./settings.service"
 import translations from '../translations.json';
 
 export namespace TranslationServices {
-    export const getCurrentLanguage = async (): Promise<'en-us' | 'pt-br'> => {
+    export const getCurrentLanguage = (): 'en-us' | 'pt-br' => {
         return SettingsService.getSettingOrDefault('language', 'en-us');
     }
 

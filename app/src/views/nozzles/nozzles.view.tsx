@@ -8,13 +8,13 @@ import { useCurrentJob } from '../../hooks/useCurrentJob';
 import { useNavigation } from '../../hooks/useNavigation';
 import { usePump } from '../../hooks/usePump';
 import { useTranslate } from '../../hooks/useTranslate';
-import { DataFecherService } from '../../services/data-fetcher.service';
-import { NozzlesService } from '../../services/nozzles.service';
 import { SettingsService } from '../../services/settings.service';
 import { ESPData } from '../../types/ESP-data.type';
-import { Nozzle } from '../../types/nozzle.type';
+import { IFlowmeterSensor } from '../../types/flowmeter-sensor';
+import { IOpticalSensor } from '../../types/optical-sensor';
+import { ISensor } from '../../types/sensor';
 import styles from './nozzles.module.css';
-import { forwardRef, useContext, useEffect, useImperativeHandle, useLayoutEffect, useState } from 'react';
+import { forwardRef, useImperativeHandle, useLayoutEffect, useState } from 'react';
 
 export type NozzlesViewElement = {}
 
@@ -29,7 +29,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number, y: number } | null>(null);
 
     const [menuState, setMenuState] = useState<'closed' | 'open'>('closed');
-    const [nozzles, setNozzles] = useState<Nozzle[]>([]);
+    const [sensors, setSensors] = useState<ISensor[]>(services.sensorsService.getSensors());
     const [clearNozzlesDialogOpen, setClearNozzlesDialogOpen] = useState<boolean>(false);
     const [syncNozzlesDialogOpen, setSyncNozzlesDialogOpen] = useState<boolean>(false);
     const [ignoreNozzleDialogOpen, setIgnoreNozzleDialogOpen] = useState<boolean>(false);
@@ -38,7 +38,6 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     const [calibrateDialogOpen, setCalibrateDialogOpen] = useState<boolean>(false);
     const [speedDialogOpen, setSpeedDialogOpen] = useState<boolean>(false);
     const [autoCalibratingDialogOpen, setAutoCalibratingDialogOpen] = useState<boolean>(false);
-    const [speed, setSpeed] = useState<number>(0);
     const [flowRateDialogOpen, setFlowRateDialogOpen] = useState<boolean>(false);
     const [flowRate, setFlowRate] = useState<number>(0);
 
@@ -52,12 +51,6 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
     useImperativeHandle(ref, () => ({
 
     }), []);
-
-    useEffect(() => {
-        NozzlesService.getNozzles().then((nozzles) => {
-            setNozzles(nozzles);
-        });
-    }, []);
 
     const onNozzleItemClick = (nozzleIndex: number, position: { x: number, y: number }) => {
         setContextMenuNozzleIndex(nozzleIndex);
@@ -100,7 +93,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
 
         if (contextMenuNozzleIndex === null) return [];
 
-        const contextMenuNozzle = nozzles[contextMenuNozzleIndex];
+        const contextMenuSensor = sensors[contextMenuNozzleIndex];
 
         items.push({
             label: translate('Rename'),
@@ -114,7 +107,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             icon: <i className="icon-pencil"></i>
         });
 
-        if (contextMenuNozzle.ignored) {
+        if (contextMenuSensor.ignored) {
             items.push({
                 label: translate('Unignore'),
                 onClick: () => {
@@ -141,17 +134,66 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             });
         }
 
-        items.push({
-            label: translate('Calibrate'),
-            onClick: () => {
-                setCalibrateDialogNozzleIndex(contextMenuNozzleIndex);
-                setCalibrateDialogOpen(true);
+        if (contextMenuSensor.type === 'flowmeter') {
+            items.push({
+                label: translate('Calibrate'),
+                onClick: () => {
+                    setCalibrateDialogNozzleIndex(contextMenuNozzleIndex);
+                    setCalibrateDialogOpen(true);
 
-                setContextMenuNozzleIndex(null);
-                setContextMenuPosition(null);
-            },
-            icon: <i className="icon-speedometer-black"></i>
-        });
+                    setContextMenuNozzleIndex(null);
+                    setContextMenuPosition(null);
+                },
+                icon: <i className="icon-speedometer"></i>
+            });
+        }
+
+        if (contextMenuSensor.type === 'flowmeter') {
+            const hasDefaultName = contextMenuSensor.name.startsWith(translate('Flowmeter'));
+            const newName = hasDefaultName ? translate('Optical sensor') + (contextMenuSensor.name.split(' ').length > 1 ? ' ' + contextMenuSensor.name.split(' ')[1] : '') : contextMenuSensor.name;
+            items.push({
+                label: translate('Change to optical sensor'),
+                onClick: () => {
+                    const newSensor: IOpticalSensor = {
+                        name: newName,
+                        type: 'optical',
+                        ignored: contextMenuSensor.ignored,
+                        lastPulseAge: 0
+                    }
+
+                    services.sensorsService.updateSensor(newSensor, contextMenuNozzleIndex);
+                    setSensors(services.sensorsService.getSensors());
+
+                    setContextMenuNozzleIndex(null);
+                    setContextMenuPosition(null);
+                },
+                icon: <i className="icon-sensor"></i>
+            });
+        }
+
+        if (contextMenuSensor.type === 'optical') {
+            const hasDefaultName = contextMenuSensor.name.startsWith(translate('Optical sensor'));
+            const newName = hasDefaultName ? translate('Flowmeter') + (contextMenuSensor.name.split(' ').length > 1 ? ' ' + contextMenuSensor.name.split(' ')[2] : '') : contextMenuSensor.name;
+            items.push({
+                label: translate('Change to flowmeter'),
+                onClick: () => {
+                    const newSensor: IFlowmeterSensor = {
+                        name: newName,
+                        type: 'flowmeter',
+                        ignored: contextMenuSensor.ignored,
+                        lastPulseAge: 0,
+                        pulsesPerLiter: 350,
+                        pulsesPerMinute: 0,
+                        pulseCount: 0
+                    }
+                    services.sensorsService.updateSensor(newSensor, contextMenuNozzleIndex);
+                    setSensors(services.sensorsService.getSensors());
+                    setContextMenuNozzleIndex(null);
+                    setContextMenuPosition(null);
+                },
+                icon: <i className="icon-sensor"></i>
+            });
+        }
 
         return items;
     }
@@ -166,7 +208,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 {navigation.previousPage === 'menu' &&
                     <TopBar
                         onBackClick={onBackClick}
-                        title={translate('Nozzles')}
+                        title={translate('Sensors')}
                     />
                 }
                 <div
@@ -186,7 +228,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                             setCalibrateDialogNozzleIndex(null);
                         }}
                     >
-                        <i className="icon-speedometer-black"></i>
+                        <i className="icon-speedometer"></i>
                     </div>
                     <div className={`${styles.menuItem} ${styles.autoCalibrateButton}`}
                         onClick={() => {
@@ -201,19 +243,19 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         <i className="icon-broom"></i>
                     </div>
                 </div>
-                {nozzles.length > 0 && (
+                {sensors.length > 0 && (
                     <div className={styles.content}>
-                        {nozzles.map((nozzle, index) => (
+                        {sensors.map((sensor, index) => (
                             <NozzleItem
                                 key={index}
                                 index={index}
-                                nozzle={nozzle}
+                                sensor={sensor}
                                 onClick={onNozzleItemClick}
                             />
                         ))}
                     </div>
                 )}
-                {nozzles === undefined || nozzles.length === 0 &&
+                {(sensors === undefined || sensors.length === 0) &&
                     <div className={styles.syncWrapper}>
                         <button className={styles.syncButton} onClick={onSyncNozzlesClick}>{translate('Add nozzles')}</button>
                     </div>
@@ -227,13 +269,11 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             )}
             {clearNozzlesDialogOpen &&
                 <YesNoDialog
-                    title={translate('Clear nozzles')}
-                    message={translate('Are you sure you want to clear all nozzles?')}
+                    title={translate('Clear sensors')}
+                    message={translate('Are you sure you want to clear all sensors?')}
                     onYesClick={async () => {
-                        NozzlesService.clearNozzles();
-                        NozzlesService.getNozzles().then((nozzles) => {
-                            setNozzles(nozzles);
-                        });
+                        services.sensorsService.clearSensors();
+                        setSensors(services.sensorsService.getSensors());
 
                         setClearNozzlesDialogOpen(false);
                     }}
@@ -245,13 +285,13 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {syncNozzlesDialogOpen &&
                 <NumberInputDialog
-                    unit='nozzles'
-                    label={translate('Nozzle count')}
-                    title={translate('Reset nozzles')}
+                    unit={translate('sensors')}
+                    label={translate('Sensor count')}
+                    title={translate('Reset sensors')}
                     onConfirmClick={(value) => {
-                        NozzlesService.generateNozzles(value).then((nozzles) => {
-                            setNozzles(nozzles);
-                        });
+                        const flowmeterSensors = services.sensorsService.generateFlowmeterSensors(value);
+                        services.sensorsService.setSensors(flowmeterSensors);
+                        setSensors(flowmeterSensors);
 
                         setSyncNozzlesDialogOpen(false);
                     }}
@@ -262,14 +302,14 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {ignoreNozzleDialogOpen && ignoreNozzleDialogNozzleIndex !== null &&
                 <YesNoDialog
-                    title={translate('Ignore nozzle')}
-                    message={translate('Are you sure you want to ignore this nozzle?')}
+                    title={`${translate('Ignore')} ${sensors[ignoreNozzleDialogNozzleIndex].name}`}
+                    message={translate('Are you sure you want to ignore this sensor?')}
                     onYesClick={() => {
-                        const nozzle = nozzles[ignoreNozzleDialogNozzleIndex];
-                        nozzle.ignored = true;
+                        const sensor = sensors[ignoreNozzleDialogNozzleIndex];
+                        sensor.ignored = true;
 
-                        NozzlesService.updateNozzle(nozzle, ignoreNozzleDialogNozzleIndex);
-
+                        services.sensorsService.updateSensor(sensor, ignoreNozzleDialogNozzleIndex);
+                        setSensors(services.sensorsService.getSensors());
                         setIgnoreNozzleDialogOpen(false);
                     }}
 
@@ -280,14 +320,14 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {unignoreNozzleDialogOpen && unignoreNozzleDialogNozzleIndex !== null &&
                 <YesNoDialog
-                    title={translate('Unignore nozzle')}
-                    message={translate('Are you sure you want to unignore this nozzle?')}
+                    title={`${translate('Unignore ')} ${sensors[unignoreNozzleDialogNozzleIndex].name}`}
+                    message={translate('Are you sure you want to unignore this sensor?')}
                     onYesClick={() => {
-                        const nozzle = nozzles[unignoreNozzleDialogNozzleIndex];
-                        nozzle.ignored = false;
+                        const sensor = sensors[unignoreNozzleDialogNozzleIndex];
+                        sensor.ignored = false;
 
-                        NozzlesService.updateNozzle(nozzle, unignoreNozzleDialogNozzleIndex);
-
+                        services.sensorsService.updateSensor(sensor, unignoreNozzleDialogNozzleIndex);
+                        setSensors(services.sensorsService.getSensors());
                         setUnignoreNozzleDialogOpen(false);
                     }}
 
@@ -320,11 +360,9 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     title={translate('Set speed')}
                     defaultValue={10}
                     onConfirmClick={async (value) => {
-                        setSpeed(value);
-
                         setSpeedDialogOpen(false);
                         setAutoCalibratingDialogOpen(true);
-                        
+
                         const currentPumpOverridenState = pump.overriddenState;
                         pump.setOverridden('off');
 
@@ -337,19 +375,18 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                             const nozzleSpacing = SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
                             const expectedFlow = (value * nozzleSpacing * 100 * flowRate) / 60000;
 
-                            let newNozzles = espData.nozzles.map((nozzle) => {
-                                const pulsesPerMinute = nozzle.pulsesPerMinute;
+                            let newSensors = espData.sensors.map((sensor) => {
+                                if (sensor.type !== 'flowmeter') return sensor;
+                                const flowmeterSensor = sensor as IFlowmeterSensor;
+                                const pulsesPerMinute = flowmeterSensor.pulsesPerMinute;
                                 return {
-                                    ...nozzle,
+                                    ...flowmeterSensor,
                                     pulsesPerLiter: Math.round(pulsesPerMinute / expectedFlow)
                                 };
                             });
 
-                            await NozzlesService.setNozzles(newNozzles);
-
-                            NozzlesService.getNozzles().then((nozzles) => {
-                                setNozzles(nozzles);
-                            });
+                            services.sensorsService.setSensors(newSensors);
+                            services.sensorsService.setSensors(services.sensorsService.getSensors());
 
                             setAutoCalibratingDialogOpen(false);
                             pump.setOverridden(currentPumpOverridenState);
@@ -365,12 +402,13 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
             }
             {changeNameDialogOpen && changeNameDialogNozzleIndex !== null &&
                 <TextInputDialog
-                    label={translate('Nozzle name')}
-                    title={translate('Change nozzle name')}
+                    label={translate('Sensor name')}
+                    title={`${translate('Rename')} ${sensors[changeNameDialogNozzleIndex].name}`}
                     onConfirmClick={(name) => {
-                        const nozzle = nozzles[changeNameDialogNozzleIndex];
-                        nozzle.name = name;
-                        NozzlesService.updateNozzle(nozzle, changeNameDialogNozzleIndex);
+                        const sensor = sensors[changeNameDialogNozzleIndex];
+                        sensor.name = name;
+                        services.sensorsService.updateSensor(sensor, changeNameDialogNozzleIndex);
+                        setSensors(services.sensorsService.getSensors());
 
                         setChangeNameDialogOpen(false);
                         setChangeNameDialogNozzleIndex(null);
@@ -385,14 +423,12 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 <NumberInputDialog
                     unit='pulses/L'
                     label={translate('Pulses/Liter')}
-                    title={translate('Calibrate nozzle')}
-                    onConfirmClick={async (value) => {
-                        const nozzle = nozzles[calibrateDialogNozzleIndex];
-                        nozzle.pulsesPerLiter = value;
-                        await NozzlesService.updateNozzle(nozzle, calibrateDialogNozzleIndex);
-                        NozzlesService.getNozzles().then((nozzles) => {
-                            setNozzles(nozzles);
-                        });
+                    title={`${translate('Calibrate')} ${sensors[calibrateDialogNozzleIndex].name}`}
+                    onConfirmClick={(value) => {
+                        const sensor = sensors[calibrateDialogNozzleIndex] as IFlowmeterSensor;
+                        sensor.pulsesPerLiter = value;
+                        services.sensorsService.updateSensor(sensor, calibrateDialogNozzleIndex);
+                        setSensors(services.sensorsService.getSensors());
 
                         setCalibrateDialogOpen(false);
                         setCalibrateDialogNozzleIndex(null);
@@ -407,19 +443,15 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                 <NumberInputDialog
                     unit='pulses/L'
                     label={translate('Pulses/Liter')}
-                    title={translate('Calibrate nozzles')}
-                    onConfirmClick={async (value) => {
-                        const nozzles = await NozzlesService.getNozzles();
-                        for (let i = 0; i < nozzles.length; i++) {
-                            nozzles[i].pulsesPerLiter = value;
+                    title={translate('Calibrate flowmeters')}
+                    onConfirmClick={(value) => {
+                        const sensors = services.sensorsService.getSensors() as IFlowmeterSensor[];
+                        for (let i = 0; i < sensors.length; i++) {
+                            sensors[i].pulsesPerLiter = value;
                         }
 
-                        await NozzlesService.setNozzles(nozzles);
-
-                        NozzlesService.getNozzles().then((nozzles) => {
-                            setNozzles(nozzles);
-                        });
-
+                        services.sensorsService.setSensors(sensors);
+                        setSensors(services.sensorsService.getSensors());
                         setCalibrateDialogOpen(false);
                         setCalibrateDialogNozzleIndex(null);
                     }}
@@ -439,7 +471,7 @@ type NozzleItemElement = {
 
 type NozzleItemProps = {
     onClick?: (nozzleIndex: number, position: { x: number, y: number }) => void;
-    nozzle: Nozzle;
+    sensor: ISensor;
     index: number;
 }
 
@@ -458,15 +490,28 @@ const NozzleItem = forwardRef<NozzleItemElement, NozzleItemProps>((props, ref) =
         props.onClick!(props.index, { x, y });
     }
 
+    const getTypeLabel = () => {
+        switch (props.sensor.type) {
+            case 'flowmeter':
+                return translate('Flowmeter');
+            case 'optical':
+                return translate('Optical sensor');
+            default:
+                return translate('Unknown');
+        }
+    }
+
     return (
         <div className={styles.jobItem} onClick={onClick}>
             <div className={styles.left}>
-                <span>{props.nozzle.name}</span>
-                {/* <span>{props.nozzle.id}</span> */}
+                <span>{props.sensor.name} {props.sensor.ignored ? <i className="icon-volume-off"></i> : <></>}</span>
+                <span>{getTypeLabel()}</span>
             </div>
-            <div className={styles.right}>
-                <span>{props.nozzle.pulsesPerLiter} {translate('pulses/L')}</span>
-            </div>
+            {props.sensor.type === 'flowmeter' &&
+                <div className={styles.right}>
+                    <span>{(props.sensor as IFlowmeterSensor).pulsesPerLiter} {translate('pulses/L')}</span>
+                </div>
+            }
         </div>
     )
 });

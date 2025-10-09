@@ -22,12 +22,14 @@ import { CurrentJobService } from './services/current-job.service';
 import { PumpService } from './services/pump.service';
 import { usePump } from './hooks/usePump';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
+import { SensorsService } from './services/sensors.service';
 
 services.jobsService = new JobsService();
 services.currentJobService = new CurrentJobService();
 services.navigationService = new NavigationService();
 services.dataFetcherService = new DataFecherService();
 services.pumpService = new PumpService();
+services.sensorsService = new SensorsService();
 
 function App() {
   const navigation = useNavigation();
@@ -39,9 +41,23 @@ function App() {
   useEffect(() => {
     navigation.navigate('menu');
 
-    const settings: SettingsType = SettingsService.getSettings();
-    const interval = settings.interval;
-    services.dataFetcherService.setInterval(interval);
+    // const settings: SettingsType = SettingsService.getSettings();
+    // const interval = settings.interval;
+    // services.dataFetcherService.setInterval(interval);
+
+    const onNetworkStatusChange = (isConnected: boolean) => {
+      if(!isConnected) return;
+
+      const settings: SettingsType = SettingsService.getSettings();
+      const interval = settings.interval;
+      services.dataFetcherService.setInterval(interval);
+    };
+
+    SettingsService.addEventListener("onNetworkStatusChange", onNetworkStatusChange);
+
+    return () => {
+      SettingsService.removeEventListener("onNetworkStatusChange", onNetworkStatusChange);
+    }
   }, []);
 
   useEffect(() => {

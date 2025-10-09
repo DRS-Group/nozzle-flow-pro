@@ -1,4 +1,4 @@
-export type Event = {
+export interface IEvent {
     id: string;
     title: string;
     description: string;
@@ -10,4 +10,5 @@ export type Event = {
         latitude: number;
         longitude: number;
     };
+    type: 'opticalSensor' | 'flowmeterSensor'
 };

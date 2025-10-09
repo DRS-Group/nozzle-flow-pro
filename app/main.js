@@ -17,7 +17,7 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    fullscreen: true,
+    // fullscreen: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -26,13 +26,15 @@ function createWindow() {
     },
   });
 
-  const isDev = false;
+  const isDev = true;
 
   const startURL = isDev
     ? 'http://localhost:3001'
     : `file://${path.join(__dirname, './build/index.html')}`;
 
+  mainWindow.webContents.openDevTools();
   mainWindow.loadURL(startURL);
+
 
   mainWindow.on('closed', () => (mainWindow = null));
 }

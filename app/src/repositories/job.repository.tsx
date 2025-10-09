@@ -1,4 +1,7 @@
+import { IEvent } from "../types/event.type";
+import { IFlowmeterEvent } from "../types/flowmeter-event.type";
 import { Job } from "../types/job.type";
+import { IOpticalSensorEvent } from "../types/optical-sensor-event.type";
 
 export abstract class JobRepository {
     public static async get(): Promise<Job[]> {
@@ -10,21 +13,38 @@ export abstract class JobRepository {
                 tolerance: job.tolerance,
                 creationDate: new Date(job.creationDate),
                 id: job.id,
-                nozzleEvents: job.nozzleEvents.map((event: any) => {
-                    return {
+                events: job.events.map((event: any) => {
+                    let e: IEvent | IFlowmeterEvent | IOpticalSensorEvent = {
                         title: event.title,
                         description: event.description,
                         startTime: new Date(event.startTime),
                         endTime: event.endTime ? new Date(event.endTime) : undefined,
-                        nozzleIndex: event.nozzleIndex,
                         triggered: event.triggered,
                         id: event.id,
                         viewed: event.viewed,
                         coordinates: {
                             latitude: event.coordinates.latitude,
                             longitude: event.coordinates.longitude
-                        }
+                        },
+                        type: event.type
                     };
+
+                    if (e.type === 'flowmeterSensor') {
+                        e = {
+                            ...e,
+                            sensorIndex: event.sensorIndex,
+                            isFlowAboveExpected: event.isFlowAboveExpected,
+                            isFlowBelowExpected: event.isFlowBelowExpected
+                        }
+                    }
+                    else if (e.type === 'opticalSensor') {
+                        e = {
+                            ...e,
+                            sensorIndex: event.sensorIndex
+                        }
+                    }
+
+                    return e;
                 })
             }
         });

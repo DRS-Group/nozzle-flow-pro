@@ -48,6 +48,7 @@ void Flowmeter::registerPulse()
         this->pulsesTimestamps[this->pulseCount] = millis();
         this->pulseCount++;
     }
+    this->lastPulseTimestamp = millis();
 }
 
 void Flowmeter::removeOldPulses()
@@ -72,6 +73,25 @@ unsigned short Flowmeter::getPulsesPerMinute()
     this->removeOldPulses();
 
     return this->pulseCount * 60000 / this->refreshRate;
+}
+
+unsigned short Flowmeter::getPulseCount()
+{
+    this->removeOldPulses();
+
+    return this->pulseCount;
+}
+
+unsigned long Flowmeter::getLastPulseTimestamp()
+{
+    return this->lastPulseTimestamp;
+}
+
+unsigned long Flowmeter::getLastPulseAge()
+{
+    if (this->lastPulseTimestamp == 0)
+        return 0;
+    return millis() - this->lastPulseTimestamp;
 }
 
 uint8_t Flowmeter::getPin()
