@@ -56,7 +56,7 @@ function App() {
     return () => {
       SettingsService.removeEventListener("onNetworkStatusChange", onNetworkStatusChange);
     }
-  }, [navigation]);
+  }, []);
 
   useEffect(() => {
     const interfaceScale = SettingsService.getSettingOrDefault('interfaceScale', 1);

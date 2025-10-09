@@ -18,4 +18,5 @@ contextBridge.exposeInMainWorld('electron', {
   },
   getCurrentWifi: () => ipcRenderer.invoke('get-current-wifi'),
   connectToWifi: (opts) => ipcRenderer.invoke('connect-to-wifi', opts),
+  getWifiQuality: () => ipcRenderer.invoke('get-wifi-quality'),
 });

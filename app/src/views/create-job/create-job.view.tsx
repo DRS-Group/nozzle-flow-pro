@@ -47,7 +47,7 @@ export const CreateJob = forwardRef<CreateJobElement, CreateJobProps>((props, re
             return;
         }
         navigation.navigateBack();
-    }, [page, navigation]);
+    }, [page]);
 
     const onConfirmButtonClick = () => {
         const title = titleInputRef.current!.getValue();

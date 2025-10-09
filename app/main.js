@@ -26,7 +26,7 @@ function createWindow() {
     },
   });
 
-  const isDev = true;
+  const isDev = false;
 
   const startURL = isDev
     ? 'http://localhost:3001'
@@ -73,4 +73,9 @@ ipcMain.handle('get-current-wifi', async () => {
 ipcMain.handle('connect-to-wifi', async (event, opts) => {
   await wifi.scan();
   await wifi.connect({ ssid: opts.ssid, password: opts.password });
+});
+ipcMain.handle('get-wifi-quality', async () => {
+  const connections = await wifi.getCurrentConnections();
+  if (connections.length === 0) return 0;
+  return connections[0].quality;
 });

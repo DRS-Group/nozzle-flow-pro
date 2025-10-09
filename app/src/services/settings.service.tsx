@@ -31,6 +31,10 @@ export namespace SettingsService {
     export const isConnectedToWifi = () => _isConnectedToWifi;
     export const setIsConnectedToWifi = (value: boolean) => _isConnectedToWifi = value;
 
+    let _wifiQuality = 0;
+    export const getWifiQuality = () => _wifiQuality;
+    export const setWifiQuality = (value: number) => _wifiQuality = value;
+
     export const addEventListener = (eventName: string, callback: EventHandler<any>) => {
         const listeners = eventListeners.get(eventName) || [];
         listeners.push(callback);
@@ -286,9 +290,10 @@ export namespace SettingsService {
         const networks = await window.electron.getCurrentWifi();
         if (!networks || networks.length === 0) return false;
 
-        const ssid = networks[0].bssid;
+        const bssid = networks[0].bssid;
+        const ssid = networks[0].ssid;
         const expected = SettingsService.getSettingOrDefault('SSID', 'D-Flow DEMO');
-        return ssid === expected;
+        return ssid === expected || bssid === expected;
     }
 }
 
@@ -320,6 +325,15 @@ let lastIsConnected = false;
 
 async function monitorNetworkLoop() {
     const start = Date.now();
+
+    const oldWifiQuality = SettingsService.getWifiQuality();
+    SettingsService.setWifiQuality(await window.electron.getWifiQuality());
+    console.log(SettingsService.getWifiQuality())
+
+    if (oldWifiQuality !== SettingsService.getWifiQuality()) {
+        SettingsService.dispatchEvent('onWifiQualityChanged', SettingsService.getWifiQuality());
+    }
+
     const isConnected = await SettingsService.checkIfIsConnected();
     if (isConnected !== lastIsConnected) {
         lastIsConnected = isConnected;

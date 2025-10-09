@@ -12,6 +12,7 @@ declare global {
       };
       getCurrentWifi: () => Promise<any>;
       connectToWifi: (opts: { ssid: string; password: string }) => Promise<void>;
+      getWifiQuality: () => Promise<number>;
     };
   }
 }
