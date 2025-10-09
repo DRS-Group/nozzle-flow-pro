@@ -154,7 +154,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         const sensors: ISensor[] = espData.sensors;
         const speed = espData.speed;
         const timeBeforeAlert = SettingsService.getTimeBeforeAlert();
-        const nozzleSpacing = SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
+        const nozzleSpacing = currentJob.nozzleSpacing;
         const expectedFlow = calculateTargetValue(currentJob, speed, nozzleSpacing);
         const maxExpectedFlow = expectedFlow * (1 + currentJob.tolerance);
         const minExpectedFlow = expectedFlow * (1 - currentJob.tolerance);

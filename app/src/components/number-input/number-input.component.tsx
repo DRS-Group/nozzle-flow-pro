@@ -1,6 +1,6 @@
 import { NumberInputDialog } from '../number-input-dialog/number-input-dialog.component';
 import styles from './number-input.module.css';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 
 export type NumberInputElement = {
     getValue: () => string;
@@ -13,6 +13,7 @@ export type NumberInputProps = {
     value?: number;
     decimals?: number;
     unit?: string;
+    visible: boolean;
 }
 
 export const NumberInput = forwardRef<NumberInputElement, NumberInputProps>((props, ref) => {
@@ -40,7 +41,9 @@ export const NumberInput = forwardRef<NumberInputElement, NumberInputProps>((pro
 
     return (
         <>
-            <div className={`${styles.wrapper} ${props.className}`}>
+            <div className={`${styles.wrapper} ${props.className}`}
+                style={{ display: props.visible === false ? 'none' : 'block' }}
+            >
                 <input
                     className={styles.input}
                     type='number'
@@ -58,11 +61,11 @@ export const NumberInput = forwardRef<NumberInputElement, NumberInputProps>((pro
             </div>
             {isNumberInputModalOpen &&
                 <NumberInputDialog
-                decimals={props.decimals}
+                    decimals={props.decimals}
                     unit={props.unit}
                     label={props.label}
                     title={props.label}
-                    defaultValue={props.value}
+                    defaultValue={inputRef.current ? Number(inputRef.current.value) : props.value}
                     onConfirmClick={(value) => {
                         inputRef.current!.value = formatNumber((value * Math.pow(10, props.decimals || 0)).toString());
                         setIsNumberInputModalOpen(false);

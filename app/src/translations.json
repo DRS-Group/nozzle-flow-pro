@@ -438,5 +438,25 @@
     {
         "en-us": "detected a failure",
         "pt-br": "detectou uma falha"
+    },
+    {
+        "en-us": "Farm",
+        "pt-br": "Fazenda"
+    },
+    {
+        "en-us": "Field",
+        "pt-br": "Talhão"
+    },
+    {
+        "en-us": "Service Order",
+        "pt-br": "Ordem de Serviço"
+    },
+    {
+        "en-us": "Operation",
+        "pt-br": "Operação"
+    },
+    {
+        "en-us": "Nozzle spacing (cm)",
+        "pt-br": "Espaçamento entre bicos (cm)"
     }
 ]

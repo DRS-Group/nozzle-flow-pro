@@ -372,7 +372,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
 
                             await services.dataFetcherService.setInterval(SettingsService.getInterval());
 
-                            const nozzleSpacing = SettingsService.getSettingOrDefault('nozzleSpacing', 0.6);
+                            const nozzleSpacing = currentJob.job?.nozzleSpacing || SettingsService.getNozzleSpacing();
                             const expectedFlow = (value * nozzleSpacing * 100 * flowRate) / 60000;
 
                             let newSensors = espData.sensors.map((sensor) => {

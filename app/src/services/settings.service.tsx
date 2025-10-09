@@ -209,6 +209,10 @@ export namespace SettingsService {
         dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
     }
 
+    export const getNozzleSpacing = () => {
+        return window.electron.store.get('nozzleSpacing');
+    }
+
     export const setTimeBeforeAlert = (timeBeforeAlert: number) => {
         window.electron.store.set('timeBeforeAlert', timeBeforeAlert);
         dispatchEvent('onTimeBeforeAlertChanged', timeBeforeAlert);

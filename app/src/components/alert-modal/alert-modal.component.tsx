@@ -2,7 +2,7 @@ import { useTranslate } from '../../hooks/useTranslate';
 import { SoundsService } from '../../services/sounds.service';
 import { IEvent } from '../../types/event.type';
 import styles from './alert-modal.module.css';
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
 
 export type AlertModalElement = {
 

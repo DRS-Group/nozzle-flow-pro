@@ -1,4 +1,3 @@
-import { useTranslate } from '../../hooks/useTranslate';
 import { TextInputDialog } from '../text-input-dialog/text-input-dialog.component';
 import styles from './text-input.module.css';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -16,10 +15,10 @@ export type TextInputProps = {
     value?: string;
     onChange?: (value: string) => void;
     type?: 'text' | 'password';
+    visible?: boolean;
 }
 
 export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, ref) => {
-    const translate = useTranslate();
     const inputRef = useRef<HTMLInputElement>(null);
 
     const [isTextInputModalOpen, setIsTextInputModalOpen] = useState(false);
@@ -44,7 +43,9 @@ export const TextInput = forwardRef<TextInputElement, TextInputProps>((props, re
 
     return (
         <>
-            <div className={`${styles.wrapper} ${props.className}`}>
+            <div className={`${styles.wrapper} ${props.className}`} 
+                style={{display: props.visible === false ? 'none' : 'block'}}
+            >
                 <input
                     className={styles.input}
                     type={props.type || 'text'}

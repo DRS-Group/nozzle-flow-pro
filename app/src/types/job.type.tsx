@@ -6,4 +6,5 @@ export type Job = {
     tolerance: number;
     creationDate: Date;
     events: IEvent[];
+    nozzleSpacing: number;
 };

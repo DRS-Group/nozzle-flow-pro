@@ -2,11 +2,9 @@ import { forwardRef, useImperativeHandle, useState } from "react"
 import styles from './bottom-menu.module.css';
 import { ToggleButton } from "../toggle-button/toggle-button.component";
 import { useTranslate } from "../../hooks/useTranslate";
-import { NavigationService } from "../../services/navigation.service";
 import { useCurrentJob } from "../../hooks/useCurrentJob";
 import { useNavigation } from "../../hooks/useNavigation";
 import { usePump } from "../../hooks/usePump";
-import { SettingsService } from "../../services/settings.service";
 import { SoundsService } from "../../services/sounds.service";
 
 export type BottomMenuElement = {

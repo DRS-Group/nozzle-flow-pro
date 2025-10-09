@@ -9,8 +9,6 @@ import { IFlowmeterSensor } from '../../types/flowmeter-sensor';
 import { services } from '../../dependency-injection';
 
 const TARGET_COLOR = 'rgb(50, 200, 100)';
-const MAX_TARGET_COLOR = 'rgb(255, 0, 0)';
-const MIN_TARGET_COLOR = 'rgb(255, 0, 0)';
 
 export type ChartData = {
     datasets: Dataset[]
@@ -162,7 +160,7 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
         const minFlow = data.targetValue * (1 - currentJob.job!.tolerance);
         const currentFlow = flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter;
         setIsOutOfBounds((currentFlow < minFlow) || (currentFlow > maxFlow));
-    }, [data.targetValue, currentJob.job, flowmeterSensor, flowmeterSensor]);
+    }, [data.targetValue, currentJob.job, flowmeterSensor]);
 
     const valueToChartPercentage = useCallback((value: number) => {
         if (!currentJob.job || !data?.targetValue) return 0;
@@ -210,8 +208,7 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
         if (!flowmeterSensor) return;
 
         const color = pump.isStabilized ? (isOutOfBounds ? 'red' : TARGET_COLOR) : 'darkgray';
-        let height = 0;
-
+        
         setStyle({
             height: pump.isStabilized ? `${valueToChartPercentage(flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter)}%` : '50%',
             opacity: flowmeterSensor.ignored ? 0.15 : 1,

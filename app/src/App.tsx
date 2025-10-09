@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { useEffect } from 'react';
 import { BottomMenu } from './components/bottom-menu/bottom-menu.component';
 import { DataFecherService } from './services/data-fetcher.service';
 import { DataView } from './views/data/data.view';
@@ -20,7 +20,6 @@ import { JobsService } from './services/jobs.service';
 import { NavigationService } from './services/navigation.service';
 import { CurrentJobService } from './services/current-job.service';
 import { PumpService } from './services/pump.service';
-import { usePump } from './hooks/usePump';
 import { AlertModal } from './components/alert-modal/alert-modal.component';
 import { SensorsService } from './services/sensors.service';
 
@@ -34,7 +33,6 @@ services.sensorsService = new SensorsService();
 function App() {
   const navigation = useNavigation();
   const currentJob = useCurrentJob();
-  const pump = usePump();
   const admin = useAdmin();
   const translate = useTranslate();
 
@@ -46,7 +44,7 @@ function App() {
     // services.dataFetcherService.setInterval(interval);
 
     const onNetworkStatusChange = (isConnected: boolean) => {
-      if(!isConnected) return;
+      if (!isConnected) return;
 
       const settings: SettingsType = SettingsService.getSettings();
       const interval = settings.interval;
@@ -58,7 +56,7 @@ function App() {
     return () => {
       SettingsService.removeEventListener("onNetworkStatusChange", onNetworkStatusChange);
     }
-  }, []);
+  }, [navigation]);
 
   useEffect(() => {
     const interfaceScale = SettingsService.getSettingOrDefault('interfaceScale', 1);

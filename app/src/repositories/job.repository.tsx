@@ -6,13 +6,14 @@ import { IOpticalSensorEvent } from "../types/optical-sensor-event.type";
 export abstract class JobRepository {
     public static async get(): Promise<Job[]> {
         const result = window.electron.store.get('jobs');
-        const jobs = JSON.parse(result || '[]').map((job: any) => {
+        const jobs = JSON.parse(result || '[]').map((job: any): Job => {
             return {
                 title: job.title,
                 expectedFlow: job.expectedFlow,
                 tolerance: job.tolerance,
                 creationDate: new Date(job.creationDate),
                 id: job.id,
+                nozzleSpacing: job.nozzleSpacing,
                 events: job.events.map((event: any) => {
                     let e: IEvent | IFlowmeterEvent | IOpticalSensorEvent = {
                         title: event.title,
