@@ -1,0 +1,36 @@
+name: Publish Electron .deb
+
+on:
+  workflow_run:
+    workflows: ["Build Electron ARM64"]
+    types:
+      - completed
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: electron-deb
+          path: ./deb-files/
+
+      - name: Push .deb to public releases repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+        run: |
+          DEB_FILE=$(ls ./deb-files/*.deb | head -n 1)
+          echo "Found file: $DEB_FILE"
+
+          git clone https://github.com/DRS-Group/D-Flow-Releases.git
+          cd D-Flow-Releases
+          cp ../$DEB_FILE .
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Release $(date '+%Y-%m-%d %H:%M:%S')"
+          git push https://x-access-token:${GH_TOKEN}@github.com/DRS-Group/D-Flow-Releases.git main
