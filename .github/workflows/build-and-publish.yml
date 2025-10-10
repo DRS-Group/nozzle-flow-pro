@@ -1,0 +1,48 @@
+name: Build and Publish Electron ARM64
+
+on:
+  push:
+    branches: [release]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the private repository
+      - uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # 3️⃣ Install dependencies
+      - run: npm ci
+        working-directory: ./app
+
+      # 4️⃣ Build the Electron app for Linux ARM64
+      - run: npx electron-forge make --platform linux --arch arm64
+        working-directory: ./app
+
+      # 5️⃣ Find the generated .deb file
+      - name: Locate .deb file
+        id: find_deb
+        run: |
+          DEB_FILE=$(ls ./app/out/make/deb/*.deb | head -n 1)
+          echo "DEB_FILE=$DEB_FILE" >> $GITHUB_ENV
+          echo "Found .deb file: $DEB_FILE"
+
+      # 6️⃣ Clone the public releases repository and copy the .deb
+      - name: Push .deb to public releases repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+        run: |
+          git clone https://github.com/DRS-Group/D-Flow-Releases.git
+          cp "$DEB_FILE" D-Flow-Releases/
+          cd D-Flow-Releases
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Release $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          git push https://x-access-token:${GH_TOKEN}@github.com/DRS-Group/D-Flow-Releases.git main
