@@ -1,0 +1,82 @@
+name: Build and Publish Electron ARM64
+
+on:
+  push:
+    branches: [release]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout your repository
+      - uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # 3️⃣ Install dependencies for React + Electron
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./app
+
+      # 4️⃣ Build the React frontend (creates ./app/build)
+      - name: Build React app
+        run: npm run build
+        working-directory: ./app
+        env:
+          CI: false
+
+      # 5️⃣ Build the Electron app for Linux ARM64
+      - name: Package Electron app
+        run: npx electron-forge make --platform linux --arch arm64
+        working-directory: ./app
+
+      # 6️⃣ List .deb files (debugging)
+      - name: List all .deb files recursively
+        run: |
+          echo "Searching for .deb files in ./app recursively:"
+          find ./app -type f -name "*.deb"
+
+      # 7️⃣ Locate the .deb file
+      - name: Locate .deb file
+        id: find_deb
+        run: |
+          DEB_FILE=$(find ./app/out/make/deb -type f -name "*.deb" | head -n 1)
+          if [ -z "$DEB_FILE" ]; then
+            echo "No .deb file found, exiting."
+            exit 1
+          fi
+          echo "DEB_FILE=$DEB_FILE" >> $GITHUB_ENV
+          echo "Found .deb file: $DEB_FILE"
+
+      # 8️⃣ Get version from package.json
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./app/package.json').version")
+          VERSION_TAG="v$VERSION"
+          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+          echo "Version from package.json: $VERSION_TAG"
+
+      # 9️⃣ Install GitHub CLI
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install -y gh
+
+      # 🔟 Create a release in D-Flow-Releases and upload .deb
+      - name: Publish release to D-Flow-Releases
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+          DEB_FILE: ${{ env.DEB_FILE }}
+          VERSION_TAG: ${{ env.VERSION_TAG }}
+        run: |
+          echo "Creating release $VERSION_TAG in D-Flow-Releases"
+          gh release create "$VERSION_TAG" "$DEB_FILE" \
+            --repo DRS-Group/D-Flow-Releases \
+            --title "D-Flow $VERSION_TAG" \
+            --notes "Automated release from workflow" \
+            --target master
