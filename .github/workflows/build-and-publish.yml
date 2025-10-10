@@ -43,25 +43,22 @@ jobs:
           echo "DEB_FILE=$DEB_FILE" >> $GITHUB_ENV
           echo "Found .deb file: $DEB_FILE"
 
-      # 7️⃣ Create GitHub release
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-        with:
-          tag_name: v1.0.0
-          release_name: Electron ARM64 v1.0.0
-          draft: false
-          prerelease: false
+      # 7️⃣ Install GitHub CLI
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install -y gh
 
-      # 8️⃣ Upload .deb to release
-      - name: Upload .deb to GitHub Release
-        uses: actions/upload-release-asset@v1
+      # 8️⃣ Create a release in D-Flow-Releases and upload .deb
+      - name: Publish release to D-Flow-Releases
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ env.DEB_FILE }}
-          asset_name: d-flow_1.0.0_arm64.deb
-          asset_content_type: application/vnd.debian.binary-package
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+          DEB_FILE: ${{ env.DEB_FILE }}
+        run: |
+          RELEASE_TAG="v$(date +'%Y.%m.%d.%H%M')"
+          echo "Creating release $RELEASE_TAG in D-Flow-Releases"
+          gh release create $RELEASE_TAG "$DEB_FILE" \
+            --repo DRS-Group/D-Flow-Releases \
+            --title "Electron ARM64 $RELEASE_TAG" \
+            --notes "Automated release from workflow" \
+            --target master
