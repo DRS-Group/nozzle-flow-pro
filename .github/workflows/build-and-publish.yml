@@ -26,6 +26,8 @@ jobs:
       - name: Build React app
         run: npm run build
         working-directory: ./app
+        env:
+          CI: false
 
       # 5️⃣ Build the Electron app for Linux ARM64
       - name: Package Electron app
