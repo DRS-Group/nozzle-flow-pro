@@ -55,4 +55,4 @@ jobs:
           git config user.email "github-actions@github.com"
           git add .
           git commit -m "Release $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
-          git push https://x-access-token:${GH_TOKEN}@github.com/DRS-Group/D-Flow-Releases.git main
+          git push https://x-access-token:${GH_TOKEN}@github.com/DRS-Group/D-Flow-Releases.git master
