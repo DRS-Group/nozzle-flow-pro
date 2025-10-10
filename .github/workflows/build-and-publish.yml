@@ -43,16 +43,25 @@ jobs:
           echo "DEB_FILE=$DEB_FILE" >> $GITHUB_ENV
           echo "Found .deb file: $DEB_FILE"
 
-      # 7️⃣ Clone the public releases repository and copy the .deb
-      - name: Push .deb to public releases repo
+      # 7️⃣ Create GitHub release
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
-          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-        run: |
-          git clone https://github.com/DRS-Group/D-Flow-Releases.git
-          cp "$DEB_FILE" D-Flow-Releases/
-          cd D-Flow-Releases
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add .
-          git commit -m "Release $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
-          git push https://x-access-token:${GH_TOKEN}@github.com/DRS-Group/D-Flow-Releases.git master
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+        with:
+          tag_name: v1.0.0
+          release_name: Electron ARM64 v1.0.0
+          draft: false
+          prerelease: false
+
+      # 8️⃣ Upload .deb to release
+      - name: Upload .deb to GitHub Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.DEB_FILE }}
+          asset_name: d-flow_1.0.0_arm64.deb
+          asset_content_type: application/vnd.debian.binary-package
