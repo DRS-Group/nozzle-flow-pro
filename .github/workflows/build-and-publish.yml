@@ -25,20 +25,25 @@ jobs:
       - run: npx electron-forge make --platform linux --arch arm64
         working-directory: ./app
 
+      # 5️⃣ List all .deb files recursively (for debugging)
       - name: List all .deb files recursively
         run: |
           echo "Searching for .deb files in ./app recursively:"
           find ./app -type f -name "*.deb"
 
-      # 5️⃣ Find the generated .deb file
+      # 6️⃣ Find the first generated .deb file safely
       - name: Locate .deb file
         id: find_deb
         run: |
-          DEB_FILE=$(ls ./app/out/make/deb/*.deb | head -n 1)
+          DEB_FILE=$(find ./app/out/make/deb -type f -name "*.deb" | head -n 1)
+          if [ -z "$DEB_FILE" ]; then
+            echo "No .deb file found, exiting."
+            exit 1
+          fi
           echo "DEB_FILE=$DEB_FILE" >> $GITHUB_ENV
           echo "Found .deb file: $DEB_FILE"
 
-      # 6️⃣ Clone the public releases repository and copy the .deb
+      # 7️⃣ Clone the public releases repository and copy the .deb
       - name: Push .deb to public releases repo
         env:
           GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
