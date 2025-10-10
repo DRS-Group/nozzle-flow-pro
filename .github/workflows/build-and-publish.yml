@@ -25,6 +25,11 @@ jobs:
       - run: npx electron-forge make --platform linux --arch arm64
         working-directory: ./app
 
+      - name: List all .deb files recursively
+        run: |
+          echo "Searching for .deb files in ./app recursively:"
+          find ./app -type f -name "*.deb"
+
       # 5️⃣ Find the generated .deb file
       - name: Locate .deb file
         id: find_deb
