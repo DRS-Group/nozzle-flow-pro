@@ -43,22 +43,31 @@ jobs:
           echo "DEB_FILE=$DEB_FILE" >> $GITHUB_ENV
           echo "Found .deb file: $DEB_FILE"
 
-      # 7️⃣ Install GitHub CLI
+      # 7️⃣ Read version from package.json
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./app/package.json').version")
+          VERSION_TAG="v$VERSION"
+          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+          echo "Version from package.json: $VERSION_TAG"
+
+      # 8️⃣ Install GitHub CLI
       - name: Install GitHub CLI
         run: |
           sudo apt update
           sudo apt install -y gh
 
-      # 8️⃣ Create a release in D-Flow-Releases and upload .deb
+      # 9️⃣ Create a release in D-Flow-Releases and upload .deb
       - name: Publish release to D-Flow-Releases
         env:
           GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
           DEB_FILE: ${{ env.DEB_FILE }}
+          VERSION_TAG: ${{ env.VERSION_TAG }}
         run: |
-          RELEASE_TAG="v$(date +'%Y.%m.%d.%H%M')"
-          echo "Creating release $RELEASE_TAG in D-Flow-Releases"
-          gh release create $RELEASE_TAG "$DEB_FILE" \
+          echo "Creating release $VERSION_TAG in D-Flow-Releases"
+          gh release create "$VERSION_TAG" "$DEB_FILE" \
             --repo DRS-Group/D-Flow-Releases \
-            --title "Electron ARM64 $RELEASE_TAG" \
+            --title "D-Flow $VERSION_TAG" \
             --notes "Automated release from workflow" \
             --target master
