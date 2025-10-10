@@ -1,5 +1,6 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const { arch } = require('os');
 
 module.exports = {
   packagerConfig: {
@@ -8,21 +9,10 @@ module.exports = {
   rebuildConfig: {},
   makers: [
     {
-      name: '@electron-forge/maker-squirrel',
-      config: {},
-    },
-    {
-      name: '@electron-forge/maker-zip',
-      platforms: ['win32', 'linux'],
-    },
-    {
       name: '@electron-forge/maker-deb',
       config: {},
-    },
-    {
-      name: '@electron-forge/maker-rpm',
-      config: {},
-    },
+      arch: ['arm64']
+    }
   ],
   plugins: [
     {

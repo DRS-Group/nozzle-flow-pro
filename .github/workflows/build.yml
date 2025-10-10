@@ -13,6 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: cd app
       - run: npm ci
-      - run: npx electron-builder --linux arm64
+        working-directory: ./app
+      - run: npx electron-forge make --platform linux --arch arm64
+        working-directory: ./app
+      - name: Upload .deb file
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-deb
+          path: ./app/out/make/deb/
