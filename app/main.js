@@ -19,6 +19,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     fullscreen: true,
     webPreferences: {
+      webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
