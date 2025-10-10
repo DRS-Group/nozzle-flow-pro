@@ -10,10 +10,6 @@ import { services } from '../../dependency-injection';
 
 const TARGET_COLOR = 'rgb(50, 200, 100)';
 
-export type ChartData = {
-    datasets: Dataset[]
-}
-
 export type BarChartElement = {
 
 }
@@ -123,12 +119,6 @@ export const BarChart = forwardRef<BarChartElement, BarChartProps>((props, ref) 
     )
 });
 
-export type Dataset = {
-    label: string,
-    value: number,
-    opacity?: number
-}
-
 type BarElement = {
 
 }
@@ -208,9 +198,9 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
         if (!flowmeterSensor) return;
 
         const color = pump.isStabilized ? (isOutOfBounds ? 'red' : TARGET_COLOR) : 'darkgray';
-        
+
         setStyle({
-            height: pump.isStabilized ? `${valueToChartPercentage(flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter)}%` : '50%',
+            height: pump.isStabilized ? flowmeterSensor.pulseCount === 0 ? '0%' : `${valueToChartPercentage(flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter)}%` : '50%',
             opacity: flowmeterSensor.ignored ? 0.15 : 1,
             backgroundColor: color
         });

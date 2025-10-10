@@ -20,8 +20,8 @@ export function useData() {
     const [nozzleSpacing, setNozzleSpacing] = useState<number>(0.6);
 
     useLayoutEffect(() => {
-        setNozzleSpacing(SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
-    }, []);
+        setNozzleSpacing(currentJob.job ? currentJob.job.nozzleSpacing : SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
+    }, [currentJob]);
 
     useLayoutEffect(() => {
         const eventHandler = async (data: ESPData) => {

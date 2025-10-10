@@ -24,56 +24,56 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
 
     private isStabilized: boolean = true;
     private timeoutHandler: NodeJS.Timeout | null = null;
-    private lastRawIsPumpActive: boolean = false;
+    private lastState: 'on' | 'off' = 'off';
 
     constructor() {
         super();
-        this.dataFetcherService.addEventListener('onDataFetched', async (data: ESPData) => {
-            const currentJob = await services.currentJobService.getCurrentJob();
-            if (currentJob) {
-                const expectedFlow = calculateTargetValue(currentJob, data.speed, SettingsService.getSettingOrDefault("nozzleSpacing", 0.6));
-                const tolerance = currentJob.tolerance;
-                const minimumExpectedFlow = expectedFlow * (1 - tolerance) * 0.5;
-                const isPumpActive = data.sensors.some((sensor: ISensor) => {
-                    if (sensor.type !== 'flowmeter') return false;
-                    const flowmeterSensor = sensor as IFlowmeterSensor;
-                    if (flowmeterSensor.ignored) return false;
-                    const litersPerMinute = flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter;
-                    return litersPerMinute > minimumExpectedFlow && !flowmeterSensor.ignored;
-                });
-                const rawIsPumpActive = data.sensors.some((sensor: ISensor) => {
-                    if (sensor.type !== 'flowmeter') return false;
-                    const flowmeterSensor = sensor as IFlowmeterSensor;
-                    return flowmeterSensor.pulsesPerMinute > 20 && !flowmeterSensor.ignored;
-                });
 
-                if (!this.lastRawIsPumpActive && rawIsPumpActive && !this.timeoutHandler) {
-                    this.isStabilized = false;
+        this.addEventListener('onStateChanged', (newState: 'on' | 'off') => {
+            console.log(newState)
+            if (newState === 'on' && !this.timeoutHandler) {
+                this.isStabilized = false;
+                this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
+                this.timeoutHandler = setTimeout(() => {
+                    this.isStabilized = true;
                     this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
-                    this.timeoutHandler = setTimeout(() => {
-                        this.isStabilized = true;
-                        this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
-                        this.timeoutHandler = null;
-                    }, (5000));
-                }
-
-                const state = isPumpActive ? 'on' : 'off';
-                if (state !== this.getState()) {
-                    this.setState(state);
-                }
-
-                this.lastRawIsPumpActive = rawIsPumpActive;
+                    this.timeoutHandler = null;
+                }, (5000));
             }
             else {
-                const isPumpActive = data.sensors.some((sensor: ISensor) => {
-                    if (sensor.type !== 'flowmeter') return false;
-                    const flowmeterSensor = sensor as IFlowmeterSensor;
-                    return flowmeterSensor.pulsesPerMinute > 20 && !flowmeterSensor.ignored;
-                });
-                const state = isPumpActive ? 'on' : 'off';
-                if (state !== this.getState()) {
-                    this.setState(state);
+                this.isStabilized = true;
+                this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
+                if (this.timeoutHandler) {
+                    clearTimeout(this.timeoutHandler)
+                    this.timeoutHandler = null;
                 }
+            }
+        });
+
+        this.dataFetcherService.addEventListener('onDataFetched', async (data: ESPData) => {
+            const currentJob = await services.currentJobService.getCurrentJob();
+            if (!currentJob) return;
+
+            const expectedFlow = calculateTargetValue(currentJob, data.speed, currentJob.nozzleSpacing);
+            const tolerance = currentJob.tolerance;
+            const minimumExpectedFlow = expectedFlow * (1 - tolerance) * 0.5;
+            const rawIsPumpActive = data.sensors.some((sensor: ISensor) => {
+                if (sensor.type !== 'flowmeter') return false;
+                const flowmeterSensor = sensor as IFlowmeterSensor;
+                if (flowmeterSensor.ignored) return false;
+                const litersPerMinute = flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter;
+                return litersPerMinute > minimumExpectedFlow && !flowmeterSensor.ignored;
+            });
+
+            let isPumpActive = rawIsPumpActive;
+            const overriddenState = this.getOverriddenState();
+            if (overriddenState !== 'auto')
+                isPumpActive = overriddenState === 'on';
+
+            const state = isPumpActive ? 'on' : 'off';
+            if (state !== this.getState()) {
+                console.log({ isPumpActive, state: this.getState() })
+                this.setState(state);
             }
         });
     }

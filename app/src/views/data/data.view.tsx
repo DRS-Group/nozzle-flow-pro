@@ -5,7 +5,7 @@ import { SettingsService } from "../../services/settings.service";
 import { useTranslate } from "../../hooks/useTranslate";
 import { useNavigation } from "../../hooks/useNavigation";
 import { useCurrentJob } from "../../hooks/useCurrentJob";
-import { SimulatedSpeed } from "../../components/simulated-speed/simulated-speen.component";
+import { SimulatedSpeed } from "../../components/simulated-speed/simulated-speed.component";
 import { useData } from "../../hooks/useData";
 import { Lights } from "../../components/lights.component/lights.component";
 

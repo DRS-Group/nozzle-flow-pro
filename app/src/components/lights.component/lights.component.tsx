@@ -55,7 +55,7 @@ export const Light = forwardRef<LightElement, LightProps>((props, ref) => {
 
     const [ignoreSensorDialogOpen, setIgnoreSensorDialogOpen] = useState<boolean>(false);
     const [unignoreSensorDialogOpen, setUnignoreSensorDialogOpen] = useState<boolean>(false);
-    const [color, setColor] = useState<'black' | 'green' | 'yellow' | 'red'>('black');
+    const [color, setColor] = useState<'black' | 'green' | 'yellow' | 'red' | 'redPulse'>('black');
 
     useLayoutEffect(() => {
         setOpticalSensor(data.opticalSensors[props.opticalSensorIndex]);
@@ -69,11 +69,15 @@ export const Light = forwardRef<LightElement, LightProps>((props, ref) => {
 
     useLayoutEffect(() => {
         if (!opticalSensor) return;
-        if (pump.pumpState === 'off' || !pump.isStabilized)
+        if (!pump.isStabilized)
             setColor('black');
-        else if (opticalSensor.lastPulseAge > SettingsService.getTimeBeforeAlert() || opticalSensor.lastPulseAge === 0)
-            setColor('red');
-        else if (opticalSensor.lastPulseAge > SettingsService.getTimeBeforeAlert() / 2)
+        else if (opticalSensor.lastPulseAge > SettingsService.getTimeBeforeAlert() * 2 || opticalSensor.lastPulseAge === 0) {
+            if (pump.pumpState === 'off')
+                setColor('red');
+            else
+                setColor('redPulse');
+        }
+        else if (opticalSensor.lastPulseAge > SettingsService.getTimeBeforeAlert())
             setColor('yellow')
         else
             setColor('green');

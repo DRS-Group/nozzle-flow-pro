@@ -302,7 +302,6 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                 }
             }
             else if (sensor.type === 'optical') {
-                debugger
                 const opticalSensor = sensor as IOpticalSensor;
 
                 const opticalSensorEvents: IOpticalSensorEvent[] = currentJob.events.filter((event: IEvent): event is IOpticalSensorEvent => {
@@ -315,7 +314,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                 });
 
                 if (opticalSensorOngoingEvent === undefined) {
-                    if (opticalSensor.lastPulseAge >= timeBeforeAlert) {
+                    if (opticalSensor.lastPulseAge >= timeBeforeAlert * 2) {
                         const description = `<b>${opticalSensor.name}</b> ${TranslationServices.translate('detected a failure', currentLanguage)}`;
                         const newEvent: IOpticalSensorEvent = {
                             id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -337,7 +336,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
                     }
                 }
                 else {
-                    if (opticalSensor.lastPulseAge < timeBeforeAlert) {
+                    if (opticalSensor.lastPulseAge < timeBeforeAlert * 2) {
                         opticalSensorOngoingEvent.endTime = new Date();
                         opticalSensorOngoingEvent.viewed = true;
                         shouldSaveJob = true;
