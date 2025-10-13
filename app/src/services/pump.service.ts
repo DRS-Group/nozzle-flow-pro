@@ -30,7 +30,6 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
         super();
 
         this.addEventListener('onStateChanged', (newState: 'on' | 'off') => {
-            console.log(newState)
             if (newState === 'on' && !this.timeoutHandler) {
                 this.isStabilized = false;
                 this.dispatchEvent('onIsStabilizedChanged', this.getIsStabilized());
@@ -72,7 +71,6 @@ export class PumpService extends BaseService<PumpServiceEvents> implements IPump
 
             const state = isPumpActive ? 'on' : 'off';
             if (state !== this.getState()) {
-                console.log({ isPumpActive, state: this.getState() })
                 this.setState(state);
             }
         });

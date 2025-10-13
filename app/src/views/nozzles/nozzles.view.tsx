@@ -360,13 +360,15 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                     title={translate('Set speed')}
                     defaultValue={10}
                     onConfirmClick={async (value) => {
-                        setSpeedDialogOpen(false);
-                        setAutoCalibratingDialogOpen(true);
-
                         const currentPumpOverridenState = pump.overriddenState;
                         pump.setOverridden('off');
 
+                        const interval = SettingsService.getInterval();
                         await services.dataFetcherService.setInterval(10000);
+
+                        setSpeedDialogOpen(false);
+                        setAutoCalibratingDialogOpen(true);
+
                         setTimeout(async () => {
                             const espData: ESPData = await services.dataFetcherService.fetchData();
 
@@ -378,7 +380,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                             let newSensors = espData.sensors.map((sensor) => {
                                 if (sensor.type !== 'flowmeter') return sensor;
                                 const flowmeterSensor = sensor as IFlowmeterSensor;
-                                const pulsesPerMinute = flowmeterSensor.pulsesPerMinute;
+                                const pulsesPerMinute = flowmeterSensor.pulseCount * (60000 / interval);
                                 return {
                                     ...flowmeterSensor,
                                     pulsesPerLiter: Math.round(pulsesPerMinute / expectedFlow)
