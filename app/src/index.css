@@ -16,7 +16,7 @@ body {
 * {
   color: var(--primary-font-color);
   user-select: none;
-  /* cursor: none !important; */
+  cursor: none !important;
 }
 
 #root {
