@@ -390,6 +390,8 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                             services.sensorsService.setSensors(newSensors);
                             services.sensorsService.setSensors(services.sensorsService.getSensors());
 
+                            setSensors(services.sensorsService.getSensors());
+
                             setAutoCalibratingDialogOpen(false);
                             pump.setOverridden(currentPumpOverridenState);
                         }, 10500);
