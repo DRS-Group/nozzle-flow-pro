@@ -363,7 +363,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         const currentPumpOverridenState = pump.overriddenState;
                         pump.setOverridden('off');
 
-                        const interval = 1000;
+                        const interval = 10000;
                         await services.dataFetcherService.setInterval(10000);
 
                         setSpeedDialogOpen(false);
