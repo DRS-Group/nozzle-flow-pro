@@ -1,7 +1,7 @@
 {
   "license": "MIT",
   "name": "d-flow",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "homepage": ".",
   "main": "main.js",

@@ -27,68 +27,82 @@ export const Logs = forwardRef<LogsElement, LogsProps>((props, ref) => {
         ) || []);
     }, [currentJob.job]);
 
-const onBackClick = () => {
-    currentJob.set(null);
-    navigation.navigateBack();
-}
+    const onBackClick = () => {
+        currentJob.set(null);
+        navigation.navigateBack();
+    }
 
-function download() {
-    if (!currentJob.job) return;
+    function download() {
+        if (!currentJob.job) return;
 
-    // CSV content
-    let content = 'Start Time,End Time,Title,Description\n';
-    eventsToShow.forEach(event => {
-        content += `${event.startTime.toLocaleDateString()} ${event.startTime.toLocaleTimeString()},${event.endTime ? event.endTime.toLocaleDateString() : ''},${event.title},${event.description}\n`;
-    });
+        // CSV content
+        function toDMS(coord: number, isLat: boolean) {
+            const abs = Math.abs(coord);
+            const deg = Math.floor(abs);
+            const minFloat = (abs - deg) * 60;
+            const min = Math.floor(minFloat);
+            const sec = ((minFloat - min) * 60).toFixed(2);
+            const dir = coord >= 0 ? (isLat ? 'N' : 'E') : (isLat ? 'S' : 'W');
+            return `${deg}°${min}'${sec}"${dir}`;
+        }
 
-    content = content.replace('<b>', '');
-    content = content.replace('</b>', '');
+        let content = 'Start Time,End Time,Title,Description,Coordinates\n';
+        eventsToShow.forEach(event => {
+            const latDMS = toDMS(event.coordinates.latitude, true);
+            const lonDMS = toDMS(event.coordinates.longitude, false);
+            const coords = `${latDMS}, ${lonDMS}`;
+            content += `${event.startTime.toLocaleDateString()} ${event.startTime.toLocaleTimeString()},${event.endTime ? event.endTime.toLocaleDateString() : ''},${event.title},${event.description},${coords}\n`;
+        });
 
 
-    var FileSaver = require('file-saver');
-    var blob = new Blob([content], { type: "text/csv;charset=utf-8" });
-    FileSaver.saveAs(blob, `${currentJob.job.title}.csv`);
-}
+        content = content.replace('<b>', '');
+        content = content.replace('</b>', '');
 
-return (
-    <>
-        <div className={styles.wrapper}>
-            {navigation.previousPage === 'jobs' &&
-                <TopBar
-                    onBackClick={onBackClick}
-                    title={translate('Logs') + ' - ' + currentJob.job?.title}
-                />
-            }
-            <div className={styles.content}>
 
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>{translate('Date')}</th>
-                            <th>{translate('Title')}</th>
-                            <th>{translate('Coordinates')}</th>
-                            <th>{translate('Description')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {eventsToShow.map((event: IEvent, index: number) => (
-                            <tr key={index}>
-                                <td>{event.startTime.toLocaleDateString()} {event.startTime.toLocaleTimeString()}</td>
-                                <td>{event.title}</td>
-                                <td>{event.coordinates.latitude}, {event.coordinates.longitude}</td>
-                                <td dangerouslySetInnerHTML={{ __html: event.description }}></td>
+        var FileSaver = require('file-saver');
+        var blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+        FileSaver.saveAs(blob, `${currentJob.job.title}.csv`);
+    }
+
+    return (
+        <>
+            <div className={styles.wrapper}>
+                {navigation.previousPage === 'jobs' &&
+                    <TopBar
+                        onBackClick={onBackClick}
+                        title={translate('Logs') + ' - ' + currentJob.job?.title}
+                    />
+                }
+                <div className={styles.content}>
+
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>{translate('Date')}</th>
+                                <th>{translate('Title')}</th>
+                                <th>{translate('Coordinates')}</th>
+                                <th>{translate('Description')}</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {eventsToShow.map((event: IEvent, index: number) => (
+                                <tr key={index}>
+                                    <td>{event.startTime.toLocaleDateString()} {event.startTime.toLocaleTimeString()}</td>
+                                    <td>{event.title}</td>
+                                    <td>{event.coordinates.latitude}, {event.coordinates.longitude}</td>
+                                    <td dangerouslySetInnerHTML={{ __html: event.description }}></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div
+                    className={styles.confirmButton}
+                    onClick={download}
+                >
+                    <i className="icon-export"></i>
+                </div>
             </div>
-            <div
-                className={styles.confirmButton}
-                onClick={download}
-            >
-                <i className="icon-export"></i>
-            </div>
-        </div>
-    </>
-)
+        </>
+    )
 });
