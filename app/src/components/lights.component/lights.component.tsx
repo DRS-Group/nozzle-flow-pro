@@ -71,7 +71,7 @@ export const Light = forwardRef<LightElement, LightProps>((props, ref) => {
         if (!opticalSensor) return;
         if (!pump.isStabilized)
             setColor('black');
-        else if (opticalSensor.lastPulseAge > SettingsService.getTimeBeforeAlert() * 2 || opticalSensor.lastPulseAge === 0) {
+        else if (opticalSensor.lastPulseAge > SettingsService.getTimeBeforeAlert() * 2) {
             if (pump.pumpState === 'off')
                 setColor('red');
             else
