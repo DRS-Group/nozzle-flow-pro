@@ -46,7 +46,7 @@ export class SensorsService extends BaseService<sensorsServiceEvents> implements
         let sensors: IFlowmeterSensor[] = [];
 
         for (let i = 0; i < count; i++) {
-            sensors.push({ name: `${TranslationServices.translate('Flowmeter', TranslationServices.getCurrentLanguage())} ${i + 1}`, type: 'flowmeter', pulsesPerLiter: 350, pulsesPerMinute: 0, ignored: false, pulseCount: 0, lastPulseAge: 0 });
+            sensors.push({ name: `${TranslationServices.translate('Flowmeter', TranslationServices.getCurrentLanguage())} ${i + 1}`, type: 'flowmeter', pulsesPerLiter: 350, pulsesPerMinute: 0, ignored: false, lastPulseAge: 0 });
         }
         return sensors;
     }

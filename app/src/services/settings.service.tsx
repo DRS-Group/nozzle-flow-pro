@@ -22,6 +22,9 @@ export const defaultSettings: Settings = {
     logo: '',
     timeBeforeAlert: 5 * 1000,
     SSID: 'D-Flow',
+    debounce: 0,
+    minPulsesPerPacket: 20,
+    maxNumberOfPackets: 1
 }
 
 export namespace SettingsService {
@@ -205,6 +208,45 @@ export namespace SettingsService {
 
     export const getInterval = () => {
         return window.electron.store.get('interval');
+    }
+
+    export const setDebounce = (debounce: number) => {
+        window.electron.store.set('debounce', debounce);
+
+        services.dataFetcherService.setDebounce(debounce);
+
+        dispatchEvent('onDebounceChanged', debounce);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
+    }
+
+    export const getDebounce = () => {
+        return window.electron.store.get('debounce');
+    }
+    
+    export const setMinPulsesPerPacket = (minPulsesPerPacket: number) => {
+        window.electron.store.set('minPulsesPerPacket', minPulsesPerPacket);
+
+        services.dataFetcherService.setMinPulsesPerPacket(minPulsesPerPacket);
+
+        dispatchEvent('onMinPulsesPerPacketChanged', minPulsesPerPacket);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
+    }
+
+    export const getMinPulsesPerPacket = () => {
+        return window.electron.store.get('minPulsesPerPacket');
+    }
+    
+    export const setMaxNumberOfPackets = (maxNumberOfPackets: number) => {
+        window.electron.store.set('maxNumberOfPackets', maxNumberOfPackets);
+
+        services.dataFetcherService.setMaxNumberOfPackets(maxNumberOfPackets);
+
+        dispatchEvent('onMaxNumberOfPacketsChanged', maxNumberOfPackets);
+        dispatchEvent('onSettingsChanged', window.electron.store.getAll() as Settings);
+    }
+
+    export const getMaxNumberOfPackets = () => {
+        return window.electron.store.get('maxNumberOfPackets');
     }
 
     export const setNozzleSpacing = (nozzleSpacing: number) => {

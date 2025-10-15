@@ -184,7 +184,6 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         lastPulseAge: 0,
                         pulsesPerLiter: 350,
                         pulsesPerMinute: 0,
-                        pulseCount: 0
                     }
                     services.sensorsService.updateSensor(newSensor, contextMenuNozzleIndex);
                     setSensors(services.sensorsService.getSensors());
@@ -363,7 +362,6 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                         const currentPumpOverridenState = pump.overriddenState;
                         pump.setOverridden('off');
 
-                        const interval = 10000;
                         await services.dataFetcherService.setInterval(10000);
 
                         setSpeedDialogOpen(false);
@@ -380,7 +378,7 @@ export const NozzlesView = forwardRef<NozzlesViewElement, NozzlesViewProps>((pro
                             let newSensors = espData.sensors.map((sensor) => {
                                 if (sensor.type !== 'flowmeter') return sensor;
                                 const flowmeterSensor = sensor as IFlowmeterSensor;
-                                const pulsesPerMinute = flowmeterSensor.pulseCount * (60000 / interval);
+                                const pulsesPerMinute = flowmeterSensor.pulsesPerMinute;
                                 return {
                                     ...flowmeterSensor,
                                     pulsesPerLiter: Math.round(pulsesPerMinute / expectedFlow)

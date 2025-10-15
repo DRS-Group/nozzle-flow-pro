@@ -169,11 +169,6 @@ void ESPNowCentralManager::getSlaveMacAddress(uint8_t index, macAddress_t &mac_a
     memcpy(mac_addr, slaves[index], sizeof(macAddress_t));
 }
 
-void ESPNowCentralManager::getSlaveMacAddress(uint8_t index, uint8_t *mac_addr)
-{
-    memcpy(mac_addr, slaves[index], sizeof(macAddress_t));
-}
-
 std::string ESPNowCentralManager::getSlaveMacAddress(uint8_t index)
 {
     char buffer[18];

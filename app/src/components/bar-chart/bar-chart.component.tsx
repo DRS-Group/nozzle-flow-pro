@@ -200,7 +200,7 @@ export const Bar = forwardRef<BarElement, BarProps>((props, ref) => {
         const color = pump.isStabilized ? (isOutOfBounds ? 'red' : TARGET_COLOR) : 'darkgray';
 
         setStyle({
-            height: pump.isStabilized ? flowmeterSensor.pulseCount === 0 ? '0%' : `${valueToChartPercentage(flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter)}%` : '50%',
+            height: pump.isStabilized ? flowmeterSensor.pulsesPerMinute === 0 ? '0%' : `${valueToChartPercentage(flowmeterSensor.pulsesPerMinute / flowmeterSensor.pulsesPerLiter)}%` : '50%',
             opacity: flowmeterSensor.ignored ? 0.15 : 1,
             backgroundColor: color
         });

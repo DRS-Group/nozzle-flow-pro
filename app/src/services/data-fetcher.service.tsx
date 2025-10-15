@@ -13,6 +13,9 @@ export type DataFecherServiceEvents = 'onDataFetched';
 export interface IDataFecherService extends IBaseService<DataFecherServiceEvents> {
     fetchData: () => Promise<ESPData>;
     setInterval: (value: number) => Promise<void>;
+    setDebounce: (value: number) => Promise<void>;
+    setMinPulsesPerPacket: (value: number) => Promise<void>;
+    setMaxNumberOfPackets: (value: number) => Promise<void>;
     getModuleMode: () => Promise<number>;
     setModuleMode: (value: number) => Promise<void>;
     getSecondaryModulesCount: () => Promise<number>;
@@ -109,7 +112,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 const simulatedSpeed = (SettingsService.getSimulatedSpeed()) / 3.6;
 
                 const sensors = services.sensorsService.getSensors();
-                const flowmetersPulseCount = response.data.flowmetersPulseCount;
+                const flowmetersPulsesPerMinute = response.data.flowmetersPulsesPerMinute;
                 const flowmetersLastPulseAge = response.data.flowmetersLastPulseAge;
                 const speed = shouldSimulateSpeed ? simulatedSpeed : response.data.speed;
                 const latitude = response.data.latitude || -21.122778;
@@ -120,8 +123,7 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
                 for (let i = 0; i < sensors.length; i++) {
                     sensors[i].lastPulseAge = flowmetersLastPulseAge[i] || 0;
                     if (sensors[i].type === 'flowmeter') {
-                        (sensors[i] as IFlowmeterSensor).pulseCount = flowmetersPulseCount[i] || 0;
-                        (sensors[i] as IFlowmeterSensor).pulsesPerMinute = (sensors[i] as IFlowmeterSensor).pulseCount * (60000 / interval);
+                        (sensors[i] as IFlowmeterSensor).pulsesPerMinute = flowmetersPulsesPerMinute[i] || 0;
                     }
                 }
 
@@ -157,6 +159,53 @@ export class DataFecherService extends BaseService<DataFecherServiceEvents> impl
             await axios.post(`${ApiBaseUri}/set_refresh_rate?refresh_rate=${value.toString()}&flowmeter_indexes=${flowmeterIndexesString}`);
         } catch (reason: any) {
             console.error('Failed to set interval:', reason);
+            throw reason;
+        }
+    };
+
+    public setDebounce = async (value: number): Promise<void> => {
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            const flowmeterIndexes = services.sensorsService.getSensors()
+                .map((sensor, index) => sensor.type === 'flowmeter' ? index : -1)
+                .filter(index => index !== -1);
+
+            const flowmeterIndexesString = flowmeterIndexes.join(',');
+
+            await axios.post(`${ApiBaseUri}/set_debounce?debounce=${value.toString()}&flowmeter_indexes=${flowmeterIndexesString}`);
+        } catch (reason: any) {
+            console.error('Failed to set debounce:', reason);
+            throw reason;
+        }
+    };
+
+    public setMinPulsesPerPacket = async (value: number): Promise<void> => {
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            const flowmeterIndexes = services.sensorsService.getSensors()
+                .map((sensor, index) => sensor.type === 'flowmeter' ? index : -1)
+                .filter(index => index !== -1);
+
+            const flowmeterIndexesString = flowmeterIndexes.join(',');
+
+            await axios.post(`${ApiBaseUri}/set_min_pulses_per_packet?min_pulses_per_packet=${value.toString()}&flowmeter_indexes=${flowmeterIndexesString}`);
+        } catch (reason: any) {
+            console.error('Failed to set min pulses per packet:', reason);
+            throw reason;
+        }
+    };
+    public setMaxNumberOfPackets = async (value: number): Promise<void> => {
+        const ApiBaseUri = SettingsService.getSettingOrDefault('apiBaseUrl', 'http://localhost:3000');
+        try {
+            const flowmeterIndexes = services.sensorsService.getSensors()
+                .map((sensor, index) => sensor.type === 'flowmeter' ? index : -1)
+                .filter(index => index !== -1);
+
+            const flowmeterIndexesString = flowmeterIndexes.join(',');
+
+            await axios.post(`${ApiBaseUri}/set_max_number_of_packets?max_number_of_packets=${value.toString()}&flowmeter_indexes=${flowmeterIndexesString}`);
+        } catch (reason: any) {
+            console.error('Failed to set max number of packets:', reason);
             throw reason;
         }
     };

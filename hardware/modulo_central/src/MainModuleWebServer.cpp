@@ -117,9 +117,113 @@ void MainModuleWebServer::setupEndpoints()
             }
             flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start).toInt()); // Add the last element
 
+            for(int i = 0; i < flowmeterIndexes.size(); i++){
+                Serial.println(flowmeterIndexes[i]);
+            }
+
             MainModule::getInstance()->setRefreshRate(newRate, flowmeterIndexes);
 
-            request->send(200); }); 
+            request->send(200); });
+
+    server->on(
+        "/set_debounce",
+        HTTP_POST, [](AsyncWebServerRequest *request)
+        {
+            if (!request->hasParam("debounce", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing debounce parameter\"}");
+                return;
+            }
+
+            if(!request->hasParam("flowmeter_indexes", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing flowmeter_indexes parameter\"}");
+                return;
+            }
+
+            unsigned short newDebounce = request->getParam("debounce", false)->value().toInt();
+            String indexesStr = request->getParam("flowmeter_indexes", false)->value();
+
+            std::vector<uint8_t> flowmeterIndexes;
+            int start = 0;
+            int end = indexesStr.indexOf(',');
+
+            while (end != -1) {
+                flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start, end).toInt());
+                start = end + 1;
+                end = indexesStr.indexOf(',', start);
+            }
+            flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start).toInt()); // Add the last element
+
+            MainModule::getInstance()->setDebounce(newDebounce, flowmeterIndexes);
+
+            request->send(200); });
+    server->on(
+        "/set_min_pulses_per_packet",
+        HTTP_POST, [](AsyncWebServerRequest *request)
+        {
+            if (!request->hasParam("min_pulses_per_packet", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing min_pulses_per_packet parameter\"}");
+                return;
+            }
+
+            if(!request->hasParam("flowmeter_indexes", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing flowmeter_indexes parameter\"}");
+                return;
+            }
+
+            unsigned short newMinPulsesPerPacket = request->getParam("min_pulses_per_packet", false)->value().toInt();
+            String indexesStr = request->getParam("flowmeter_indexes", false)->value();
+
+            std::vector<uint8_t> flowmeterIndexes;
+            int start = 0;
+            int end = indexesStr.indexOf(',');
+
+            while (end != -1) {
+                flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start, end).toInt());
+                start = end + 1;
+                end = indexesStr.indexOf(',', start);
+            }
+            flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start).toInt()); // Add the last element
+
+            MainModule::getInstance()->setMinPulsesPerPacket(newMinPulsesPerPacket, flowmeterIndexes);
+
+            request->send(200); });
+    server->on(
+        "/set_max_number_of_packets",
+        HTTP_POST, [](AsyncWebServerRequest *request)
+        {
+            if (!request->hasParam("max_number_of_packets", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing max_number_of_packets parameter\"}");
+                return;
+            }
+
+            if(!request->hasParam("flowmeter_indexes", false))
+            {
+                request->send(400, "application/json", "{\"error\": \"Missing flowmeter_indexes parameter\"}");
+                return;
+            }
+
+            unsigned short newMaxNumberOfPackets = request->getParam("max_number_of_packets", false)->value().toInt();
+            String indexesStr = request->getParam("flowmeter_indexes", false)->value();
+
+            std::vector<uint8_t> flowmeterIndexes;
+            int start = 0;
+            int end = indexesStr.indexOf(',');
+
+            while (end != -1) {
+                flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start, end).toInt());
+                start = end + 1;
+                end = indexesStr.indexOf(',', start);
+            }
+            flowmeterIndexes.push_back((uint8_t)indexesStr.substring(start).toInt()); // Add the last element
+
+            MainModule::getInstance()->setMaxNumberOfPackets(newMaxNumberOfPackets, flowmeterIndexes);
+
+            request->send(200); });
 }
 
 void MainModuleWebServer::setupDefaultHeaders()
@@ -140,11 +244,11 @@ void MainModuleWebServer::onDataRequest(AsyncWebServerRequest *request)
         {
             Serial.println("Sending data response...");
             JsonDocument doc;
-            JsonArray flowmeters = doc["flowmetersPulseCount"].to<JsonArray>();
+            JsonArray flowmeters = doc["flowmetersPulsesPerMinute"].to<JsonArray>();
             JsonArray ages = doc["flowmetersLastPulseAge"].to<JsonArray>();
             for (int i = 0; i < data.flowmeterCount; i++)
             {
-                flowmeters.add(data.flowmetersPulseCount[i]);
+                flowmeters.add(data.flowmetersPulsesPerMinute[i]);
                 ages.add(data.flowmetersLastPulseAge[i]);
             }
 

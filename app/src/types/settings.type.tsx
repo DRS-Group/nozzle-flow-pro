@@ -17,4 +17,7 @@ export type Settings = {
     logo: string;
     timeBeforeAlert: number;
     SSID: string;
+    debounce: number;
+    minPulsesPerPacket: number;
+    maxNumberOfPackets: number;
 }

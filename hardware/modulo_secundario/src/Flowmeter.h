@@ -2,42 +2,40 @@
 
 #include <Arduino.h>
 #include <map>
-
-// typedef of an array of timestamps
-typedef unsigned long *timestamp_arr_t;
+#include <vector>
 
 class Flowmeter
 {
 public:
-    /*
-     * Constructor
-     *
-     * @param pin: the pin the flowmeter is connected to
-     * @param refreshRate: the refresh rate of the flowmeter in milliseconds
-     */
     Flowmeter(uint8_t pin, unsigned short refreshRate);
     ~Flowmeter();
 
 private:
     uint8_t pin;
     unsigned short refreshRate;
+    unsigned short debounce = 0;
+    unsigned short minPulsesPerPacket = 40;
+    unsigned short maxNumberOfPackets = 10;
 
     volatile unsigned long lastPulseTimestamp = 0;
-    volatile timestamp_arr_t pulsesTimestamps = nullptr;
-    volatile unsigned short pulseCount = 0;
+    std::vector<unsigned long> pulsesTimestamps;
 
     static void onPulseStatic(void *arg);
 
     void registerPulse();
     void removeOldPulses();
+    void removeOldPulses(unsigned short refreshRate);
 
 public:
     void onPulse();
     static std::map<uint8_t, Flowmeter *> instances;
     unsigned short getPulsesPerMinute();
     unsigned short getPulseCount();
-    unsigned long getLastPulseTimestamp();
+    unsigned short getProcessedPulsesPerMinute();
     unsigned long getLastPulseAge();
     uint8_t getPin();
     void setRefreshRate(unsigned short refreshRate);
+    void setDebounce(unsigned short debounce);
+    void setMinPulsesPerPacket(unsigned short minPulsesPerPacket);
+    void setMaxNumberOfPackets(unsigned short maxNumberOfPackets);
 };

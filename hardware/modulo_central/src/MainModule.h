@@ -35,7 +35,10 @@ public:
     static void onDataResponseReceived(const uint8_t *mac_addr, const uint8_t *data, int data_len);
 
     void getFlowmetersData(std::function<void(flowmeters_data)> callback);
-    void setRefreshRate(unsigned short refreshRate, std::vector<uint8_t> flowmeterIndexes);
+    void setRefreshRate(unsigned short refreshRate, const std::vector<uint8_t> &flowmeterIndexes);
+    void setDebounce(unsigned short debounce, const std::vector<uint8_t> &flowmeterIndexes);
+    void setMinPulsesPerPacket(unsigned short minPulsesPerPacket, const std::vector<uint8_t> &flowmeterIndexes);
+    void setMaxNumberOfPackets(unsigned short maxNumberOfPackets, const std::vector<uint8_t> &flowmeterIndexes);
 
     void addGetFlowmetersDataCallback(std::function<void(flowmeters_data)> callback);
     void callGetFlowmetersDataCallbacks(flowmeters_data data);

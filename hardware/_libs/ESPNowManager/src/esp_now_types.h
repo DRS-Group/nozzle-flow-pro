@@ -15,6 +15,9 @@ enum MessageType
     PAIR_REQUEST = 0X10,
     FLOWMETER_DATA_REQUEST,
     SET_REFRESH_RATE,
+    SET_DEBOUNCE,
+    SET_MIN_PULSES_PER_PACKET,
+    SET_MAX_NUMBER_OF_PACKETS
 };
 
 enum moduleType
@@ -29,12 +32,10 @@ enum ModuleMode
     MODULE_MODE_PAIRING
 };
 
-typedef unsigned short flowmeter_data_t;
-
 typedef struct flowmeters_data
 {
     uint8_t flowmeterCount;
-    flowmeter_data_t *flowmetersPulseCount;
+    unsigned short *flowmetersPulsesPerMinute;
     unsigned long *flowmetersLastPulseAge;
 } flowmeters_data;
 

@@ -35,7 +35,6 @@ public:
     void disablePairing();
     uint8_t getSlavesCount();
     void getSlaveMacAddress(uint8_t index, macAddress_t &mac_addr);
-    void getSlaveMacAddress(uint8_t index, uint8_t *mac_addr);
     std::string getSlaveMacAddress(uint8_t index);
     void removeAllSlaves();
     bool isPairingEnabled();

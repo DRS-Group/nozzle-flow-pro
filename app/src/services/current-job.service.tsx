@@ -69,7 +69,7 @@ export class CurrentJobService extends BaseService<CurrentJobServiceEvents> impl
         await this.refreshData();
         const refreshEnd = new Date();
         const refreshDuration = refreshEnd.getTime() - refreshBegin.getTime();
-        const nextTimeout = 250 - refreshDuration;
+        const nextTimeout = 500 - refreshDuration;
 
         setTimeout(() => {
             this.loop();

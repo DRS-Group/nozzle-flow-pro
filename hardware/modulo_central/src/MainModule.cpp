@@ -41,12 +41,12 @@ void MainModule::onDataResponseReceived(const uint8_t *mac_addr, const uint8_t *
     flowmeters_data flowmetersData;
     flowmetersData.flowmeterCount = data[0];
     // Allocate and copy pulse counts
-    flowmetersData.flowmetersPulseCount = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
-    memcpy(flowmetersData.flowmetersPulseCount, &data[1], sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount);
+    flowmetersData.flowmetersPulsesPerMinute = (unsigned short *)malloc(sizeof(unsigned short) * flowmetersData.flowmeterCount);
+    memcpy(flowmetersData.flowmetersPulsesPerMinute, &data[1], sizeof(unsigned short) * flowmetersData.flowmeterCount);
 
     // After the pulse counts, the secondary sends last pulse ages (unsigned long per flowmeter)
     flowmetersData.flowmetersLastPulseAge = (unsigned long *)malloc(sizeof(unsigned long) * flowmetersData.flowmeterCount);
-    const uint8_t *agesSrc = &data[1 + sizeof(flowmeter_data_t) * flowmetersData.flowmeterCount];
+    const uint8_t *agesSrc = &data[1 + sizeof(unsigned short) * flowmetersData.flowmeterCount];
     memcpy(flowmetersData.flowmetersLastPulseAge, agesSrc, sizeof(unsigned long) * flowmetersData.flowmeterCount);
 
     instance->setLastFlowmeterDataResponseTimestamp(senderAddress, millis());
@@ -60,20 +60,23 @@ void MainModule::onDataResponseReceived(const uint8_t *mac_addr, const uint8_t *
         instance->setLastFlowmetersDataRequestTimestamp(0);
         for (auto &pair : instance->flowmetersData)
         {
-            free(pair.second.flowmetersPulseCount);
-            if(pair.second.flowmetersLastPulseAge != nullptr) {
+            free(pair.second.flowmetersPulsesPerMinute);
+            if (pair.second.flowmetersLastPulseAge != nullptr)
+            {
                 free(pair.second.flowmetersLastPulseAge);
             }
         }
         instance->flowmetersData.clear();
-        free(allFlowmetersData.flowmetersPulseCount);
-        if(allFlowmetersData.flowmetersLastPulseAge != nullptr) {
+        free(allFlowmetersData.flowmetersPulsesPerMinute);
+        if (allFlowmetersData.flowmetersLastPulseAge != nullptr)
+        {
             free(allFlowmetersData.flowmetersLastPulseAge);
         }
     }
 
-    free(flowmetersData.flowmetersPulseCount);
-    if(flowmetersData.flowmetersLastPulseAge != nullptr) {
+    free(flowmetersData.flowmetersPulsesPerMinute);
+    if (flowmetersData.flowmetersLastPulseAge != nullptr)
+    {
         free(flowmetersData.flowmetersLastPulseAge);
     }
 }
@@ -87,7 +90,7 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
     {
         flowmeters_data data;
         data.flowmeterCount = 0;
-        data.flowmetersPulseCount = nullptr;
+        data.flowmetersPulsesPerMinute = nullptr;
         data.flowmetersLastPulseAge = nullptr;
         callGetFlowmetersDataCallbacks(data);
         return;
@@ -97,7 +100,7 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
     {
         for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
         {
-            uint8_t *mac_addr = (uint8_t *)malloc(6);
+            macAddress_t mac_addr;
             espNowCentralManager->getSlaveMacAddress(i, mac_addr);
 
             if (this->lastFlowmetersDataRequestTimestamp < this->lastFlowmetersDataResponseTimestamps[macAddressToString(mac_addr)])
@@ -108,9 +111,7 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
             uint8_t messageType = FLOWMETER_DATA_REQUEST;
             uint8_t *buffer = nullptr;
 
-            // Serial.printf("Requesting data from %02X:%02X:%02X:%02X:%02X:%02X\n", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
             ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, 0);
-            free(mac_addr);
         }
 
         esp_task_wdt_reset();
@@ -118,38 +119,116 @@ void MainModule::getFlowmetersData(std::function<void(flowmeters_data)> callback
     }
 }
 
-void MainModule::setRefreshRate(unsigned short refreshRate, std::vector<uint8_t> flowmeterIndexes)
+void MainModule::setRefreshRate(unsigned short refreshRate, const std::vector<uint8_t> &flowmeterIndexes)
 {
-    uint8_t flowmeterIndexesBySlave[espNowCentralManager->getSlavesCount()][9];
+    const int slaveCount = espNowCentralManager->getSlavesCount();
+    uint8_t flowmeterIndexesBySlave[slaveCount][9] = {0};
 
-    for(int i = 0; i < flowmeterIndexes.size(); i++)
+    for (uint8_t index : flowmeterIndexes)
     {
-        uint8_t index = flowmeterIndexes[i] % 9;
-        uint8_t slave = flowmeterIndexes[i] / 9;
-        if(slave < espNowCentralManager->getSlavesCount())
+        uint8_t local = index % 9;
+        uint8_t slave = index / 9;
+        if (slave < slaveCount)
+            flowmeterIndexesBySlave[slave][local] = 1;
+    }
+
+    for (int i = 0; i < slaveCount; i++)
+    {
+        macAddress_t mac_addr;
+        espNowCentralManager->getSlaveMacAddress(i, mac_addr);
+
+        uint8_t buffer[sizeof(unsigned short) + 9];
+        memcpy(buffer, &refreshRate, sizeof(unsigned short));
+        memcpy(buffer + sizeof(unsigned short), flowmeterIndexesBySlave[i], 9);
+
+        ESPNowManager::getInstance()->sendBuffer(mac_addr, SET_REFRESH_RATE, buffer, sizeof(buffer));
+    }
+}
+
+void MainModule::setDebounce(unsigned short debounce, const std::vector<uint8_t> &flowmeterIndexes)
+{
+    const int slaveCount = espNowCentralManager->getSlavesCount();
+    uint8_t flowmeterIndexesBySlave[slaveCount][9] = {0}; // initialize all to zero
+
+    // Map flowmeter indexes to each slave (each handles up to 9 flowmeters)
+    for (uint8_t index : flowmeterIndexes)
+    {
+        uint8_t local = index % 9;
+        uint8_t slave = index / 9;
+        if (slave < slaveCount)
+            flowmeterIndexesBySlave[slave][local] = 1;
+    }
+
+    // Send debounce + indexes mask to each slave
+    for (int i = 0; i < slaveCount; i++)
+    {
+        macAddress_t mac_addr;
+        espNowCentralManager->getSlaveMacAddress(i, mac_addr);
+
+        uint8_t buffer[sizeof(unsigned short) + 9];
+        memcpy(buffer, &debounce, sizeof(unsigned short));
+        memcpy(buffer + sizeof(unsigned short), flowmeterIndexesBySlave[i], 9);
+
+        ESPNowManager::getInstance()->sendBuffer(mac_addr, SET_DEBOUNCE, buffer, sizeof(buffer));
+    }
+}
+
+void MainModule::setMinPulsesPerPacket(unsigned short minPulsesPerPacket, const std::vector<uint8_t> &flowmeterIndexes)
+{
+    const int slaveCount = espNowCentralManager->getSlavesCount();
+    uint8_t flowmeterIndexesBySlave[slaveCount][9] = {0}; // zero-init
+
+    // Map flowmeters to corresponding slave and local index
+    for (uint8_t index : flowmeterIndexes)
+    {
+        uint8_t local = index % 9;
+        uint8_t slave = index / 9;
+        if (slave < slaveCount)
+            flowmeterIndexesBySlave[slave][local] = 1;
+    }
+
+    // Send config to each slave
+    for (int i = 0; i < slaveCount; i++)
+    {
+        macAddress_t mac_addr;
+        espNowCentralManager->getSlaveMacAddress(i, mac_addr);
+
+        uint8_t buffer[sizeof(unsigned short) + 9];
+        memcpy(buffer, &minPulsesPerPacket, sizeof(unsigned short));
+        memcpy(buffer + sizeof(unsigned short), flowmeterIndexesBySlave[i], 9);
+
+        ESPNowManager::getInstance()->sendBuffer(mac_addr, SET_MIN_PULSES_PER_PACKET, buffer, sizeof(buffer));
+    }
+}
+
+void MainModule::setMaxNumberOfPackets(unsigned short maxNumberOfPackets, const std::vector<uint8_t> &flowmeterIndexes)
+{
+    int slaveCount = espNowCentralManager->getSlavesCount();
+    uint8_t flowmeterIndexesBySlave[slaveCount][9];
+    memset(flowmeterIndexesBySlave, 0, sizeof(flowmeterIndexesBySlave)); // FIX: initialize to 0
+
+    for (uint8_t idx : flowmeterIndexes)
+    {
+        uint8_t index = idx % 9;
+        uint8_t slave = idx / 9;
+        if (slave < slaveCount)
         {
             flowmeterIndexesBySlave[slave][index] = 1;
         }
     }
 
-    // Send flowmeter irefreshrate followed by the indexes to each slave. Each slave can handle up to 9 flowmeters. The indexes are represented by 9 bits.
-    for (int i = 0; i < espNowCentralManager->getSlavesCount(); i++)
+    for (int i = 0; i < slaveCount; i++)
     {
-        uint8_t *mac_addr = (uint8_t *)malloc(6);
+        macAddress_t mac_addr;
         espNowCentralManager->getSlaveMacAddress(i, mac_addr);
 
-        uint8_t messageType = SET_REFRESH_RATE;
-        uint8_t *buffer = (uint8_t *)malloc(sizeof(unsigned short) + 9);
-        memcpy(buffer, &refreshRate, sizeof(unsigned short));
+        uint8_t messageType = SET_MAX_NUMBER_OF_PACKETS;
+        uint8_t buffer[sizeof(unsigned short) + 9];
 
-        for(int j = 0; j < 9; j++)
-        {
-            buffer[sizeof(unsigned short) + j] = flowmeterIndexesBySlave[i][j];
-        }
+        memcpy(buffer, &maxNumberOfPackets, sizeof(unsigned short));
+        memcpy(buffer + sizeof(unsigned short), flowmeterIndexesBySlave[i], 9);
 
-        ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, sizeof(unsigned short) + 9);
-        free(buffer);
-        free(mac_addr);
+        ESPNowManager::getInstance()->sendBuffer(mac_addr, messageType, buffer, sizeof(buffer));
     }
 }
 
@@ -185,13 +264,16 @@ void MainModule::registerFlowmetersData(const macAddress_t mac_addr, flowmeters_
 
     flowmeters_data flowmetersData;
     flowmetersData.flowmeterCount = data.flowmeterCount;
-    flowmetersData.flowmetersPulseCount = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * data.flowmeterCount);
-    memcpy(flowmetersData.flowmetersPulseCount, data.flowmetersPulseCount, sizeof(flowmeter_data_t) * data.flowmeterCount);
+    flowmetersData.flowmetersPulsesPerMinute = (unsigned short *)malloc(sizeof(unsigned short) * data.flowmeterCount);
+    memcpy(flowmetersData.flowmetersPulsesPerMinute, data.flowmetersPulsesPerMinute, sizeof(unsigned short) * data.flowmeterCount);
     // Copy last pulse ages if present
     flowmetersData.flowmetersLastPulseAge = (unsigned long *)malloc(sizeof(unsigned long) * data.flowmeterCount);
-    if(data.flowmetersLastPulseAge != nullptr) {
+    if (data.flowmetersLastPulseAge != nullptr)
+    {
         memcpy(flowmetersData.flowmetersLastPulseAge, data.flowmetersLastPulseAge, sizeof(unsigned long) * data.flowmeterCount);
-    } else {
+    }
+    else
+    {
         // Initialize to zero if not provided
         memset(flowmetersData.flowmetersLastPulseAge, 0, sizeof(unsigned long) * data.flowmeterCount);
     }
@@ -227,7 +309,7 @@ void MainModule::getLastFlowmeterData(flowmeters_data *result)
         std::string mac_addr_str = espNowCentralManager->getSlaveMacAddress(i);
         result->flowmeterCount += this->flowmetersData[mac_addr_str].flowmeterCount;
     }
-    result->flowmetersPulseCount = (flowmeter_data_t *)malloc(sizeof(flowmeter_data_t) * result->flowmeterCount);
+    result->flowmetersPulsesPerMinute = (unsigned short *)malloc(sizeof(unsigned short) * result->flowmeterCount);
     result->flowmetersLastPulseAge = (unsigned long *)malloc(sizeof(unsigned long) * result->flowmeterCount);
 
     int index = 0;
@@ -236,7 +318,7 @@ void MainModule::getLastFlowmeterData(flowmeters_data *result)
         std::string mac_addr_str = espNowCentralManager->getSlaveMacAddress(i);
         for (int j = 0; j < this->flowmetersData[mac_addr_str].flowmeterCount; j++)
         {
-            result->flowmetersPulseCount[index] = this->flowmetersData[mac_addr_str].flowmetersPulseCount[j];
+            result->flowmetersPulsesPerMinute[index] = this->flowmetersData[mac_addr_str].flowmetersPulsesPerMinute[j];
             result->flowmetersLastPulseAge[index] = this->flowmetersData[mac_addr_str].flowmetersLastPulseAge[j];
             index++;
         }

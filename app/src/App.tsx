@@ -39,16 +39,18 @@ function App() {
   useEffect(() => {
     navigation.navigate('menu');
 
-    // const settings: SettingsType = SettingsService.getSettings();
-    // const interval = settings.interval;
-    // services.dataFetcherService.setInterval(interval);
-
     const onNetworkStatusChange = (isConnected: boolean) => {
       if (!isConnected) return;
 
       const settings: SettingsType = SettingsService.getSettings();
       const interval = settings.interval;
+      const debounce = settings.debounce;
+      const minPulsesPerPacket = settings.minPulsesPerPacket;
+      const maxNumberOfPackets = settings.maxNumberOfPackets;
       services.dataFetcherService.setInterval(interval);
+      services.dataFetcherService.setDebounce(debounce);
+      services.dataFetcherService.setMinPulsesPerPacket(minPulsesPerPacket);
+      services.dataFetcherService.setMaxNumberOfPackets(maxNumberOfPackets);
     };
 
     SettingsService.addEventListener("onNetworkStatusChange", onNetworkStatusChange);

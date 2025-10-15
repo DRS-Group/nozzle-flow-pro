@@ -34,6 +34,9 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
 
     const [ApiBaseUriDialogOpen, setApiBaseUriDialogOpen] = useState<boolean>(false);
     const [refreshIntervalDialogOpen, setRefreshIntervalDialogOpen] = useState<boolean>(false);
+    const [debounceDialogOpen, setDebounceDialogOpen] = useState<boolean>(false);
+    const [minPulsesPerPacketDialogOpen, setMinPulsesPerPacketDialogOpen] = useState<boolean>(false);
+    const [maxNumberOfPacketsDialogOpen, setMaxNumberOfPacketsDialogOpen] = useState<boolean>(false);
     const [primaryColorDialogOpen, setPrimaryColorDialogOpen] = useState<boolean>(false);
     const [secondaryColorDialogOpen, setSecondaryColorDialogOpen] = useState<boolean>(false);
     const [primaryFontColorDialogOpen, setPrimaryFontColorDialogOpen] = useState<boolean>(false);
@@ -380,6 +383,57 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                                     </div>
                                 </div>
                             }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
+                                        setDebounceDialogOpen(true);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Debounce')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{settings?.debounce}ms</span>
+                                        </div>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
+                                        setMinPulsesPerPacketDialogOpen(true);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Minimum pulses per packet')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{settings?.minPulsesPerPacket} {translate('pulse(s)')}</span>
+                                        </div>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
+                            {isAdmin &&
+                                <div className={styles.item}
+                                    onClick={() => {
+                                        setMaxNumberOfPacketsDialogOpen(true);
+                                    }}
+                                >
+                                    <div className={styles.itemLeft}>
+                                        <span className={styles.itemName}>{translate('Maximum number of packets')}</span>
+                                    </div>
+                                    <div className={styles.itemRight}>
+                                        <div className={styles.itemValue}>
+                                            <span>{settings?.maxNumberOfPackets} {translate('packet(s)')}</span>
+                                        </div>
+                                        <i className="icon-thin-chevron-right"></i>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -617,6 +671,54 @@ export const Settings = forwardRef<SettingsElement, SettingsProps>((props, ref) 
                     }}
                     onCancelClick={() => {
                         setRefreshIntervalDialogOpen(false);
+                    }}
+                />
+            }
+            {debounceDialogOpen &&
+                <NumberInputDialog
+                    unit='ms'
+                    title={translate('Set debounce')}
+                    label={translate('Debounce')}
+                    defaultValue={settings?.debounce}
+                    onConfirmClick={(value: number) => {
+                        SettingsService.setDebounce(value);
+                        setSettings(SettingsService.getSettings());
+                        setDebounceDialogOpen(false);
+                    }}
+                    onCancelClick={() => {
+                        setDebounceDialogOpen(false);
+                    }}
+                />
+            }
+            {minPulsesPerPacketDialogOpen &&
+                <NumberInputDialog
+                    unit='pulses'
+                    title={translate('Set minumum pulses per packet')}
+                    label={translate('Minimum pulses per packet')}
+                    defaultValue={settings?.minPulsesPerPacket}
+                    onConfirmClick={(value: number) => {
+                        SettingsService.setMinPulsesPerPacket(value);
+                        setSettings(SettingsService.getSettings());
+                        setMinPulsesPerPacketDialogOpen(false);
+                    }}
+                    onCancelClick={() => {
+                        setMinPulsesPerPacketDialogOpen(false);
+                    }}
+                />
+            }
+            {maxNumberOfPacketsDialogOpen &&
+                <NumberInputDialog
+                    unit='packets'
+                    title={translate('Set maximum number of packets')}
+                    label={translate('Maximum number of packets')}
+                    defaultValue={settings?.maxNumberOfPackets}
+                    onConfirmClick={(value: number) => {
+                        SettingsService.setMaxNumberOfPackets(value);
+                        setSettings(SettingsService.getSettings());
+                        setMaxNumberOfPacketsDialogOpen(false);
+                    }}
+                    onCancelClick={() => {
+                        setMaxNumberOfPacketsDialogOpen(false);
                     }}
                 />
             }
